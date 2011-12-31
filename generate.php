@@ -7,11 +7,13 @@
 */
 
 
-define('RUCKUSING_BASE', realpath(dirname(__FILE__)));
+if (!defined('RUCKUSING_BASE')) define('RUCKUSING_BASE', dirname(__FILE__));
 require_once RUCKUSING_BASE . '/config/config.inc.php';
 require_once RUCKUSING_BASE  . '/lib/classes/util/class.Ruckusing_NamingUtil.php';
 require_once RUCKUSING_BASE  . '/lib/classes/util/class.Ruckusing_MigratorUtil.php';
 
+if (!isset($argv))
+    $argv = "";
 $args = parse_args($argv);
 main($args);
 

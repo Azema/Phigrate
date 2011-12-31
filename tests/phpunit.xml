@@ -1,0 +1,29 @@
+<phpunit bootstrap="./test_helper.php" colors="true">
+    <testsuite name="Ruckusing Migrations">
+        <directory>./unit</directory>
+        <exclude>
+            <!--<directory suffix=".php">./library/Motoka/Motors/Adjustit</directory>-->
+        </exclude>
+    </testsuite>
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">../lib</directory>
+        </whitelist>
+        <blacklist>
+            <directory>../config</directory>
+            <directory>../db</directory>
+            <directory>../logs</directory>
+            <directory>../tests</directory>
+        </blacklist>
+    </filter>
+
+    <logging>
+        <log type="coverage-html" target="./logs/report" charset="UTF-8"
+            yui="true" highlight="true" lowUpperBound="50" highLowerBound="80" />
+        <log type="coverage-clover" target="./logs/clover.xml"/>
+        <log type="junit" target="./logs/phpunit.xml" logIncompleteSkipped="false"/>
+        <log type="testdox-html" target="./logs/testdox.html" />
+        <log type="story-html" target="./logs/story.html" />
+    </logging>
+</phpunit>
+

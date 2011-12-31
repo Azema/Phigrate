@@ -1,23 +1,68 @@
 <?php
+/**
+ * Rucksing Migrations
+ *
+ * PHP Version 5
+ *
+ * @category  RuckusingMigrations
+ * @package   tasks
+ * @author    Cody Caughlan <toolbag@gmail.com>
+ * @copyright 2010-2011 Cody Caughlan
+ * @license   
+ * @link      https://github.com/ruckus/ruckusing-migrations
+ */
 
-/*
-	This task retrieves the current version of the schema.
-*/
-
+/**
+ * @see Ruckusing_iTask 
+ */
 require_once RUCKUSING_BASE . '/lib/classes/task/class.Ruckusing_iTask.php';
+/**
+ * get config 
+ */
 require_once RUCKUSING_BASE . '/config/config.inc.php';
 
-
+/**
+ * This task retrieves the current version of the schema.
+ *
+ * @category  RuckusingMigrations
+ * @package   tasks
+ * @author    Cody Caughlan <toolbag@gmail.com>
+ * @copyright 2010-2011 Cody Caughlan
+ * @license   
+ * @link      https://github.com/ruckus/ruckusing-migrations
+ */
 class Ruckusing_DB_Version implements Ruckusing_iTask {
 	
+    /**
+     * adapter 
+     * 
+     * @var Ruckusing_BaseAdapter
+     */
 	private $adapter = null;
-	private $create_ddl = ""; 
+    /**
+     * create_ddl 
+     * 
+     * @var string
+     */
+	private $create_ddl = "";
 	
+    /**
+     * __construct 
+     * 
+     * @param Ruckusing_BaseAdapter $adapter 
+     *
+     * @return Ruckusing_DB_Version
+     */
 	function __construct($adapter) {
 		$this->adapter = $adapter;
 	}
 	
-	/* Primary task entry point */
+    /**
+     * Primary task entry point
+     * 
+     * @param mixed $args 
+     * @return void
+     */
 	public function execute($args) {
 		echo "Started: " . date('Y-m-d g:ia T') . "\n\n";		
 		echo "[db:version]: \n";
@@ -26,27 +71,27 @@ class Ruckusing_DB_Version implements Ruckusing_iTask {
 			echo "\tSchema version table (" . RUCKUSING_TS_SCHEMA_TBL_NAME . ") does not exist. Do you need to run 'db:setup'?";
 		} else {
 			//it exists, read the version from it
-      // We only want one row but we cannot assume that we are using MySQL and use a LIMIT statement
-      // as it is not part of the SQL standard. Thus we have to select all rows and use PHP to return
-      // the record we need
-      $versions_nested = $this->adapter->select_all(sprintf("SELECT version FROM %s", RUCKUSING_TS_SCHEMA_TBL_NAME));
-      $versions = array();
-      foreach($versions_nested as $v) {
-        $versions[] = $v['version'];
-      }
-      $num_versions = count($versions);
-      if($num_versions > 0) {
-        sort($versions); //sorts lowest-to-highest (ascending)
-        $version = (string)$versions[$num_versions-1];
-  			printf("\tCurrent version: %s", $version);
-      } else {
-        printf("\tNo migrations have been executed.");  			
-      }
+            // We only want one row but we cannot assume that we are using MySQL and use a LIMIT statement
+            // as it is not part of the SQL standard. Thus we have to select all rows and use PHP to return
+            // the record we need
+            $versions_nested = $this->adapter->select_all(
+                sprintf("SELECT version FROM %s", RUCKUSING_TS_SCHEMA_TBL_NAME)
+            );
+            $versions = array();
+            foreach($versions_nested as $v) {
+                $versions[] = $v['version'];
+            }
+            $num_versions = count($versions);
+            if($num_versions > 0) {
+                sort($versions); //sorts lowest-to-highest (ascending)
+                $version = (string)$versions[$num_versions-1];
+                printf("\tCurrent version: %s", $version);
+            } else {
+                printf("\tNo migrations have been executed.");  			
+            }
 		}
 		echo "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";		
 	}
-	
-	
 }
 
 ?>

@@ -1,17 +1,97 @@
 <?php
+/**
+ * Rucksing Migrations
+ *
+ * PHP Version 5
+ *
+ * @category   RuckusingMigrations
+ * @package    classes
+ * @subpackage adapters
+ * @author     Cody Caughlan <toolbag@gmail.com>
+ * @copyright  2010-2011 Cody Caughlan
+ * @license    
+ * @link       https://github.com/ruckus/ruckusing-migrations
+ */
 
+/**
+ * Class of mysql table definition
+ *
+ * @category   RuckusingMigrations
+ * @package    classes
+ * @subpackage adapters
+ * @author     Cody Caughlan <toolbag@gmail.com>
+ * @copyright  2010-2011 Cody Caughlan
+ * @license    
+ * @link       https://github.com/ruckus/ruckusing-migrations
+ */
 class Ruckusing_MySQLTableDefinition {
 	
+    /**
+     * adapter MySQL
+     * 
+     * @var Ruckusing_MySQLAdapter
+     */
 	private $adapter;
+    /**
+     * name 
+     * 
+     * @var string
+     */
 	private $name;
+    /**
+     * options 
+     * 
+     * @var mixed
+     */
 	private $options;
+    /**
+     * sql 
+     * 
+     * @var string
+     */
 	private $sql = "";
+    /**
+     * initialized 
+     * 
+     * @var boolean
+     */
 	private $initialized = false;
+    /**
+     * columns 
+     * 
+     * @var array
+     */
 	private $columns = array();
+    /**
+     * table_def 
+     * 
+     * @var Ruckusing_TableDefinition
+     */
 	private $table_def;
+    /**
+     * primary_keys 
+     * 
+     * @var array
+     */
 	private $primary_keys = array();
+    /**
+     * auto_generate_id 
+     * 
+     * @var boolean
+     */
 	private $auto_generate_id = true;
 	
+    /**
+     * __construct 
+     * 
+     * @param Ruckusing_BaseAdapter $adapter 
+     * @param string $name 
+     * @param array $options 
+     *
+     * @return void
+     * @throws Ruckusing_MissingAdapterException
+     * @throws Ruckusing_ArgumentException
+     */
 	function __construct($adapter, $name, $options = array()) {
 		//sanity check
 		if( !($adapter instanceof Ruckusing_BaseAdapter)) {
@@ -69,6 +149,15 @@ class Ruckusing_MySQLTableDefinition {
 	}
 	*/
 	
+    /**
+     * column
+     * 
+     * @param string $column_name
+     * @param string $type
+     * @param array  $options
+     *
+     * @return void
+     */
 	public function column($column_name, $type, $options = array()) {		
 		//if there is already a column by the same name then silently fail 
 		//and continue
@@ -79,36 +168,49 @@ class Ruckusing_MySQLTableDefinition {
 		$column_options = array();
 		
 		if(array_key_exists('primary_key', $options)) {
-		  if($options['primary_key'] == true) {
-		    $this->primary_keys[] = $column_name;
-	    }
-	  }
+            if($options['primary_key'] == true) {
+                $this->primary_keys[] = $column_name;
+            }
+        }
 	  
 		if(array_key_exists('auto_increment', $options)) {
-		  if($options['auto_increment'] == true) {
-		    $column_options['auto_increment'] = true;
-	    }
-	  }
+            if($options['auto_increment'] == true) {
+                $column_options['auto_increment'] = true;
+            }
+        }
         $column_options = array_merge($column_options, $options);
         $column = new Ruckusing_ColumnDefinition($this->adapter, $column_name, $type, $column_options);
         
         $this->columns[] = $column;
 	}//column
 	
+    /**
+     * keys 
+     * 
+     * @return void
+     */
 	private function keys() {
-	  if(count($this->primary_keys) > 0) {
-  	  $lead = ' PRIMARY KEY (';
-  	  $quoted = array();
-	    foreach($this->primary_keys as $key) {
-	      $quoted[] = sprintf("%s", $this->adapter->identifier($key));
-      }
-      $primary_key_sql = ",\n" . $lead . implode(",", $quoted) . ")";
-      return($primary_key_sql);
-    } else {
-      return '';
+        if (count($this->primary_keys) > 0) {
+            $lead = ' PRIMARY KEY (';
+            $quoted = array();
+            foreach($this->primary_keys as $key) {
+                $quoted[] = sprintf("%s", $this->adapter->identifier($key));
+            }
+            $primary_key_sql = ",\n" . $lead . implode(",", $quoted) . ")";
+            return($primary_key_sql);
+        } else {
+            return '';
+        }
     }
-  }
 	
+    /**
+     * finish 
+     * 
+     * @param boolean $wants_sql 
+     *
+     * @return mixed
+     * @throws Ruckusing_InvalidTableDefinitionException
+     */
 	public function finish($wants_sql = false) {
 		if($this->initialized == false) {
 			throw new Ruckusing_InvalidTableDefinitionException(sprintf("Table Definition: '%s' has not been initialized", $this->name));
@@ -140,6 +242,11 @@ class Ruckusing_MySQLTableDefinition {
 		}
 	}//finish
 	
+    /**
+     * columns_to_str 
+     * 
+     * @return string
+     */
 	private function columns_to_str() {
 		$str = "";
 		$fields = array();
@@ -151,7 +258,15 @@ class Ruckusing_MySQLTableDefinition {
 		return join(",\n", $fields);
 	}
 	
-	private function init_sql($name, $options) {
+    /**
+     * init_sql 
+     * 
+     * @param string $name 
+     * @param array $options 
+     *
+     * @return void
+     */
+	private function init_sql($name, $options = array()) {
 		//are we forcing table creation? If so, drop it first
 		if(array_key_exists('force', $options) && $options['force'] == true) {
 			try {
@@ -171,12 +286,39 @@ class Ruckusing_MySQLTableDefinition {
 	}//init_sql	
 }
 
-
+/**
+ * Class of table definition
+ *
+ * @category   RuckusingMigrations
+ * @package    classes
+ * @subpackage adapters
+ * @author     Cody Caughlan <toolbag@gmail.com>
+ * @copyright  2010-2011 Cody Caughlan
+ * @license    
+ * @link       https://github.com/ruckus/ruckusing-migrations
+ */
 class Ruckusing_TableDefinition {
 
+    /**
+     * columns 
+     * 
+     * @var array
+     */
 	private $columns = array();
+    /**
+     * adapter 
+     * 
+     * @var Ruckusing_BaseAdapter
+     */
 	private $adapter;
 	
+    /**
+     * __construct 
+     * 
+     * @param Ruckusing_BaseAdapter $adapter 
+     *
+     * @return Ruckusing_TableDefinition
+     */
 	function __construct($adapter) {
 		$this->adapter = $adapter;
 	}
@@ -231,13 +373,18 @@ class Ruckusing_TableDefinition {
 	}//column
 	*/
 	
-	/*
-		Determine whether or not the given column already exists in our 
-		table definition.
-		
-		This method is lax enough that it can take either a string column name
-		or a Ruckusing_ColumnDefinition object.
-	*/
+    /**
+     * included 
+	 * Determine whether or not the given column already exists in our 
+	 * table definition.
+	 * 
+	 * This method is lax enough that it can take either a string column name
+	 * or a Ruckusing_ColumnDefinition object.
+     * 
+     * @param Ruckusing_ColumnDefinition|string $column 
+     *
+     * @return boolean
+     */
 	public function included($column) {
 		$k = count($this->columns);
 		for($i = 0; $i < $k; $i++) {
@@ -245,25 +392,79 @@ class Ruckusing_TableDefinition {
 			if(is_string($column) && $col->name == $column) {
 				return true;
 			}
-			if(($column instanceof Ruckusing_ColumnDefinition) && $col->name == $column->name) {
+            if (($column instanceof Ruckusing_ColumnDefinition) 
+                && $col->name == $column->name) 
+            {
 				return true;
 			}
 		}
 		return false;
 	}	
 	
+    /**
+     * to_sql 
+     * 
+     * @return string
+     */
 	public function to_sql() {
 		return join(",", $this->columns);
 	}
 }
 
-class Ruckusing_ColumnDefinition {
+/**
+ * Class of column definition
+ *
+ * @category   RuckusingMigrations
+ * @package    classes
+ * @subpackage adapters
+ * @author     Cody Caughlan <toolbag@gmail.com>
+ * @copyright  2010-2011 Cody Caughlan
+ * @license    
+ * @link       https://github.com/ruckus/ruckusing-migrations
+ */
+class Ruckusing_ColumnDefinition
+{
+    /**
+     * adapter 
+     * 
+     * @var Ruckusing_BaseAdapter
+     */
 	private $adapter;
+    /**
+     * name 
+     * 
+     * @var string
+     */
 	public $name;
+    /**
+     * type 
+     * 
+     * @var mixed
+     */
 	public $type;
+    /**
+     * properties 
+     * 
+     * @var mixed
+     */
 	public $properties;
+    /**
+     * options 
+     * 
+     * @var array
+     */
 	private $options = array();
 	
+    /**
+     * __construct 
+     * 
+     * @param Ruckusing_BaseAdapter $adapter 
+     * @param string $name 
+     * @param mixed $type 
+     * @param array $options 
+     * 
+     * @return Ruckusing_ColumnDefinition
+     */
 	function __construct($adapter, $name, $type, $options = array()) {
 		$this->adapter = $adapter;
 		$this->name = $name;
@@ -271,19 +472,40 @@ class Ruckusing_ColumnDefinition {
 	    $this->options = $options;
 	}
 
+    /**
+     * to_sql 
+     * 
+     * @return string
+     */
 	public function to_sql() {
-		$column_sql = sprintf("%s %s", $this->adapter->identifier($this->name), $this->sql_type());
-		$column_sql .= $this->adapter->add_column_options($this->type, $this->options);			
+        $column_sql = sprintf(
+            '%s %s', 
+            $this->adapter->identifier($this->name), 
+            $this->sql_type()
+        );
+        $column_sql .= $this->adapter->add_column_options(
+            $this->type, $this->options
+        );			
 		return $column_sql;
 	}
 
+    /**
+     * __toString 
+     * 
+     * @return string
+     */
 	public function __toString() {
-	  //Dont catch any exceptions here, let them bubble up
-	  return $this->to_sql();
+        //Dont catch any exceptions here, let them bubble up
+        return $this->to_sql();
 	}
 
+    /**
+     * sql_type 
+     * 
+     * @return string
+     */
 	private function sql_type() {
-    return $this->adapter->type_to_sql($this->type, $this->options);
+        return $this->adapter->type_to_sql($this->type, $this->options);
 	}
 }
 

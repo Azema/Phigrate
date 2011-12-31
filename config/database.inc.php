@@ -11,17 +11,17 @@ $ruckusing_db_config = array(
         'host'      => 'localhost',
         'port'      => 3306,
         'database'  => 'ruckusing_migrations',
-        'user'      => 'root',
-        'password'  => ''
+        'user'      => 'rucku',
+        'password'  => 'rucku'
     ),
 
 	'test' 					=> array(
-			'type' 			=> 'mysql',
-			'host' 			=> 'localhost',
-			'port'			=> 3306,
-			'database' 	=> 'ruckusing_migrations_test',
-			'user' 			=> 'root',
-			'password' 	=> ''
+        'type' 			=> 'mysql',
+        'host' 			=> 'localhost',
+        'port'			=> 3306,
+        'database' 	=> 'ruckusing_migrations_test',
+        'user' 			=> 'rucku',
+        'password' 	=> 'rucku'
 	)
 	
 );
