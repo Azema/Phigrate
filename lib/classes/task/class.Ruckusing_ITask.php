@@ -5,11 +5,11 @@
  * PHP Version 5
  *
  * @category   RuckusingMigrations
- * @package    classes
- * @subpackage task
+ * @package    Classes
+ * @subpackage Task
  * @author     Cody Caughlan <toolbag@gmail.com>
  * @copyright  2010-2011 Cody Caughlan
- * @license    
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
 
@@ -17,23 +17,21 @@
  * Interface that all tasks must implement.
  *
  * @category   RuckusingMigrations
- * @package    classes
- * @subpackage task
+ * @package    Classes
+ * @subpackage Task
  * @author     Cody Caughlan <toolbag@gmail.com>
  * @copyright  2010-2011 Cody Caughlan
- * @license    
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
-interface Ruckusing_iTask
+interface Ruckusing_ITask
 {
     /**
      * execute 
      * 
-     * @param array $args
+     * @param array $args Argument to the task
      *
      * @return string
      */
     public function execute($args);
 }
-
-?>

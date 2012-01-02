@@ -5,11 +5,11 @@
  * PHP Version 5
  *
  * @category   RuckusingMigrations
- * @package    classes
- * @subpackage util
+ * @package    Classes
+ * @subpackage Util
  * @author     Cody Caughlan <toolbag@gmail.com>
  * @copyright  2010-2011 Cody Caughlan
- * @license    
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
 
@@ -17,29 +17,36 @@
  * Logger of application
  *
  * @category   RuckusingMigrations
- * @package    classes
- * @subpackage util
+ * @package    Classes
+ * @subpackage Util
  * @author     Cody Caughlan <toolbag@gmail.com>
  * @copyright  2010-2011 Cody Caughlan
- * @license    
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
-class Ruckusing_Logger {
-
+class Ruckusing_Logger
+{
     /**
      * Instance of logger
      *
      * @var Ruckusing_Logger 
      */
-    private static $instance;
+    private static $_instance;
 
     /**
      * file 
      * 
      * @var string
      */
-    private $file = '';
-  
+    private $_file = '';
+
+    /**
+     * File descriptor
+     * 
+     * @var resource
+     */
+    private $_fp;
+
     /**
      * __construct 
      * 
@@ -47,9 +54,10 @@ class Ruckusing_Logger {
      *
      * @return Ruckusing_Logger
      */
-    public function __construct($file) {
-        $this->file = $file;
-        $this->fp = fopen($file, "a+");
+    public function __construct($file)
+    {
+        $this->_file = $file;
+        $this->_fp = fopen($this->_file, "a+");
         //register_shutdown_function(array("Logger", "close_log"));
     }
   
@@ -60,36 +68,37 @@ class Ruckusing_Logger {
      *
      * @return Ruckusing_Logger
      */
-    public static function instance($logfile) {
-        if (self::$instance !== NULL) {
-            return self::$instance;
+    public static function instance($logfile)
+    {
+        if (isset(self::$_instance)) {
+            return self::$_instance;
         }
-        self::$instance = new Ruckusing_Logger($logfile);
-        return self::$instance; 
+        self::$_instance = new Ruckusing_Logger($logfile);
+        return self::$_instance; 
     }
   
     /**
      * log a message in file
      * 
-     * @param string $msg 
+     * @param string $msg Message to log
      *
      * @return void
      * @throws Exception
      */
-    public function log($msg) {
-        if ($this->fp) {
+    public function log($msg)
+    {
+        if ($this->_fp) {
             $ts = date('M d H:i:s', time());
             $line = sprintf("%s [info] %s\n", $ts, $msg); 
-            fwrite($this->fp, $line);
+            fwrite($this->_fp, $line);
         } else {
             throw new Exception(
                 sprintf(
                     "Error: logfile '%s' not open for writing!", 
-                    $this->file
+                    $this->_file
                 )
             );
         }
-        
     }
   
     /**
@@ -97,12 +106,11 @@ class Ruckusing_Logger {
      * 
      * @return void
      */
-    public function close() {
-        if ($this->fp) {
-            fclose($this->fp);
+    public function close()
+    {
+        if ($this->_fp) {
+            fclose($this->_fp);
         }
     }
   
-}//class()
-
-?>
+}

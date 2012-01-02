@@ -20,7 +20,7 @@ $ruckusing_db_config = array(
         'host' 			=> 'localhost',
         'port'			=> 3306,
         'database' 	=> 'ruckusing_migrations_test',
-        'user' 			=> 'rucku',
+        'user' 			=> 'rucku_test',
         'password' 	=> 'rucku'
 	)
 	

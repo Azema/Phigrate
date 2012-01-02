@@ -5,11 +5,11 @@
  * PHP Version 5
  *
  * @category   RuckusingMigrations
- * @package    classes
- * @subpackage adapters
+ * @package    Classes
+ * @subpackage Adapters
  * @author     Cody Caughlan <toolbag@gmail.com>
  * @copyright  2010-2011 Cody Caughlan
- * @license    
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
 
@@ -18,9 +18,9 @@
  */
 require_once RUCKUSING_BASE . '/lib/classes/class.Ruckusing_BaseAdapter.php';
 /**
- * @see Ruckusing_iAdapter 
+ * @see Ruckusing_IAdapter 
  */
-require_once RUCKUSING_BASE . '/lib/classes/class.Ruckusing_iAdapter.php';
+require_once RUCKUSING_BASE . '/lib/classes/class.Ruckusing_IAdapter.php';
 /**
  * @see Ruckusing_MySQLTableDefinition 
  */
@@ -60,92 +60,108 @@ define('MAX_IDENTIFIER_LENGTH', 64);
  * Class of mysql adapter
  *
  * @category   RuckusingMigrations
- * @package    classes
- * @subpackage adapters
+ * @package    Classes
+ * @subpackage Adapters
  * @author     Cody Caughlan <toolbag@gmail.com>
  * @copyright  2010-2011 Cody Caughlan
- * @license    
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
 class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter 
-    implements Ruckusing_iAdapter 
+    implements Ruckusing_IAdapter
 {
-
     /**
      * Name of adapter 
      * 
      * @var string
      */
-	private $name = 'MySQL';
+	private $_name = 'MySQL';
     /**
      * tables 
      * 
      * @var array
      */
-	private $tables = array();
+	private $_tables = array();
     /**
      * tables_loaded 
      * 
      * @var boolean
      */
-	private $tables_loaded = false;
+	private $_tablesLoaded = false;
     /**
      * version 
      * 
      * @var string
      */
-	private $version = '1.0';
+	private $_version = '1.0';
     /**
      * Indicate if is in transaction
      * 
      * @var boolean
      */
-	private $in_trx = false;
+	private $_inTrx = false;
 
     /**
      * __construct 
      * 
-     * @param mixed $dsn 
-     * @param mixed $logger 
-     * @return void
+     * @param array            $dsn    Config DB for connect it
+     * @param Ruckusing_Logger $logger Logger
+     *
+     * @return Ruckusing_MySQLAdapter
      */
-	function __construct($dsn, $logger) {
+    public function __construct($dsn, $logger)
+    {
 		parent::__construct($dsn);
-		$this->connect($dsn);
-		$this->set_logger($logger);
+		$this->_connect($dsn);
+		$this->setLogger($logger);
 	}
 	
     /**
-     * supports_migrations 
+     * supports migrations ?
      * 
      * @return boolean
      */
-	public function supports_migrations() {
+    public function supportsMigrations()
+    {
 	    return true;
     }
 	
     /**
-     * native_database_types 
+     * native database types 
      * 
      * @return array
      */
-	public function native_database_types() {
+    public function nativeDatabaseTypes()
+    {
 		$types = array(
-            'primary_key'   => array('name' => 'integer', 'limit' => 11, 'null' => false),
-            'string'        => array('name' => "varchar", 'limit' => 255),
-            'text'          => array('name' => "text"),
+            'primary_key'   => array(
+                'name' => 'integer',
+                'limit' => 11,
+                'null' => false,
+            ),
+            'string'        => array(
+                'name' => 'varchar',
+                'limit' => 255,
+            ),
+            'text'          => array('name' => 'text'),
             'mediumtext'    => array('name' => 'mediumtext'),
-            'integer'       => array('name' => "int", 'limit' => 11),
-            'smallinteger'  => array('name' => "smallint"),
-            'biginteger'    => array('name' => "bigint"),
-            'float'         => array('name' => "float"),
-            'decimal'       => array('name' => "decimal"),
-            'datetime'      => array('name' => "datetime"),
-            'timestamp'     => array('name' => "timestamp"),
-            'time'          => array('name' => "time"),
-            'date'          => array('name' => "date"),
-            'binary'        => array('name' => "blob"),
-            'boolean'       => array('name' => "tinyint", 'limit' => 1)
+            'integer'       => array(
+                'name' => 'int',
+                'limit' => 11,
+            ),
+            'smallinteger'  => array('name' => 'smallint'),
+            'biginteger'    => array('name' => 'bigint'),
+            'float'         => array('name' => 'float'),
+            'decimal'       => array('name' => 'decimal'),
+            'datetime'      => array('name' => 'datetime'),
+            'timestamp'     => array('name' => 'timestamp'),
+            'time'          => array('name' => 'time'),
+            'date'          => array('name' => 'date'),
+            'binary'        => array('name' => 'blob'),
+            'boolean'       => array(
+                'name' => 'tinyint',
+                'limit' => 1,
+            ),
 		);
 		return $types;
 	}
@@ -160,98 +176,111 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
      * 
      * @return void
      */
-	public function create_schema_version_table() {
-        if(!$this->has_table(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
-            $t = $this->create_table(RUCKUSING_TS_SCHEMA_TBL_NAME, array('id' => false));
+    public function createSchemaVersionTable()
+    {
+        if (! $this->hasTable(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
+            $t = $this->createTable(
+                RUCKUSING_TS_SCHEMA_TBL_NAME, 
+                array('id' => false)
+            );
             $t->column('version', 'string');
             $t->finish();
-            $this->add_index(RUCKUSING_TS_SCHEMA_TBL_NAME, 'version', array('unique' => true));
-        }//if !has_table
+            $this->addIndex(
+                RUCKUSING_TS_SCHEMA_TBL_NAME, 
+                'version', 
+                array('unique' => true)
+            );
+        }
     }
 	
     /**
-     * start_transaction 
+     * start a transaction if not started
      * 
      * @return void
      */
-	public function start_transaction() {
+    public function startTransaction()
+    {
 		try {
-			if($this->inTransaction() === false) {
-				$this->beginTransaction();
-			}
-		}catch(Exception $e) {
+            $this->_beginTransaction();
+		} catch (Exception $e) {
 			trigger_error($e->getMessage());
 		}
     }
 
     /**
-     * commit_transaction 
+     * commit the transaction if started
      * 
      * @return void
      */
-	public function commit_transaction() {
+    public function commitTransaction()
+    {
 		try {
-			if($this->inTransaction()) {
-				$this->commit();
-			}
-		}catch(Exception $e) {
+            $this->_commit();
+		} catch (Exception $e) {
 			trigger_error($e->getMessage());
 		}
     }
 
     /**
-     * rollback_transaction 
+     * rollback the transaction if started
      * 
      * @return void
      */
-	public function rollback_transaction() {
+    public function rollbackTransaction()
+    {
 		try {
-			if($this->inTransaction()) {
-				$this->rollback();
-			}
-		}catch(Exception $e) {
+            $this->_rollback();
+		} catch (Exception $e) {
 			trigger_error($e->getMessage());
 		}
 	}
 	
     /**
-     * quote_table 
+     * quote table 
      * 
-     * @param string $str 
+     * @param string $tableName The table name to quote
+     *
      * @return string
      */
-    public function quote_table($str) {
-        return "`" . $str . "`";
+    public function quoteTable($tableName)
+    {
+        return $this->identifier($tableName);
     }
 	
     /**
-     * column_definition 
+     * column definition 
      * 
-     * @param string $column_name 
-     * @param mixed $type 
-     * @param mixed $options 
+     * @param string $columnName Column name
+     * @param string $type       Type generic
+     * @param array  $options    Options
+     *
      * @return string
      */
-	public function column_definition($column_name, $type, $options = null) {
-		$col = new Ruckusing_ColumnDefinition($this, $column_name, $type, $options);
+    public function columnDefinition($columnName, $type, $options = null)
+    {
+        $col = new Ruckusing_ColumnDefinition(
+            $this, 
+            $columnName, 
+            $type, 
+            $options
+        );
 		return $col->__toString();
-	}//column_definition
+	}
 
 	//-------- DATABASE LEVEL OPERATIONS
     /**
-     * database_exists 
+     * database exists ?
      * 
-     * @param mixed $db 
+     * @param string $db Database name
+     *
      * @return boolean
      */
-	public function database_exists($db) {
-		$ddl = "SHOW DATABASES";
-		$result = $this->select_all($ddl);
-		if (count($result) == 0) {
-            return false;
-        }
-        foreach($result as $dbrow) {
-            if($dbrow['Database'] == $db) {
+    public function databaseExists($db)
+    {
+		$ddl = 'SHOW DATABASES';
+		$result = $this->selectAll($ddl);
+        foreach ($result as $dbrow) {
+            if ($dbrow['Database'] == $db) {
                 return true;
             }
         }
@@ -259,45 +288,37 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
     }
     
     /**
-     * create_database 
+     * create database 
      * 
-     * @param mixed $db 
+     * @param string $db Database name
      *
      * @return boolean
      */
-	public function create_database($db) {
-		if($this->database_exists($db)) {
+    public function createDatabase($db)
+    {
+		if ($this->databaseExists($db)) {
 			return false;
 		}
-		$ddl = sprintf("CREATE DATABASE %s", $this->identifier($db));
-		$result = $this->query($ddl);
-		if($result === true) {
-			return true;
-		}		
-        return false;
+		$ddl = sprintf('CREATE DATABASE %s', $this->identifier($db));
+		return $this->query($ddl);
 	}
 	
     /**
-     * drop_database 
+     * drop database 
      * 
-     * @param mixed $db 
+     * @param string $db Database name
      *
      * @return boolean
      */
-	public function drop_database($db) {
-		if(!$this->database_exists($db)) {
+    public function dropDatabase($db)
+    {
+		if (!$this->databaseExists($db)) {
 			return false;
 		}
-		$ddl = sprintf("DROP DATABASE IF EXISTS %s", $this->identifier($db));
-		$result = $this->query($ddl);
-		if( $result === true) {
-			return true;
-		}		
-        return false;
+		$ddl = sprintf('DROP DATABASE IF EXISTS %s', $this->identifier($db));
+		return $this->query($ddl);
 	}
 
-	/*
-	*/
     /**
 	 * Dump the complete schema of the DB. This is really just all of the 
 	 * CREATE TABLE statements for all of the tables in the DB.
@@ -307,20 +328,20 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
      * 
      * @return string
      */
-	public function schema() {
-		$final = "";
+    public function schema()
+    {
+		$final = '';
         $views = '';
-		$this->load_tables(true);
-		foreach($this->tables as $tbl => $idx) {
+		$this->_loadTables(true);
+		foreach ($this->_tables as $tbl => $idx) {
+			if ($tbl == 'schema_info') continue;
 
-			if($tbl == 'schema_info') { continue; }
-
-			$stmt = sprintf("SHOW CREATE TABLE %s", $this->identifier($tbl));
+			$stmt = sprintf('SHOW CREATE TABLE %s', $this->identifier($tbl));
 			$result = $this->query($stmt);
 
-            if(is_array($result) && count($result) == 1) {
+            if (is_array($result) && count($result) == 1) {
                 $row = $result[0];
-                if(count($row) == 2) {
+                if (count($row) == 2) {
                     if (isset($row['Create Table'])) {
                         $final .= $row['Create Table'] . ";\n\n";
                     } else if (isset($row['Create View'])) {
@@ -333,534 +354,598 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
 	}
 	
     /**
-     * table_exists 
+     * Verify if table exists 
      * 
-     * @param string $tbl 
-     * @param boolean $reload_tables 
+     * @param string  $tbl           Table name
+     * @param boolean $reload_tables Flag for reload all tables
      *
      * @return boolean
      */
-	public function table_exists($tbl, $reload_tables = false) {
-		$this->load_tables($reload_tables);
-		return array_key_exists($tbl, $this->tables);
+    public function tableExists($tbl, $reload_tables = false)
+    {
+		$this->_loadTables($reload_tables);
+		return array_key_exists($tbl, $this->_tables);
 	}
 		
     /**
-     * show_fields_from 
+     * show fields from 
      * 
-     * @param string $tbl 
+     * @param string $tbl Table name
+     *
      * @return string
      */
-	public function show_fields_from($tbl) {
-		return "";
+    public function showFieldsFrom($tbl)
+    {
+		return '';
 	}
 
     /**
      * execute 
      * 
-     * @param string $query 
+     * @param string $query Query SQL
+     *
      * @return mixed
      */
-	public function execute($query) {
+    public function execute($query)
+    {
 		return $this->query($query);
 	}
 
     /**
      * query 
      * 
-     * @param string $query 
+     * @param string $query Query SQL
+     *
      * @return mixed
      */
-	public function query($query) {
-		$this->logger->log($query);
-		$query_type = $this->determine_query_type($query);
+    public function query($query)
+    {
+		$this->getLogger()->log($query);
+		$query_type = $this->_determineQueryType($query);
 		$data = array();
-		if($query_type == SQL_SELECT || $query_type == SQL_SHOW) {		  
-			$res = mysql_query($query, $this->conn);
-			if($this->isError($res)) { 
-                trigger_error(sprintf("Error executing 'query' with:\n%s\n\nReason: %s\n\n", $query, mysql_error($this->conn)));
-            }
-            while($row = mysql_fetch_assoc($res)) {
+        $res = mysql_query($query, $this->_conn);
+        // Check error
+        if ($this->_isError($res)) { 
+            trigger_error(
+                sprintf(
+                    "Error executing 'query' with:\n%s\n\nReason: %s\n\n",
+                    $query, 
+                    mysql_error($this->_conn)
+                )
+            );
+        }
+		if ($query_type == SQL_SELECT || $query_type == SQL_SHOW) {		  
+            while ($row = mysql_fetch_assoc($res)) {
                 $data[] = $row; 
             }
 			return $data;
-			
-		} else {
-            // INSERT, DELETE, etc...
-			$res = mysql_query($query, $this->conn);
-			if($this->isError($res)) { 
-                trigger_error(sprintf("Error executing 'query' with:\n%s\n\nReason: %s\n\n", $query, mysql_error($this->conn)));
-            }
-            return true;
 		}
+        return true;
 	}
 	
     /**
-     * select_one 
+     * select one for query type SELECT or SHOW
      * 
-     * @param string $query 
-     * @return mixed
+     * @param string $query Query SQL
+     *
+     * @return array 
      */
-	public function select_one($query) {
-		$this->logger->log($query);
-		$query_type = $this->determine_query_type($query);
-		if ($query_type == SQL_SELECT || $query_type == SQL_SHOW) {
-            $res = mysql_query($query, $this->conn);
-            if($this->isError($res)) {
-                $msg = "Error executing 'query' with:\n%s\n\nReason: %s\n\n";
-                trigger_error(sprintf($msg, $query, mysql_error($this->conn)));
-            }
-            return mysql_fetch_assoc($res);			
-		} else {
+    public function selectOne($query)
+    {
+		$query_type = $this->_determineQueryType($query);
+        if ($query_type != SQL_SELECT && $query_type != SQL_SHOW) {
             trigger_error(
-                "Query for select_one() is not one of SELECT or SHOW: $query"
+                'Query for selectOne() is not one of SELECT or SHOW: ' 
+                . $query
             );
         }
+        $result = $this->query($query);
+        return array_shift($result);			
 	}
 
     /**
-     * select_all 
+     * select all 
      * 
-     * @param string $query 
+     * @param string $query Query SQL
      *
-     * @return mixed
+     * @return array
      */
-	public function select_all($query) {
-        return $this->query($query);
+    public function selectAll($query)
+    {
+        $query_type = $this->_determineQueryType($query);
+        if ($query_type != SQL_SELECT && $query_type != SQL_SHOW) {
+            trigger_error(
+                'Query for selectAll() is not one of SELECT or SHOW: ' 
+                . $query
+            );
+        }
+        $results = $this->query($query);
+        return $results;			
 	}
 	
-
-	/*
-	*/
     /**
 	 * Use this method for non-SELECT queries
-	 * Or anything where you dont necessarily expect a result string, e.g. DROPs, CREATEs, etc.
+     * Or anything where you dont necessarily expect a result string, 
+     * e.g. DROPs, CREATEs, etc.
      * 
-     * @param string $ddl 
+     * @param string $ddl Query SQL
      *
      * @return boolean
      */
-	public function execute_ddl($ddl) {
-		$result = $this->query($ddl);
-		return true;
-
-	}
-	
-    /**
-     * drop_table 
-     * 
-     * @param string $tbl 
-     *
-     * @return boolean
-     */
-	public function drop_table($tbl) {
-		$ddl = sprintf("DROP TABLE IF EXISTS %s", $this->identifier($tbl));
-		$result = $this->query($ddl);
+    public function executeDdl($ddl)
+    {
+        $result = $this->query($ddl);
+        // @TODO Check result
 		return true;
 	}
 	
     /**
-     * create_table 
+     * drop table 
      * 
-     * @param string $table_name 
-     * @param array $options 
+     * @param string $tbl Table name
+     *
+     * @return boolean
+     */
+    public function dropTable($tbl)
+    {
+		$ddl = sprintf('DROP TABLE IF EXISTS %s', $this->identifier($tbl));
+        $result = $this->query($ddl);
+        // @TODO Check result
+		return true;
+	}
+	
+    /**
+     * create table 
+     * 
+     * @param string $tableName Table name
+     * @param array  $options   Options definition table
      *
      * @return Ruckusing_MySQLTableDefinition
      */
-	public function create_table($table_name, $options = array()) {
-		return new Ruckusing_MySQLTableDefinition($this, $table_name, $options);
+    public function createTable($tableName, $options = array())
+    {
+		return new Ruckusing_MySQLTableDefinition($this, $tableName, $options);
 	}
 	
     /**
-     * quote_string 
+     * quote string 
      * 
-     * @param string $str 
+     * @param string $str String to escape
+     *
      * @return string
      */
-	public function quote_string($str) {
+    public function quoteString($str)
+    {
         return mysql_real_escape_string($str); 
     }
   
     /**
      * identifier 
      * 
-     * @param string $str 
+     * @param string $str Identifier to quote
+     *
      * @return string
      */
-    public function identifier($str) {
+    public function identifier($str)
+    {
         return('`' . $str . '`');
     }
 	
     /**
-     * quote 
+     * quote a value
      * 
-     * @param mixed $value 
-     * @param string $column 
+     * @param string $value  String to quote
+     * @param string $column Column name
      *
      * @return string
      */
-	public function quote($value, $column) {
-        return $this->quote_string($value);
+    public function quote($value, $column)
+    {
+        return $this->quoteString($value);
 	}
 	
     /**
-     * rename_table 
+     * rename table 
      * 
-     * @param string $name 
-     * @param string $new_name 
+     * @param string $name    The old table name
+     * @param string $newName The new table name
      *
      * @return boolean
      * @throws Ruckusing_ArgumentException
      */
-	public function rename_table($name, $new_name) {
-		if(empty($name)) {
-			throw new Ruckusing_ArgumentException("Missing original column name parameter");
+    public function renameTable($name, $newName)
+    {
+		if (empty($name)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing original table name parameter'
+            );
 		}
-		if(empty($new_name)) {
-			throw new Ruckusing_ArgumentException("Missing new column name parameter");
+		if (empty($newName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing new table name parameter'
+            );
 		}
-		$sql = sprintf("RENAME TABLE %s TO %s", $this->identifier($name), $this->identifier($new_name));
-		return $this->execute_ddl($sql);
-	}//rename_table
+        $sql = sprintf(
+            'RENAME TABLE %s TO %s',
+            $this->identifier($name), 
+            $this->identifier($newName)
+        );
+		return $this->executeDdl($sql);
+	}
 	
     /**
-     * add_column 
+     * add column 
      * 
-     * @param string $table_name 
-     * @param string $column_name 
-     * @param string $type 
-     * @param array $options 
+     * @param string $tableName  Table name
+     * @param string $columnName Column name
+     * @param string $type       Type generic of column
+     * @param array  $options    Options of column
      *
-     * @return void
+     * @return boolean
      * @throws Ruckusing_ArgumentException
      */
-	public function add_column($table_name, $column_name, $type, $options = array()) {
-		if(empty($table_name)) {
-			throw new Ruckusing_ArgumentException("Missing table name parameter");
+    public function addColumn($tableName, $columnName, $type, $options = array())
+    {
+		if (empty($tableName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing table name parameter'
+            );
 		}
-		if(empty($column_name)) {
-			throw new Ruckusing_ArgumentException("Missing column name parameter");
+		if (empty($columnName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing column name parameter'
+            );
 		}
-		if(empty($type)) {
-			throw new Ruckusing_ArgumentException("Missing type parameter");
+		if (empty($type)) {
+			throw new Ruckusing_ArgumentException('Missing type parameter');
 		}
 		//default types
-		if (!array_key_exists('limit', $options)) {
+		if (! array_key_exists('limit', $options)) {
 			$options['limit'] = null;
 		}
-		if (!array_key_exists('precision', $options)) {
+		if (! array_key_exists('precision', $options)) {
 			$options['precision'] = null;
 		}
-		if (!array_key_exists('scale', $options)) {
+		if (! array_key_exists('scale', $options)) {
 			$options['scale'] = null;
 		}
         $sql = sprintf(
-            'ALTER TABLE %s ADD `%s` %s',
-            $table_name, 
-            $column_name,
-            $this->type_to_sql($type,$options)
+            'ALTER TABLE %s ADD %s %s',
+            $this->identifier($tableName),
+            $this->identifier($columnName),
+            $this->typeToSql($type, $options)
         );
-        $sql .= $this->add_column_options($type, $options);
+        $sql .= $this->addColumnOptions($type, $options);
 
-		return $this->execute_ddl($sql);
-	}//add_column
+		return $this->executeDdl($sql);
+	}
 	
     /**
-     * remove_column 
+     * remove column 
      * 
-     * @param string $table_name 
-     * @param string $column_name 
+     * @param string $tableName  Table name
+     * @param string $columnName Column name
      *
      * @return boolean
      */
-	public function remove_column($table_name, $column_name) {
+    public function removeColumn($tableName, $columnName)
+    {
+		if (empty($tableName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing table name parameter'
+            );
+		}
+		if (empty($columnName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing column name parameter'
+            );
+		}
         $sql = sprintf(
             'ALTER TABLE %s DROP COLUMN %s', 
-            $this->identifier($table_name), 
-            $this->identifier($column_name)
+            $this->identifier($tableName), 
+            $this->identifier($columnName)
         );
 
-		return $this->execute_ddl($sql);
-	}//remove_column
+		return $this->executeDdl($sql);
+	}
 	
     /**
-     * rename_column 
+     * rename column 
      * 
-     * @param string $table_name 
-     * @param string $column_name 
-     * @param string $new_column_name 
+     * @param string $tableName     Table name
+     * @param string $columnName    Old column name
+     * @param string $newColumnName New column name
      *
      * @return boolean
      * @throws Ruckusing_ArgumentException
      */
-	public function rename_column($table_name, $column_name, $new_column_name) {
-		if(empty($table_name)) {
-			throw new Ruckusing_ArgumentException("Missing table name parameter");
+    public function renameColumn($tableName, $columnName, $newColumnName)
+    {
+		if (empty($tableName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing table name parameter'
+            );
 		}
-		if(empty($column_name)) {
-			throw new Ruckusing_ArgumentException("Missing original column name parameter");
+		if (empty($columnName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing original column name parameter'
+            );
 		}
-		if(empty($new_column_name)) {
-			throw new Ruckusing_ArgumentException("Missing new column name parameter");
+		if (empty($newColumnName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing new column name parameter'
+            );
 		}
-		$column_info = $this->column_info($table_name, $column_name);
-		$current_type = $column_info['type'];
-        $sql =  sprintf(
+		$columnInfo = $this->columnInfo($tableName, $columnName);
+		$current_type = $columnInfo['type'];
+        $sql = sprintf(
             'ALTER TABLE %s CHANGE %s %s %s', 
-		    $this->identifier($table_name), 
-		    $this->identifier($column_name), 
-            $this->identifier($new_column_name),
+		    $this->identifier($tableName), 
+		    $this->identifier($columnName), 
+            $this->identifier($newColumnName),
             $current_type
         );
 
-		return $this->execute_ddl($sql);
-	}//rename_column
+		return $this->executeDdl($sql);
+	}
 
 
     /**
-     * change_column 
+     * change column 
      * 
-     * @param string $table_name 
-     * @param string $column_name 
-     * @param string $type 
-     * @param array $options 
+     * @param string $tableName  Table name
+     * @param string $columnName Column name
+     * @param string $type       Type generic of column
+     * @param array  $options    Options definition column
      *
      * @return boolean
      * @throws Ruckusing_ArgumentException
      */
-	public function change_column($table_name, $column_name, $type, $options = array()) {
-		if(empty($table_name)) {
-			throw new Ruckusing_ArgumentException("Missing table name parameter");
+    public function changeColumn($tableName, $columnName, $type, $options = array())
+    {
+		if (empty($tableName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing table name parameter'
+            );
 		}
-		if(empty($column_name)) {
-			throw new Ruckusing_ArgumentException("Missing original column name parameter");
+		if (empty($columnName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing column name parameter'
+            );
 		}
-		if(empty($type)) {
-			throw new Ruckusing_ArgumentException("Missing type parameter");
+		if (empty($type)) {
+			throw new Ruckusing_ArgumentException('Missing type parameter');
 		}
-		$column_info = $this->column_info($table_name, $column_name);
+		$columnInfo = $this->columnInfo($tableName, $columnName);
 		//default types
-		if (!array_key_exists('limit', $options)) {
+		if (! array_key_exists('limit', $options)) {
 			$options['limit'] = null;
 		}
-		if (!array_key_exists('precision', $options)) {
+		if (! array_key_exists('precision', $options)) {
 			$options['precision'] = null;
 		}
-		if (!array_key_exists('scale', $options)) {
+		if (! array_key_exists('scale', $options)) {
 			$options['scale'] = null;
 		}
         $sql = sprintf(
-            "ALTER TABLE `%s` CHANGE `%s` `%s` %s",
-            $table_name,
-            $column_name,
-            $column_name,
-            $this->type_to_sql($type,$options)
+            'ALTER TABLE %s CHANGE %s %s %s',
+            $this->identifier($tableName),
+            $this->identifier($columnName),
+            $this->identifier($columnName),
+            $this->typeToSql($type, $options)
         );
-        $sql .= $this->add_column_options($type, $options);
+        $sql .= $this->addColumnOptions($type, $options);
 
-		return $this->execute_ddl($sql);
-	}//change_column
+		return $this->executeDdl($sql);
+	}
 
     /**
-     * column_info 
+     * column info 
      * 
-     * @param string $table 
-     * @param string $column 
+     * @param string $table  Table name
+     * @param string $column Column name
      *
      * @return mixed
      * @throws Ruckusing_ArgumentException
      */
-	public function column_info($table, $column) {
-		if(empty($table)) {
-			throw new Ruckusing_ArgumentException("Missing table name parameter");
-		}
-		if(empty($column)) {
-			throw new Ruckusing_ArgumentException("Missing original column name parameter");
-		}
-		try {
-            $sql = sprintf(
-                "SHOW COLUMNS FROM %s LIKE '%s'",
-                $this->identifier($table),
-                $column
+    public function columnInfo($table, $column)
+    {
+		if (empty($table)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing table name parameter'
             );
-			$result = $this->select_one($sql);
-			if (is_array($result)) {
-                //lowercase key names
-                $result = array_change_key_case($result, CASE_LOWER);			
-            }
-			return $result;
-		}catch(Exception $e) {
-			return null;
 		}
-	}//column_info
+		if (empty($column)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing column name parameter'
+            );
+		}
+        $sql = sprintf(
+            'SHOW COLUMNS FROM %s LIKE \'%s\'',
+            $this->identifier($table),
+            $column
+        );
+        $result = $this->selectOne($sql);
+        if (is_array($result)) {
+            //lowercase key names
+            $result = array_change_key_case($result, CASE_LOWER);			
+        }
+        return $result;
+	}
 	
     /**
-     * add_index 
+     * add index 
      * 
-     * @param string $table_name 
-     * @param string $column_name 
-     * @param array $options 
+     * @param string       $tableName  Table name
+     * @param string|array $columnName Column name
+     * @param array        $options    Options definition of index
      *
      * @return boolean
      * @throws Ruckusing_ArgumentException
      * @throws Ruckusing_InvalidIndexNameException
      */
-	public function add_index($table_name, $column_name, $options = array()) {
-		if(empty($table_name)) {
-			throw new Ruckusing_ArgumentException("Missing table name parameter");
+    public function addIndex($tableName, $columnName, $options = array())
+    {
+		if (empty($tableName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing table name parameter'
+            );
 		}
-		if(empty($column_name)) {
-			throw new Ruckusing_ArgumentException("Missing column name parameter");
+		if (empty($columnName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing column name parameter'
+            );
 		}
 		//unique index?
         $unique = false;
-		if(is_array($options) && array_key_exists('unique', $options)) {
+        if (is_array($options) && array_key_exists('unique', $options)
+            && $options['unique'] === true
+        ) {
 			$unique = true;
 		}
-		//did the user specify an index name?
-		if(is_array($options) && array_key_exists('name', $options)) {
-			$index_name = $options['name'];
-		} else {
-			$index_name = Ruckusing_NamingUtil::index_name($table_name, $column_name);
-		}
-		
-		if(strlen($index_name) > MAX_IDENTIFIER_LENGTH) {
-		    $msg = 'The auto-generated index name is too long for MySQL (max is 64 chars). ';
-		    $msg .= 'Considering using \'name\' option parameter to specify a custom name for this index.';
-		    $msg .= ' Note: you will also need to specify';
-		    $msg .= ' this custom name in a drop_index() - if you have one.';
+        $indexName = $this->_getIndexName($tableName, $columnName, $options);
+		// Check length index name
+		if (strlen($indexName) > MAX_IDENTIFIER_LENGTH) {
+            $msg = 'The auto-generated index name is too long for '
+                . 'MySQL (max is 64 chars). Considering using \'name\' option '
+                . 'parameter to specify a custom name for this index. '
+                . 'Note: you will also need to specify this custom name '
+                . 'in a drop_index() - if you have one.';
 		    throw new Ruckusing_InvalidIndexNameException($msg);
 	    }
-		if(!is_array($column_name)) {
-			$column_names = array($column_name);
-		} else {
-		    $column_names = $column_name;
+        $columnNames = $columnName;
+		if (! is_array($columnNames)) {
+			$columnNames = array($columnNames);
 	    }
 		$cols = array();
-		foreach($column_names as $name) {
+		foreach ($columnNames as $name) {
 		    $cols[] = $this->identifier($name);
 	    }
         $sql = sprintf(
             'CREATE %sINDEX %s ON %s(%s)',
-            $unique ? 'UNIQUE ' : '',
-            $index_name, 
-            $this->identifier($table_name),
+            ($unique === true) ? 'UNIQUE ' : '',
+            $indexName, 
+            $this->identifier($tableName),
             join(', ', $cols)
         );
 
-		return $this->execute_ddl($sql);		
-	}//add_index
+		return $this->executeDdl($sql);		
+	}
 	
     /**
-     * remove_index 
+     * remove index 
      * 
-     * @param string $table_name 
-     * @param string $column_name 
-     * @param array $options 
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     * @param array  $options    The options definition of the index
      *
      * @return boolean
      * @throws Ruckusing_ArgumentException
      */
-	public function remove_index($table_name, $column_name, $options = array()) {
-		if(empty($table_name)) {
-			throw new Ruckusing_ArgumentException('Missing table name parameter');
+    public function removeIndex($tableName, $columnName, $options = array())
+    {
+		if (empty($tableName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing table name parameter'
+            );
 		}
-		if(empty($column_name)) {
-			throw new Ruckusing_ArgumentException('Missing column name parameter');
+		if (empty($columnName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing column name parameter'
+            );
 		}
-		//did the user specify an index name?
-		if(is_array($options) && array_key_exists('name', $options)) {
-			$index_name = $options['name'];
-		} else {
-			$index_name = Ruckusing_NamingUtil::index_name($table_name, $column_name);
-		}
+        $indexName = $this->_getIndexName($tableName, $columnName, $options);
         $sql = sprintf(
             'DROP INDEX %s ON %s', 
-            $this->identifier($index_name), 
-            $this->identifier($table_name)
+            $this->identifier($indexName), 
+            $this->identifier($tableName)
         );
 
-		return $this->execute_ddl($sql);
+		return $this->executeDdl($sql);
 	}
 
     /**
-     * has_index 
+     * has index 
      * 
-     * @param string $table_name 
-     * @param string $column_name 
-     * @param array $options 
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     * @param array  $options    The option definition of the index
      *
      * @return boolean
      * @throws Ruckusing_ArgumentException
      */
-	public function has_index($table_name, $column_name, $options = array()) {
-		if(empty($table_name)) {
-			throw new Ruckusing_ArgumentException("Missing table name parameter");
+    public function hasIndex($tableName, $columnName, $options = array())
+    {
+		if (empty($tableName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing table name parameter'
+            );
 		}
-		if(empty($column_name)) {
-			throw new Ruckusing_ArgumentException("Missing column name parameter");
+		if (empty($columnName)) {
+            throw new Ruckusing_ArgumentException(
+                'Missing column name parameter'
+            );
 		}
-		//did the user specify an index name?
-		if(is_array($options) && array_key_exists('name', $options)) {
-			$index_name = $options['name'];
-		} else {
-			$index_name = Ruckusing_NamingUtil::index_name($table_name, $column_name);
-		}
-		$indexes = $this->indexes($table_name);
-		foreach($indexes as $idx) {
-			if($idx['name'] == $index_name) {
+        $indexName = $this->_getIndexName($tableName, $columnName, $options);
+		$indexes = $this->indexes($tableName);
+		foreach ($indexes as $idx) {
+			if ($idx['name'] == $indexName) {
 				return true;
 			}
 		}
 		return false;
-	}//has_index
-	
+    }
+
     /**
      * indexes 
      * 
-     * @param string $table_name 
+     * @param string $tableName The table name
      *
      * @return array
      */
-	public function indexes($table_name) {
-		$sql = sprintf('SHOW KEYS FROM %s', $this->identifier($table_name));
-		$result = $this->select_all($sql);
+    public function indexes($tableName)
+    {
+		$sql = sprintf('SHOW KEYS FROM %s', $this->identifier($tableName));
+		$result = $this->selectAll($sql);
 		$indexes = array();
-		$cur_idx = null;
-		foreach($result as $row) {
+		foreach ($result as $row) {
             //skip primary
-            if($row['Key_name'] == 'PRIMARY') continue;
-            $cur_idx = $row['Key_name'];
+            if ($row['Key_name'] == 'PRIMARY') continue;
             $indexes[] = array(
                 'name' => $row['Key_name'], 
-                'unique' => (int)$row['Non_unique'] == 0 ? true : false
+                'unique' => (int)$row['Non_unique'] == 0 ? true : false,
             );
         }
-
 		return $indexes;
-	}//has_index
-
-    //$limit = null, $precision = null, $scale = null
+	}
 
     /**
-     * type_to_sql
+     * type to sql : Return the type SQL of type generic
      * 
-     * @param string $type 
-     * @param array $options
+     * @param string $type    The type generic
+     * @param array  $options The options definition
      *
      * @return string
      * @throws Ruckusing_ArgumentException
      */
-	public function type_to_sql($type, $options = array()) {		
-		$natives = $this->native_database_types();
+    public function typeToSql($type, $options = array())
+    {
+        $natives = $this->nativeDatabaseTypes();
+        if (! is_array($options)) {
+            $options = array();
+        }
 		
-		if (!array_key_exists($type, $natives)) {
-            $error = sprintf("Error:I dont know what column type of '%s' maps to for MySQL.", $type);
-            $error .= "\nYou provided: {$type}\n";
-            $error .= "Valid types are: \n";
+		if (! array_key_exists($type, $natives)) {
+            $error = sprintf(
+                "Error: I dont know what column type "
+                . "of '%s' maps to for MySQL.",
+                $type
+            );
+            $error .= "\nYou provided: {$type}\n"
+                . "Valid types are: \n";
             $types = array_keys($natives);
-            foreach($types as $t) {
-                if($t == 'primary_key') { continue; }
+            foreach ($types as $t) {
+                if ($t == 'primary_key') continue;
                 $error .= "\t{$t}\n";
             }
             throw new Ruckusing_ArgumentException($error);
@@ -870,13 +955,13 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
         $precision = null;
         $limit = null;
 	  
-        if(isset($options['precision'])) {
+        if (array_key_exists('precision', $options)) {
             $precision = $options['precision'];
         }
-        if(isset($options['scale'])) {
+        if (array_key_exists('scale', $options)) {
             $scale = $options['scale'];
         }
-        if(isset($options['limit'])) {
+        if (array_key_exists('limit', $options)) {
             $limit = $options['limit'];
         }
 		
@@ -886,22 +971,22 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
 		} else {
 			return $native_type;
 		}
-		if($type == 'decimal') {
+		if ($type == 'decimal') {
 			//ignore limit, use precison and scale
-			if( $precision == null || array_key_exists('precision', $native_type)) {
+			if (!isset($precision) || array_key_exists('precision', $native_type)) {
 				$precision = $native_type['precision'];
 			}
-			if( $scale == null || array_key_exists('scale', $native_type)) {
+			if (!isset($scale) || array_key_exists('scale', $native_type)) {
 				$scale = $native_type['scale'];
 			}
-			if($precision != null) {
-				if(is_int($scale)) {
-					$column_type_sql .= sprintf("(%d, %d)", $precision, $scale);
+			if (isset($precision)) {
+				if (is_int($scale)) {
+					$column_type_sql .= sprintf('(%d, %d)', $precision, $scale);
 				} else {
-					$column_type_sql .= sprintf("(%d)", $precision);						
+					$column_type_sql .= sprintf('(%d)', $precision);						
 				}//scale
 			} else {
-				if($scale) {
+				if ($scale) {
                     throw new Ruckusing_ArgumentException(
                         'Error adding decimal column: precision cannot '
                         . 'be empty if scale is specified'
@@ -910,51 +995,60 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
 			}//precision
 		} else {
 			//not a decimal column
-			if($limit == null && array_key_exists('limit', $native_type)) {
+			if (!isset($limit) && array_key_exists('limit', $native_type)) {
 				$limit = $native_type['limit'];
 			}
-			if($limit) {
+			if ($limit) {
 				$column_type_sql .= sprintf('(%d)', $limit);
-			}		
-		}
+			}
+        }
+
 		return $column_type_sql;
-	}//type_to_sql
+	}
 	
     /**
-     * add_column_options 
+     * add column options 
      * 
-     * @param string $type 
-     * @param array $options 
+     * @param string $type    The type generic
+     * @param array  $options The options definition
      *
      * @return string
      */
-	public function add_column_options($type, $options) {
-		$sql = "";
+    public function addColumnOptions($type, $options)
+    {
+		$sql = '';
 
-        if(is_array($options) && array_key_exists('unsigned', $options) 
-            && $options['unsigned'] === true) 
-        {
+        if (!is_array($options) || empty($options)) {
+            return $sql;
+        }
+
+        // unsigned
+        if (array_key_exists('unsigned', $options) 
+            && $options['unsigned'] === true
+        ) {
 			$sql .= ' UNSIGNED';
 		}
-    /*
+        /*
         if($type === 'primary_key') {
       		if(is_array($options) && array_key_exists('auto_increment', $options) && $options['auto_increment'] === true) {
       			$sql .= ' auto_increment';
       		}
       		$sql .= ' PRIMARY KEY';
         }
-    */
+        */
 
-        if (is_array($options) && array_key_exists('auto_increment', $options) 
-            && $options['auto_increment'] === true) 
-        {
+        // auto_increment
+        if (array_key_exists('auto_increment', $options) 
+            && $options['auto_increment'] === true
+        ) {
 			$sql .= ' auto_increment';
 		}
 
-        if (is_array($options) && array_key_exists('default', $options) 
-            && $options['default'] !== null) 
-        {
-			if($this->is_sql_method_call($options['default'])) {
+        // default value
+        if (array_key_exists('default', $options) 
+            && $options['default'] !== null
+        ) {
+			if ($this->_isSqlMethodCall($options['default'])) {
 				//$default_value = $options['default'];
                 throw new Exception(
                     'MySQL does not support function calls '
@@ -970,51 +1064,54 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
                 }
                 $default_value = sprintf($default_format, $options['default']);			
             }
-			$sql .= sprintf(" DEFAULT %s", $default_value);
+			$sql .= sprintf(' DEFAULT %s', $default_value);
 		}
-		
-        if(is_array($options) && array_key_exists('null', $options) 
-            && $options['null'] === false) 
-        {
-			$sql .= " NOT NULL";
-		}
-		if(is_array($options) && array_key_exists('after', $options)) {
-            $sql .= sprintf(" AFTER %s", $this->identifier($options['after']));
+
+        // default null
+        if (array_key_exists('null', $options) && $options['null'] === false) {
+			$sql .= ' NOT NULL';
+        }
+
+        // position of column
+		if (array_key_exists('after', $options)) {
+            $sql .= sprintf(' AFTER %s', $this->identifier($options['after']));
         }
 
 		return $sql;
-	}//add_column_options
+	}
 	
     /**
-     * set_current_version 
+     * set current version 
      * 
-     * @param string $version 
+     * @param string $version The current version
      *
      * @return boolean
      */
-	public function set_current_version($version) {
+    public function setCurrentVersion($version)
+    {
         $sql = sprintf(
             "INSERT INTO %s (version) VALUES ('%s')", 
             RUCKUSING_TS_SCHEMA_TBL_NAME, 
             $version
-        );        
-		return $this->execute_ddl($sql);
+        );
+		return $this->executeDdl($sql);
 	}
 	
     /**
-     * remove_version 
+     * remove version 
      * 
-     * @param string $version 
+     * @param string $version The version to remove
      *
      * @return boolean
      */
-	public function remove_version($version) {
+    public function removeVersion($version)
+    {
         $sql = sprintf(
             "DELETE FROM %s WHERE version = '%s'", 
             RUCKUSING_TS_SCHEMA_TBL_NAME, 
             $version
-        );		
-		return $this->execute_ddl($sql);
+        );
+		return $this->executeDdl($sql);
     }
 	
     /**
@@ -1022,8 +1119,9 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
      * 
      * @return string
      */
-	public function __toString() {
-		return "Ruckusing_MySQLAdapter, version " . $this->version;
+    public function __toString()
+    {
+		return 'Ruckusing_MySQLAdapter, version ' . $this->_version;
 	}
 
 	
@@ -1033,41 +1131,54 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
     /**
      * connect 
      * 
-     * @param string $dsn 
+     * @param array $dsn DSN config to connect at DB
      *
      * @return void
      */
-	private function connect($dsn) {
-		$this->db_connect($dsn);
+    private function _connect($dsn)
+    {
+		$this->_dbConnect($dsn);
 	}
 	
     /**
-     * db_connect 
+     * db connect 
      * 
-     * @param string $dsn 
+     * @param array $dsn DSN config to connect at DB
      *
      * @return boolean
      */
-    private function db_connect($dsn) {
-        $db_info = $this->get_dsn();
-        if ($db_info) {
-            $this->db_info = $db_info;
+    private function _dbConnect($dsn)
+    {
+        $dbInfo = $this->getDsn();
+        if ($dbInfo) {
             //we might have a port
-            if(!empty($db_info['port'])) {
-                $host = $db_info['host'] . ':' . $db_info['port'];
-            } else {
-                $host = $db_info['host'];
+            $host = $dbInfo['host'];
+            if (! empty($dbInfo['port'])) {
+                $host .= ':' . $dbInfo['port'];
             }
-            $this->conn = mysql_connect($host, $db_info['user'], $db_info['password']);
-            if(!$this->conn) {
-                die("\n\nCould not connect to the DB, check host / user / password\n\n");
+            $this->_conn = mysql_connect(
+                $host, 
+                $dbInfo['user'], 
+                $dbInfo['password']
+            );
+            if (! $this->_conn) {
+                die(
+                    "\n\nCould not connect to the DB, "
+                    . "check host / user / password\n\n"
+                );
             }
-            if(!mysql_select_db($db_info['database'], $this->conn)) {
-                die("\n\nCould not select the DB, check permissions on host\n\n");
+            if (! mysql_select_db($dbInfo['database'], $this->_conn)) {
+                die(
+                    "\n\nCould not select the DB, "
+                    . "check permissions on host\n\n"
+                );
             }
             return true;
         } else {
-            die("\n\nCould not extract DB connection information from: {$dsn}\n\n");
+            die(
+                "\n\nCould not extract DB connection "
+                . "information from: " . var_export($dsn, true) ."\n\n"
+            );
         }
     }
 	
@@ -1075,127 +1186,146 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
     /**
      * isError 
      * 
-     * @param mixed $o 
+     * @param mixed $o Return to mysql_query function 
      *
      * @return boolean
      */
-	private function isError($o) {
-		return $o === FALSE;
+    private function _isError($o)
+    {
+		return $o === false;
 	}
 	
     /**
-     * load_tables 
+     * load tables 
 	 * Initialize an array of table names
      * 
-     * @param boolean $reload 
+     * @param boolean $reload Flag to reload tables
      *
      * @return void
      */
-	private function load_tables($reload = true) {
-		if($this->tables_loaded == false || $reload) {
-			$this->tables = array(); //clear existing structure			
+    private function _loadTables($reload = true)
+    {
+		if ($this->_tablesLoaded == false || $reload) {
+			$this->_tables = array(); //clear existing structure
 			$qry = 'SHOW TABLES';
-			$res = mysql_query($qry, $this->conn);
-			while($row = mysql_fetch_row($res)) {
+			$res = mysql_query($qry, $this->_conn);
+			while ($row = mysql_fetch_row($res)) {
                 $table = $row[0];
-                $this->tables[$table] = true;
+                $this->_tables[$table] = true;
             }
-		}	  
+		}
     }
 
     /**
-     * determine_query_type 
+     * determine query type 
      * 
-     * @param string $query 
+     * @param string $query Query SQL
      *
      * @return integer
      */
-	private function determine_query_type($query) {
-		$query = strtolower(trim($query));
-		
-		if(preg_match('/^select/', $query)) {
-			return SQL_SELECT;
-		}
-		if(preg_match('/^update/', $query)) {
-			return SQL_UPDATE;
-		}
-		if(preg_match('/^delete/', $query)) {
-			return SQL_DELETE;
-		}
-		if(preg_match('/^insert/', $query)) {
-			return SQL_INSERT;
-		}
-		if(preg_match('/^alter/', $query)) {
-			return SQL_ALTER;
-		}
-		if(preg_match('/^drop/', $query)) {
-			return SQL_DROP;
-		}
-		if(preg_match('/^create/', $query)) {
-			return SQL_CREATE;
-		}
-		if(preg_match('/^show/', $query)) {
-			return SQL_SHOW;
-		}
-		if(preg_match('/^rename/', $query)) {
-			return SQL_RENAME;
-		}
-		if(preg_match('/^set/', $query)) {
-			return SQL_SET;
-		}
-		// else
-		return SQL_UNKNOWN_QUERY_TYPE;
+    private function _determineQueryType($query)
+    {
+        $query = strtolower(trim($query));
+        $match = array();
+        preg_match('/^(\w)*/i', $query, $match);
+        if (empty($match)) {
+            return SQL_UNKNOWN_QUERY_TYPE;
+        }
+        $type = $match[0];
+        switch (strtolower($type)) {
+        case 'select':
+                return SQL_SELECT;
+        case 'update':
+                return SQL_UPDATE;
+        case 'delete':
+                return SQL_DELETE;
+        case 'insert':
+                return SQL_INSERT;
+        case 'alter':
+                return SQL_ALTER;
+        case 'drop':
+                return SQL_DROP;
+        case 'create':
+                return SQL_CREATE;
+        case 'show':
+                return SQL_SHOW;
+        case 'rename':
+                return SQL_RENAME;
+        case 'set':
+                return SQL_SET;
+        default:
+                return SQL_UNKNOWN_QUERY_TYPE;
+        }
 	}
 	
     /**
-     * is_select 
+     * is select 
      * 
-     * @param integer $query_type 
+     * @param integer $query_type Type of query SQL
      *
      * @return boolean
      */
-	private function is_select($query_type) {
-		if($query_type == SQL_SELECT) {
+    private function _isSelect($query_type)
+    {
+		if ($query_type == SQL_SELECT) {
 			return true;
 		}
 		return false;
 	}
 	
-	/*
-	*/
     /**
-     * is_sql_method_call 
+     * _getIndexName 
+     * 
+     * @param string       $tableName  The table name
+     * @param string|array $columnName The column name(s)
+     * @param array        $options    The options definition of the index
+     *
+     * @return string
+     */
+    private function _getIndexName($tableName, $columnName, $options = array())
+    {
+		//did the user specify an index name?
+		if (is_array($options) && array_key_exists('name', $options)) {
+			$indexName = $options['name'];
+		} else {
+            $indexName = Ruckusing_NamingUtil::indexName(
+                $tableName, 
+                $columnName
+            );
+        }
+        return $indexName;
+    }
+	
+    /**
+     * is sql method call 
 	 * Detect whether or not the string represents a function call and if so
 	 * do not wrap it in single-quotes, otherwise do wrap in single quotes.
      * 
-     * @param string $str 
+     * @param string $str String to detect method call
+     *
      * @return boolean
      */
-	private function is_sql_method_call($str) {
+    private function _isSqlMethodCall($str)
+    {
 		$str = trim($str);
-		if(substr($str, -2, 2) == "()") {
-			return true;			
+		if (substr($str, -2, 2) == '()') {
+			return true;
 		}
         return false;
 	}
 	
     /**
-     * inTransaction 
-     * 
-     * @return boolean
-     */
-	private function inTransaction() {
-        return $this->in_trx;
-    }
-  
-    /**
      * beginTransaction 
      * 
      * @return void
      */
-    private function beginTransaction() {
-        mysql_query("BEGIN", $this->conn);
-        $this->in_trx = true;
+    private function _beginTransaction()
+    {
+        if ($this->_inTrx === true) {
+            throw new Exception('Transaction already started');
+        }
+        mysql_query('BEGIN', $this->_conn);
+        $this->_inTrx = true;
     }
   
     /**
@@ -1203,11 +1333,13 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
      * 
      * @return void
      */
-    private function commit() {
-        if($this->in_trx === true) {
-            mysql_query("COMMIT", $this->conn);
-            $this->in_trx = false; 
+    private function _commit()
+    {
+        if ($this->_inTrx === false) {
+            throw new Exception('Transaction not started');
         }
+        mysql_query('COMMIT', $this->_conn);
+        $this->_inTrx = false; 
     }
   
     /**
@@ -1215,14 +1347,12 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
      * 
      * @return void
      */
-    private function rollback() {
-        if($this->in_trx === true) {
-            mysql_query("ROLLBACK", $this->conn);
-            $this->in_trx = false; 
-        }    
+    private function _rollback()
+    {
+        if ($this->_inTrx === false) {
+            throw new Exception('Transaction not started');
+        }
+        mysql_query('ROLLBACK', $this->_conn);
+        $this->_inTrx = false; 
     }
-	
-	
-}//class
-
-?>
+}

@@ -5,17 +5,17 @@
  * PHP Version 5
  *
  * @category  RuckusingMigrations
- * @package   tasks
+ * @package   Tasks
  * @author    Cody Caughlan <toolbag@gmail.com>
  * @copyright 2010-2011 Cody Caughlan
- * @license   
+ * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
 
 /**
- * @see Ruckusing_iTask 
+ * @see Ruckusing_ITask 
  */
-require_once RUCKUSING_BASE . '/lib/classes/task/class.Ruckusing_iTask.php';
+require_once RUCKUSING_BASE . '/lib/classes/task/class.Ruckusing_ITask.php';
 /**
  * get config 
  */
@@ -29,69 +29,64 @@ require_once RUCKUSING_BASE . '/lib/classes/util/class.Ruckusing_MigratorUtil.ph
  * Prints out a list of migrations that have and haven't been applied
  *
  * @category  RuckusingMigrations
- * @package   tasks
+ * @package   Tasks
  * @author    Cody Caughlan <toolbag@gmail.com>
  * @copyright 2010-2011 Cody Caughlan
- * @license   
+ * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
-class Ruckusing_DB_Status implements Ruckusing_iTask {
-	
+class Ruckusing_DB_Status implements Ruckusing_ITask
+{
     /**
      * adapter 
      * 
      * @var Ruckusing_BaseAdapter
      */
-	private $adapter = null;
-    /**
-     * create_ddl 
-     * 
-     * @var string
-     */
-	private $create_ddl = "";
-	
+    private $_adapter = null;
+
     /**
      * __construct 
      * 
-     * @param Ruckusing_BaseAdapter $adapter 
+     * @param Ruckusing_BaseAdapter $adapter Adapter RDBMS
      *
      * @return Ruckusing_DB_Status
      */
-	function __construct($adapter) {
-		$this->adapter = $adapter;
+    function __construct($adapter)
+    {
+		$this->_adapter = $adapter;
 	}
 	
     /**
      * Primary task entry point
      * 
-     * @param array $args 
+     * @param array $args Arguments to task
+     *
      * @return void
      */
-	public function execute($args) {
-		echo "Started: " . date('Y-m-d g:ia T') . "\n\n";		
+    public function execute($args)
+    {
+		echo 'Started: ' . date('Y-m-d g:ia T') . "\n\n";		
 		echo "[db:status]: \n";
-		$util = new Ruckusing_MigratorUtil($this->adapter);
-		$migrations = $util->get_executed_migrations();
-		$files = $util->get_migration_files(RUCKUSING_MIGRATION_DIR, 'up');
+		$util = new Ruckusing_MigratorUtil($this->_adapter);
+		$migrations = $util->getExecutedMigrations();
+		$files = $util->getMigrationFiles(RUCKUSING_MIGRATION_DIR, 'up');
 		$applied = array();
-		$not_applied = array();
-		foreach($files as $file) {
-            if(in_array($file['version'], $migrations)) {
+		$notApplied = array();
+		foreach ($files as $file) {
+            if (in_array($file['version'], $migrations)) {
                 $applied[] = $file['class'] . ' [ ' . $file['version'] . ' ]';
             } else {
-                $not_applied[] = $file['class'] . ' [ ' . $file['version'] . ' ]';
+                $notApplied[] = $file['class'] . ' [ ' . $file['version'] . ' ]';
             }
         }
         echo "\n\n===================== APPLIED ======================= \n";
-        foreach($applied as $a) {
+        foreach ($applied as $a) {
             echo "\t" . $a . "\n";
         }
         echo "\n\n===================== NOT APPLIED ======================= \n";
-        foreach($not_applied as $na) {
+        foreach ($notApplied as $na) {
             echo "\t" . $na . "\n";
         }
 		echo "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";		
 	}
 }
-
-?>

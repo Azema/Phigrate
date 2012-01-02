@@ -5,10 +5,10 @@
  * PHP Version 5
  *
  * @category  RuckusingMigrations
- * @package   classes
+ * @package   Classes
  * @author    Cody Caughlan <toolbag@gmail.com>
  * @copyright 2010-2011 Cody Caughlan
- * @license   
+ * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
 
@@ -16,112 +16,129 @@
  * Adapter base
  *
  * @category  RuckusingMigrations
- * @package   classes
+ * @package   Classes
  * @author    Cody Caughlan <toolbag@gmail.com>
  * @copyright 2010-2011 Cody Caughlan
- * @license   
+ * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
-class Ruckusing_BaseAdapter {
+class Ruckusing_BaseAdapter
+{
     /**
      * dsn 
      * 
      * @var string
      */
-	private $dsn;
+	private $_dsn;
     /**
      * db 
      * 
      * @var mixed
      */
-	private $db;
+    private $_db;
+
     /**
-     * conn 
+     * connection to DB
      * 
      * @var mixed
      */
-	private $conn;
+    private $_conn;
+
+    /**
+     * logger 
+     * 
+     * @var Ruckusing_Logger
+     */
+    private $_logger;
 	
     /**
      * __construct 
      * 
-     * @param string $dsn 
+     * @param array $dsn Config DB for connect it
+     *
      * @return Ruckusing_BaseAdapter
      */
-	function __construct($dsn) {
-		$this->set_dsn($dsn);
+    function __construct($dsn)
+    {
+		$this->setDsn($dsn);
 	}
 	
     /**
-     * set_dsn 
+     * set dsn 
      * 
-     * @param string $dsn 
+     * @param array $dsn Config DB for connect it
      *
      * @return void
      */
-	public function set_dsn($dsn) { 
-		$this->dsn = $dsn;
+    public function setDsn($dsn) 
+    {
+		$this->_dsn = $dsn;
     }
 
     /**
-     * get_dsn 
+     * get dsn 
      * 
-     * @return strinfg
+     * @return array
      */
-	public function get_dsn() {
-		return $this->dsn;
+    public function getDsn()
+    {
+		return $this->_dsn;
 	}	
 
     /**
-     * set_db
+     * set db
      *
-     * @param mixed $db
+     * @param mixed $db The connection to DB
      *
      * @return void 
      */
-	public function set_db($db) { 
-		$this->db = $db;
+    public function setDb($db) 
+    {
+		$this->_db = $db;
     }
 
     /**
-     * get_db 
+     * get db 
      * 
      * @return mixed
      */
-	public function get_db() {
-		return $this->db;
+    public function getDb()
+    {
+		return $this->_db;
 	}	
 	
     /**
-     * set_logger 
+     * set logger 
      * 
-     * @param Ruckusing_Logger $logger 
+     * @param Ruckusing_Logger $logger The logger
      *
      * @return void
      */
-	public function set_logger($logger) {
-		$this->logger = $logger;
+    public function setLogger($logger)
+    {
+		$this->_logger = $logger;
 	}
 
     /**
-     * get_logger 
+     * get logger 
      * 
      * @return Ruckusing_Logger
      */
-	public function get_logger() {
-		return $this->logger;
+    public function getLogger()
+    {
+		return $this->_logger;
 	}
 	
 	//alias
     /**
-     * has_table 
+     * has table 
      * 
-     * @param string $tbl 
+     * @param string $tbl Table name
+     *
      * @return boolean
      */
-	public function has_table($tbl) {
-		return $this->table_exists($tbl);
+    public function hasTable($tbl)
+    {
+		return $this->tableExists($tbl);
 	}
-	
 }
-?>

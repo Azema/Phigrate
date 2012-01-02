@@ -6,7 +6,7 @@ if(!defined('BASE')) {
 require_once BASE  . '/test_helper.php';
 require_once RUCKUSING_BASE  . '/lib/classes/class.Ruckusing_BaseAdapter.php';
 require_once RUCKUSING_BASE  . '/lib/classes/class.Ruckusing_BaseMigration.php';
-require_once RUCKUSING_BASE  . '/lib/classes/class.Ruckusing_iAdapter.php';
+require_once RUCKUSING_BASE  . '/lib/classes/class.Ruckusing_IAdapter.php';
 require_once RUCKUSING_BASE  . '/lib/classes/adapters/class.Ruckusing_MySQLAdapter.php';
 require_once RUCKUSING_BASE  . '/lib/classes/adapters/class.Ruckusing_MySQLTableDefinition.php';
 
@@ -22,20 +22,18 @@ class MySQLTableDefinitionTest extends PHPUnit_Framework_TestCase {
 
 		$test_db = $ruckusing_db_config['test'];
 		//setup our log
-    $logger = Ruckusing_Logger::instance(RUCKUSING_BASE . '/tests/logs/test.log');
+        $logger = Ruckusing_Logger::instance(RUCKUSING_BASE . '/tests/logs/test.log');
 
 		$this->adapter = new Ruckusing_MySQLAdapter($test_db, $logger);
-		$this->adapter->logger->log("Test run started: " . date('Y-m-d g:ia T') );
+		$this->adapter->getLogger()->log("Test run started: " . date('Y-m-d g:ia T') );
 		
 	}//setUp()
 	
 	protected function tearDown() {			
-
 		//delete any tables we created
-		if($this->adapter->has_table('users',true)) {
-			$this->adapter->drop_table('users');
+		if($this->adapter->hasTable('users',true)) {
+			$this->adapter->dropTable('users');
 		}
-
 	}
 
 	/*
@@ -74,7 +72,7 @@ EXP;
 */
 	}//test_create_sql
 
-	public function test_column_definition() {
+	public function testColumnDefinition() {
 		
 		$c = new Ruckusing_ColumnDefinition($this->adapter, "last_name", "string", array('limit' => 32));
 		$this->assertEquals("`last_name` varchar(32)", trim($c));
@@ -90,103 +88,101 @@ EXP;
 
 		$c = new Ruckusing_ColumnDefinition($this->adapter, "id", "integer", array("primary_key" => true, "unsigned" => true));
 		$this->assertEquals("`id` int(11) UNSIGNED", trim($c));
-	}//test_column_definition
+	}
 	
-	public function test_column_definition_with_limit() {
-    $bm = new Ruckusing_BaseMigration();
-    $bm->set_adapter($this->adapter);
-    $ts = time();
-    $table_name = "users_${ts}";
-    $table = $bm->create_table($table_name);
-    $table->column('username', 'string', array('limit' => 17));
-    $table->finish();
+	public function testColumnDefinitionWithLimit() {
+        $bm = new Ruckusing_BaseMigration();
+        $bm->setAdapter($this->adapter);
+        $ts = time();
+        $tableName = "users_${ts}";
+        $table = $bm->createTable($tableName);
+        $table->column('username', 'string', array('limit' => 17));
+        $table->finish();
 
-    $username_actual = $this->adapter->column_info($table_name, "username");
-    $this->assertEquals('varchar(17)', $username_actual['type']);
-    $bm->drop_table($table_name);
-  }
+        $usernameActual = $this->adapter->columnInfo($tableName, "username");
+        $this->assertEquals('varchar(17)', $usernameActual['type']);
+        $bm->dropTable($tableName);
+    }
 
-	public function test_column_definition_with_not_null() {
-    $bm = new Ruckusing_BaseMigration();
-    $bm->set_adapter($this->adapter);
-    $ts = time();
-    $table_name = "users_${ts}";
-    $table = $bm->create_table($table_name);
-    $table->column('username', 'string', array('limit' => 17, 'null' => false));
-    $table->finish();
+	public function testColumnDefinitionWithNotNull() {
+        $bm = new Ruckusing_BaseMigration();
+        $bm->setAdapter($this->adapter);
+        $ts = time();
+        $tableName = "users_${ts}";
+        $table = $bm->createTable($tableName);
+        $table->column('username', 'string', array('limit' => 17, 'null' => false));
+        $table->finish();
 
-    $username_actual = $this->adapter->column_info($table_name, "username");
-    $this->assertEquals('varchar(17)', $username_actual['type']);
-    $this->assertEquals('NO', $username_actual['null']);
-    $bm->drop_table($table_name);
-  }
+        $usernameActual = $this->adapter->columnInfo($tableName, "username");
+        $this->assertEquals('varchar(17)', $usernameActual['type']);
+        $this->assertEquals('NO', $usernameActual['null']);
+        $bm->dropTable($tableName);
+    }
 
-	public function test_column_definition_with_default_value() {
-    $bm = new Ruckusing_BaseMigration();
-    $bm->set_adapter($this->adapter);
-    $ts = time();
-    $table_name = "users_${ts}";
-    $table = $bm->create_table($table_name);
-    $table->column('username', 'string', array('limit' => 17, 'default' => 'thor'));
-    $table->finish();
+	public function testColumnDefinitionWithDefaultValue() {
+        $bm = new Ruckusing_BaseMigration();
+        $bm->setAdapter($this->adapter);
+        $ts = time();
+        $tableName = "users_${ts}";
+        $table = $bm->createTable($tableName);
+        $table->column('username', 'string', array('limit' => 17, 'default' => 'thor'));
+        $table->finish();
 
-    $username_actual = $this->adapter->column_info($table_name, "username");
-    $this->assertEquals('varchar(17)', $username_actual['type']);
-    $this->assertEquals('thor', $username_actual['default']);
-    $bm->drop_table($table_name);
-  }
+        $usernameActual = $this->adapter->columnInfo($tableName, "username");
+        $this->assertEquals('varchar(17)', $usernameActual['type']);
+        $this->assertEquals('thor', $usernameActual['default']);
+        $bm->dropTable($tableName);
+    }
 
-  public function test_multiple_primary_keys() {
-    $bm = new Ruckusing_BaseMigration();
-    $bm->set_adapter($this->adapter);
-    $ts = time();
-    $table_name = "users_${ts}";
-    $table = $bm->create_table($table_name, array('id' => false));
-    $table->column('user_id', 'integer', array('unsigned' => true, 'primary_key' => true));
-    $table->column('username', 'string', array('primary_key' => true));
-    $table->finish();
-    
-    $user_id_actual = $this->adapter->column_info($table_name, "user_id");
-    $username_actual = $this->adapter->column_info($table_name, "username");
-    $this->assertEquals('PRI', $user_id_actual['key']);
-    $this->assertEquals('PRI', $username_actual['key']);
+    public function testMultiplePrimaryKeys() {
+        $bm = new Ruckusing_BaseMigration();
+        $bm->setAdapter($this->adapter);
+        $ts = time();
+        $tableName = "users_${ts}";
+        $table = $bm->createTable($tableName, array('id' => false));
+        $table->column('user_id', 'integer', array('unsigned' => true, 'primary_key' => true));
+        $table->column('username', 'string', array('primary_key' => true));
+        $table->finish();
+        
+        $userIdActual = $this->adapter->columnInfo($tableName, "user_id");
+        $usernameActual = $this->adapter->columnInfo($tableName, "username");
+        $this->assertEquals('PRI', $userIdActual['key']);
+        $this->assertEquals('PRI', $usernameActual['key']);
 
-		//make sure there is NO 'id' column
-    $id_actual = $this->adapter->column_info($table_name, "id");
-    $this->assertEquals(NULL, $id_actual);    
-    $bm->drop_table($table_name);
-  }
+            //make sure there is NO 'id' column
+        $idActual = $this->adapter->columnInfo($tableName, "id");
+        $this->assertEquals(NULL, $idActual);    
+        $bm->dropTable($tableName);
+    }
 
-  public function test_custom_primary_key_with_auto_increment() {
-    $bm = new Ruckusing_BaseMigration();
-    $bm->set_adapter($this->adapter);
-    $ts = time();
-    $table_name = "users_${ts}";
-    $table = $bm->create_table($table_name, array('id' => false));
-    $table->column('user_id', 'integer', array('unsigned' => true, 'primary_key' => true, 'auto_increment' => true));
-    $sql = $table->finish();
+    public function testCustomPrimaryKeyWithAutoIncrement() {
+        $bm = new Ruckusing_BaseMigration();
+        $bm->setAdapter($this->adapter);
+        $ts = time();
+        $tableName = "users_${ts}";
+        $table = $bm->createTable($tableName, array('id' => false));
+        $table->column('user_id', 'integer', array('unsigned' => true, 'primary_key' => true, 'auto_increment' => true));
+        $sql = $table->finish();
 
-    $user_id_actual = $this->adapter->column_info($table_name, "user_id");
-    $this->assertEquals('PRI', $user_id_actual['key']);
-    $this->assertEquals('auto_increment', $user_id_actual['extra']);
+        $user_id_actual = $this->adapter->columnInfo($tableName, "user_id");
+        $this->assertEquals('PRI', $user_id_actual['key']);
+        $this->assertEquals('auto_increment', $user_id_actual['extra']);
 
-		//make sure there is NO 'id' column
-    $id_actual = $this->adapter->column_info($table_name, "id");
-    $this->assertEquals(NULL, $id_actual);    
-    $bm->drop_table($table_name);
-  }
+            //make sure there is NO 'id' column
+        $id_actual = $this->adapter->columnInfo($tableName, "id");
+        $this->assertEquals(NULL, $id_actual);    
+        $bm->dropTable($tableName);
+    }
 
 	//test that we can generate a table w/o a primary key
-	public function test_generate_table_without_primary_key() {
+	public function testGenerateTableWithoutPrimaryKey() {
 
 		$t1 = new Ruckusing_MySQLTableDefinition($this->adapter, "users", array('id' => false, 'options' => 'Engine=InnoDB') );
 		$t1->column("first_name", "string");
 		$t1->column("last_name", "string", array('limit' => 32));
 		$actual = $t1->finish();
 
-		$col = $this->adapter->column_info("users", "id");
+		$col = $this->adapter->columnInfo("users", "id");
 		$this->assertEquals(null, $col);			
 	}
-	
 }
-?>

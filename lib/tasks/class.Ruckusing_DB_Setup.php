@@ -5,17 +5,17 @@
  * PHP Version 5
  *
  * @category  RuckusingMigrations
- * @package   tasks
+ * @package   Tasks
  * @author    Cody Caughlan <toolbag@gmail.com>
  * @copyright 2010-2011 Cody Caughlan
- * @license   
+ * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
 
 /**
- * @see Ruckusing_iTask 
+ * @see Ruckusing_ITask 
  */
-require_once RUCKUSING_BASE . '/lib/classes/task/class.Ruckusing_iTask.php';
+require_once RUCKUSING_BASE . '/lib/classes/task/class.Ruckusing_ITask.php';
 /**
  * get config 
  */
@@ -28,51 +28,55 @@ require_once RUCKUSING_BASE . '/config/config.inc.php';
  * if it does not already exist, otherwise no other actions are performed.	
  *
  * @category  RuckusingMigrations
- * @package   tasks
+ * @package   Tasks
  * @author    Cody Caughlan <toolbag@gmail.com>
  * @copyright 2010-2011 Cody Caughlan
- * @license   
+ * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
-class Ruckusing_DB_Setup implements Ruckusing_iTask {
-	
+class Ruckusing_DB_Setup implements Ruckusing_ITask
+{
     /**
      * adapter 
      * 
      * @var Ruckusing_BaseAdapter
      */
-	private $adapter = null;
+	private $_adapter = null;
 	
     /**
      * __construct 
      * 
-     * @param Ruckusing_BaseAdapter $adapter 
+     * @param Ruckusing_BaseAdapter $adapter Adapter RDBMS
      *
      * @return Ruckusing_DB_Setup
      */
-	function __construct($adapter) {
-		$this->adapter = $adapter;
+    function __construct($adapter)
+    {
+		$this->_adapter = $adapter;
 	}
 	
     /**
      * Primary task entry point
      * 
-     * @param mixed $args 
+     * @param mixed $args Arguments to task
+     *
      * @return void
      */
-	public function execute($args) {
-		echo "Started: " . date('Y-m-d g:ia T') . "\n\n";		
+    public function execute($args)
+    {
+		echo 'Started: ' . date('Y-m-d g:ia T') . "\n\n";		
 		echo "[db:setup]: \n";
 		//it doesnt exist, create it
-		if( !$this->adapter->table_exists(RUCKUSING_TS_SCHEMA_TBL_NAME) ) {
+		if (! $this->_adapter->table_exists(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
 			echo sprintf("\tCreating table: %s", RUCKUSING_TS_SCHEMA_TBL_NAME);
-            $this->adapter->create_schema_version_table();
+            $this->_adapter->createSchemaVersionTable();
 			echo "\n\tDone.\n";
 		} else {
-			echo sprintf("\tNOTICE: table '%s' already exists. Nothing to do.", RUCKUSING_TS_SCHEMA_TBL_NAME);
+            echo sprintf(
+                "\tNOTICE: table '%s' already exists. Nothing to do.", 
+                RUCKUSING_TS_SCHEMA_TBL_NAME
+            );
 		}
 		echo "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";		
 	}
 }
-
-?>

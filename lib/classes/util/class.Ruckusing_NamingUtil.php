@@ -5,18 +5,18 @@
  * PHP Version 5
  *
  * @category   RuckusingMigrations
- * @package    classes
- * @subpackage util
+ * @package    Classes
+ * @subpackage Util
  * @author     Cody Caughlan <toolbag@gmail.com>
  * @copyright  2010-2011 Cody Caughlan
- * @license    
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
 
 /**
  * This utility class maps class names between their task names, back and forth.
  *
- *This framework relies on conventions which allow us to make certain
+ * This framework relies on conventions which allow us to make certain
  * assumptions.
  *
  * Example valid task names are "db:version" which maps to a PHP class called DB_Version.
@@ -27,21 +27,21 @@
  * Using this convention one can easily go back and forth between task names and PHP Class names.
  *
  * @category   RuckusingMigrations
- * @package    classes
- * @subpackage util
+ * @package    Classes
+ * @subpackage Util
  * @author     Cody Caughlan <toolbag@gmail.com>
  * @copyright  2010-2011 Cody Caughlan
- * @license    
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
-class Ruckusing_NamingUtil {
-
+class Ruckusing_NamingUtil
+{
     /**
      * prefix of class name
      *
      * @var string 
      */
-    const class_ns_prefix = 'Ruckusing_';
+    const CLASS_NS_PREFIX = 'Ruckusing_';
 
     /**
      * Return the name of task from the name of class 
@@ -50,118 +50,124 @@ class Ruckusing_NamingUtil {
      *
      * @return string
      */
-	public static function task_from_class_name($klass) {
+    public static function taskFromClassName($klass)
+    {
         //strip namespace
-        $klass = str_replace(self::class_ns_prefix, '', $klass);
+        $klass = str_replace(self::CLASS_NS_PREFIX, '', $klass);
         $klass = strtolower($klass);
-        $klass = str_replace("_", ":", $klass);
+        $klass = str_replace('_', ':', $klass);
         return $klass;
 	}
 
     /**
      * Return the name of class from the name of task 
      * 
-     * @param string $task 
+     * @param string $task The task name
      *
      * @return string
      * @throws Exception
      */
-	public static function task_to_class_name($task) {
+    public static function taskToClassName($task)
+    {
 		$parts = explode(':', $task);
-		if(count($parts) < 2) {
-			throw new Exception("Task name invalid: $task");
+		if (count($parts) < 2) {
+			throw new Exception('Task name invalid: ' . $task);
 		}
-        return self::class_ns_prefix . strtoupper($parts[0]) 
+        return self::CLASS_NS_PREFIX . strtoupper($parts[0]) 
             . '_' . ucfirst($parts[1]);
 	}
 
     /**
-     * class_from_file_name 
+     * class from file name 
      * 
-     * @param string $file_name 
+     * @param string $fileName The file name
      *
      * @return string
      */
-	public static function class_from_file_name($file_name) {
+    public static function classFromFileName($fileName)
+    {
 		//we could be given either a string or an absolute path
 		//deal with it appropriately
-		if(is_file($file_name)) {
-			$file_name = basename($file_name);
+		if (is_file($fileName)) {
+			$fileName = basename($fileName);
 		}
 		$regex = '/^class\.(\w+)\.php$/';	
-		if(preg_match($regex, $file_name, $matches)) {
-			if(count($matches) == 2) {
+		if (preg_match($regex, $fileName, $matches)) {
+			if (count($matches) == 2) {
 				return $matches[1];
 			}
 		}
-		return "";		
+		return '';
 	}
 	
     /**
-     * class_from_migration_file 
+     * class from migration file 
      * 
-     * @param string $file_name 
+     * @param string $fileName The file name
      *
      * @return string
      */
-	public static function class_from_migration_file($file_name) {
-		if(preg_match('/^(\d+)_(.*)\.php$/', $file_name, $matches)) {
-			if( count($matches) == 3) {
+    public static function classFromMigrationFile($fileName)
+    {
+		if (preg_match('/^(\d+)_(.*)\.php$/', $fileName, $matches)) {
+			if (count($matches) == 3) {
 				return $matches[2];
 			}
-		}//if-preg-match
+		}
 	}
 	
     /**
      * camelcase 
      * 
-     * @param string $str 
+     * @param string $str String to camelcased
      *
      * @return string
      */
-	public static function camelcase($str) {
+    public static function camelcase($str)
+    {
         $str = preg_replace('/\s+/', '_', $str);
         $parts = explode("_", $str);
         //if there were no spaces in the input string
         //then assume its already camel-cased
-        if(count($parts) == 0) { return $str; }
-        $cleaned = "";
-        foreach($parts as $word) {
+        if (count($parts) == 0) return $str;
+        $cleaned = '';
+        foreach ($parts as $word) {
             $cleaned .= ucfirst($word);
         }
         return $cleaned;  
     }
 
     /**
-     * index_name 
+     * index name 
      * 
-     * @param string $table_name 
-     * @param string $column_name 
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
      *
      * @return string
      */
-	public static function index_name($table_name, $column_name) {
-		$name = sprintf("idx_%s", self::underscore($table_name));
+    public static function indexName($tableName, $columnName)
+    {
+		$name = sprintf("idx_%s", self::underscore($tableName));
 		//if the column parameter is an array then the user wants to create a multi-column
 		//index
-		if(is_array($column_name)) {
-			$column_str = join("_and_", $column_name);
+		if (is_array($columnName)) {
+			$columnStr = join('_and_', $columnName);
 		} else {
-			$column_str = $column_name;
+			$columnStr = $columnName;
 		}
-		$name .= sprintf("_%s", $column_str);
+		$name .= sprintf('_%s', $columnStr);
 		return $name;
 	}
   
     /**
      * underscore 
      * 
-     * @param string $str 
+     * @param string $str String to change
+     *
      * @return string
      */
-	public static function underscore($str) {
+    public static function underscore($str)
+    {
 		return preg_replace('/\W/', '_', $str);
 	}
 }
-
-?>

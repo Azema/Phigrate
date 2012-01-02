@@ -5,10 +5,10 @@
  * PHP Version 5
  *
  * @category  RuckusingMigrations
- * @package   classes
+ * @package   Classes
  * @author    Cody Caughlan <toolbag@gmail.com>
  * @copyright 2010-2011 Cody Caughlan
- * @license   
+ * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
 
@@ -22,113 +22,117 @@ require_once RUCKUSING_BASE . '/lib/classes/task/class.Ruckusing_TaskManager.php
  * all adapters and tasks.
  *
  * @category  RuckusingMigrations
- * @package   classes
+ * @package   Classes
  * @author    Cody Caughlan <toolbag@gmail.com>
  * @copyright 2010-2011 Cody Caughlan
- * @license   
+ * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
-class Ruckusing_FrameworkRunner {
-	
+class Ruckusing_FrameworkRunner
+{
     /**
      * reference to our DB connection
      * 
      * @var array
      */
-	private $db = null;
+	private $_db = null;
     /**
      * the currently active config 
      * 
      * @var mixed
      */
-	private $active_db_config;
+	private $_activeDbConfig;
     /**
      * all available DB configs (e.g. test,development, production)
      * 
      * @var array
      */
-	private $db_config = array();
+	private $_dbConfig = array();
     /**
-     * task_mgr 
+     * task manager 
      * 
      * @var Ruckusing_TaskManager
      */
-	private $task_mgr = null;
+	private $_taskMgr = null;
     /**
      * adapter 
      * 
      * @var Ruckusing_BaseAdapter
      */
-	private $adapter = null;
+	private $_adapter = null;
     /**
-     * cur_task_name 
+     * current task name 
      * 
      * @var string
      */
-	private $cur_task_name = "";
+	private $_curTaskName = "";
     /**
-     * task_options 
+     * task options 
      * 
      * @var string
      */
-	private $task_options = "";
+	private $_taskOptions = "";
     /**
-     * ENV 
+     * Environment
      * default is development 
      * but can also be one 'test', 'production'
      * 
      * @var string
      */
-	private $ENV = "development"; //
+	private $_env = "development"; //
 	
     /**
 	 * set up some defaults
      * 
      * @var array
      */
-	private $opt_map = array('ENV' => 'development');
+	private $_optMap = array('ENV' => 'development');
 	
     /**
      * __construct 
      * 
-     * @param mixed $db 
-     * @param array $argv 
+     * @param array $db   Configs DB
+     * @param array $argv Arguments of the command line
      *
      * @return Ruckusing_FrameworkRunner
      */
-	function __construct($db, $argv) {
+    function __construct($db, $argv)
+    {
 		try {
-			set_error_handler( array("Ruckusing_FrameworkRunner", "scr_error_handler"), E_ALL );
+            set_error_handler(
+                array(
+                    'Ruckusing_FrameworkRunner', 
+                    'scrErrorHandler',
+                ), 
+                E_ALL
+            );
 
 			//parse arguments
-			$this->parse_args($argv);
+			$this->_parseArgs($argv);
 
 			//initialize logger
 			$log_dir = RUCKUSING_BASE . "/logs";
-			if(is_dir($log_dir) && !is_writable($log_dir)) {
-				die("\n\nCannot write to log directory: $log_dir\n\nCheck permissions.\n\n");
-			}elseif(!is_dir($log_dir)){
+			if (is_dir($log_dir) && ! is_writable($log_dir)) {
+                die(
+                    "\n\nCannot write to log directory: "
+                    . "{$log_dir}\n\nCheck permissions.\n\n"
+                );
+			} else if (!is_dir($log_dir)) {
 				//try and create the log directory
 				mkdir($log_dir);
 			}
-			$log_name = sprintf("%s.log", $this->ENV);
-			$this->logger = Ruckusing_Logger::instance($log_dir . "/" . $log_name);
+			$log_name = sprintf('%s.log', $this->_env);
+            $this->logger = Ruckusing_Logger::instance(
+                $log_dir . '/' . $log_name
+            );
 			
 			//include all adapters
-			$this->load_all_adapters(RUCKUSING_BASE . '/lib/classes/adapters');
-			$this->db_config = $db;
-			$this->initialize_db();
-			$this->init_tasks();
-		}catch(Exception $e) {
+			$this->_loadAllAdapters(RUCKUSING_BASE . '/lib/classes/adapters');
+			$this->_dbConfig = $db;
+			$this->initializeDb();
+			$this->initTasks();
+		} catch (Exception $e) {
 		}
-	}//constructor
-	
-    /**
-     * __destruct 
-     * 
-     * @return void
-     */
-	function __destruct() {
 	}
 	
 	//-------------------------
@@ -139,54 +143,63 @@ class Ruckusing_FrameworkRunner {
      * 
      * @return void
      */
-	public function execute() {
-		if($this->task_mgr->has_task($this->cur_task_name)) {
-			$output = $this->task_mgr->execute($this->cur_task_name, $this->task_options);
-			$this->display_results($output);
+    public function execute()
+    {
+		if ($this->_taskMgr->hasTask($this->_curTaskName)) {
+            $output = $this->_taskMgr->execute(
+                $this->_curTaskName, 
+                $this->_taskOptions
+            );
+			$this->_displayResults($output);
 			exit(0); // 0 is success
 		} else {
-			trigger_error(sprintf("Task not found: %s", $this->cur_task_name));
+			trigger_error(sprintf('Task not found: %s', $this->_curTaskName));
 			exit(1);
 		}
-		if($this->logger) {
-		  $this->logger->close();
-	  }
+		if ($this->logger) {
+            $this->logger->close();
+        }
 	}
 	
     /**
-     * init_tasks 
+     * initialize tasks 
      * 
      * @return void
      */
-	public function init_tasks() {
-		$this->task_mgr = new Ruckusing_TaskManager($this->adapter);
+    public function initTasks()
+    {
+		$this->_taskMgr = new Ruckusing_TaskManager($this->_adapter);
 	}
 	
     /**
-     * initialize_db 
+     * initialize db 
      * 
      * @return void
      */
-	public function initialize_db() {
+    public function initializeDb()
+    {
 		try {
-			$this->verify_db_config();			
-			$db = $this->db_config[$this->ENV];
-			$adapter = $this->get_adapter_class($db['type']);
+			$this->_verifyDbConfig();			
+			$db = $this->_dbConfig[$this->_env];
+			$adapter = $this->_getAdapterClass($db['type']);
 			
-			if($adapter === null) {
-				trigger_error(sprintf("No adapter available for DB type: %s", $db['type']));
+			if ($adapter === null) {
+                trigger_error(
+                    sprintf(
+                        'No adapter available for DB type: %s', 
+                        $db['type']
+                    )
+                );
 			}			
 			//construct our adapter			
-			$this->adapter = new $adapter($db, $this->logger);
-		}catch(Exception $ex) {
-			trigger_error(sprintf("\n%s\n",$ex->getMessage()));
+			$this->_adapter = new $adapter($db, $this->logger);
+		} catch (Exception $ex) {
+			trigger_error(sprintf("\n%s\n", $ex->getMessage()));
 		}
 	}
 	
-	/*
-	*/
     /**
-     * parse_args 
+     * parse args 
 	 * $argv is our complete command line argument set.
 	 * PHP gives us: 
 	 * [0] = the actual file name we're executing
@@ -196,46 +209,50 @@ class Ruckusing_FrameworkRunner {
 	 * Anything else are additional parameters that we can pass
 	 * to our task and they can deal with them as they see fit.
      * 
-     * @param array $argv 
+     * @param array $argv Arguments of command line
      *
      * @return void
      */
-	private function parse_args($argv) {
-		
+    private function _parseArgs($argv)
+    {
 		$num_args = count($argv);
 
 		if ($num_args >= 2) {					
-			$this->cur_task_name = $argv[1];			
+			$this->_curTaskName = $argv[1];			
 			$options = array();
-			for($i = 2; $i < $num_args;$i++) {
+			for ($i = 2; $i < $num_args;$i++) {
 				$arg = $argv[$i];
-				if(strpos($arg, '=') !== FALSE) {
+				if (strpos($arg, '=') !== false) {
 					list($key, $value) = explode("=", $arg);
 					$options[$key] = $value;
-					if($key == 'ENV') {
-						$this->ENV = $value;
+					if ($key == 'ENV') {
+						$this->_env = $value;
 					}
 				}
 			}
-			$this->task_options = $options;
-		}		
-	}//parse_args()
+			$this->_taskOptions = $options;
+		}
+	}
 
-	/*
-	*/
     /**
      * error_handler 
 	 * Global error handler to process all errors during script execution
      * 
-     * @param integer $errno 
-     * @param string $errstr 
-     * @param string $errfile 
-     * @param string $errline 
+     * @param integer $errno   Error number
+     * @param string  $errstr  Error message
+     * @param string  $errfile Error file
+     * @param string  $errline Error line
      *
      * @return void
      */
-	public static function scr_error_handler($errno, $errstr, $errfile, $errline) {
-		echo(sprintf("\n\n(%s:%d) %s\n\n", basename($errfile), $errline, $errstr));
+    public static function scrErrorHandler($errno, $errstr, $errfile, $errline)
+    {
+        echo sprintf(
+            "\n\n(%s:%d) %s\n\n", 
+            basename($errfile), 
+            $errline, 
+            $errstr
+        );
 		exit(1); // exit with error
 	}
 	
@@ -246,13 +263,14 @@ class Ruckusing_FrameworkRunner {
      * 
      * @return void
      */
-	public function update_schema_for_timestamps() {
+    public function updateSchemaForTimestamps()
+    {
         //only create the table if it doesnt already exist
-        $this->adapter->create_schema_version_table();
+        $this->_adapter->createSchemaVersionTable();
         //insert all existing records into our new table
-        $migrator_util = new Ruckusing_MigratorUtil($this->adapter);
-        $files = $migrator_util->get_migration_files(RUCKUSING_MIGRATION_DIR, 'up');
-        foreach($files as $file) {
+        $migrator_util = new Ruckusing_MigratorUtil($this->_adapter);
+        $files = $migrator_util->getMigrationFiles(RUCKUSING_MIGRATION_DIR, 'up');
+        foreach ($files as $file) {
             if ((int)$file['version'] >= PHP_INT_MAX) {
                 //its new style like '20081010170207' so its not a candidate
                 continue;
@@ -263,7 +281,7 @@ class Ruckusing_FrameworkRunner {
                 RUCKUSING_SCHEMA_TBL_NAME, 
                 $file['version']
             );
-            $existing_version_old_style = $this->adapter->select_one($query_sql);
+            $existing_version_old_style = $this->_adapter->selectOne($query_sql);
             if (count($existing_version_old_style) > 0) {
                 //make sure it doesnt exist in our new table, who knows how it got inserted?
                 $new_vers_sql = sprintf(
@@ -271,7 +289,7 @@ class Ruckusing_FrameworkRunner {
                     RUCKUSING_TS_SCHEMA_TBL_NAME, 
                     $file['version']
                 );
-                $existing_version_new_style = $this->adapter->select_one($new_vers_sql);
+                $existing_version_new_style = $this->_adapter->selectOne($new_vers_sql);
                 if (empty($existing_version_new_style)) {       
                     // use printf & %d to force it to be stripped of any leading zeros, we *know* this represents an old version style
                     // so we dont have to worry about PHP and integer overflow
@@ -280,25 +298,26 @@ class Ruckusing_FrameworkRunner {
                         RUCKUSING_TS_SCHEMA_TBL_NAME,
                         $file['version']
                     );
-                    $this->adapter->query($insert_sql);
+                    $this->_adapter->query($insert_sql);
                 }
             }
-        }//foreach
-    } // update_schema_for_timestamps()
+        }
+    }
 
 	//-------------------------
 	// PRIVATE METHODS
 	//-------------------------	
     /**
-     * display_results 
+     * display results 
      *
-     * @deprecated
+     * @param string $output The output to display
      * 
-     * @param string $output 
+     * @deprecated
      *
      * @return void
      */
-	private function display_results($output) {
+    private function _displayResults($output)
+    {
 		return;
 		//deprecated
 		echo "\nStarted: " . date('Y-m-d g:ia T') . "\n\n";
@@ -308,112 +327,116 @@ class Ruckusing_FrameworkRunner {
 	}
 	
     /**
-     * set_opt 
+     * set opt
      * 
-     * @param string $key 
-     * @param mixed $value 
+     * @param string $key   The key of value
+     * @param mixed  $value The value to set
      *
      * @return void
      */
-	private function set_opt($key, $value) {
-		if(!$key) { return; }		
-		$this->opt_map[$key] = $value;		
+    private function _setOpt($key, $value)
+    {
+		if (!$key) return;
+		$this->_optMap[$key] = $value;		
 	}
 	
     /**
-     * verify_db_config 
+     * verify db config 
      * 
      * @return void
      * @throws Exception
      */
-	private function verify_db_config() {
-		if( !array_key_exists($this->ENV, $this->db_config)) {
+    private function _verifyDbConfig()
+    {
+        if (! is_array($this->_dbConfig) 
+            || ! array_key_exists($this->_env, $this->_dbConfig)
+        ) {
             throw new Exception(
                 sprintf(
                     "Error: '%s' DB is not configured",
-                    $this->opt_map[$ENV]
+                    $this->_optMap[$ENV]
                 )
             );
 		}
-		$env = $this->ENV;
-		$this->active_db_config = $this->db_config[$this->ENV];
-		if(!array_key_exists("type",$this->active_db_config)) {
+		$env = $this->_env;
+		$this->_activeDbConfig = $this->_dbConfig[$env];
+		if (! array_key_exists('type', $this->_activeDbConfig)) {
             throw new Exception(
-                sprintf("Error: 'type' is not set for '%s' DB",$this->ENV)
+                sprintf("Error: 'type' is not set for '%s' DB", $env)
+            );
+		}
+		if (! array_key_exists('host', $this->_activeDbConfig)) {
+            throw new Exception(
+                sprintf("Error: 'host' is not set for '%s' DB", $env)
             );			
 		}
-		if(!array_key_exists("host",$this->active_db_config)) {
+		if (! array_key_exists('database', $this->_activeDbConfig)) {
             throw new Exception(
-                sprintf("Error: 'host' is not set for '%s' DB",$this->ENV)
+                sprintf("Error: 'database' is not set for '%s' DB", $env)
             );			
 		}
-		if(!array_key_exists("database",$this->active_db_config)) {
+		if (! array_key_exists('user', $this->_activeDbConfig)) {
             throw new Exception(
-                sprintf("Error: 'database' is not set for '%s' DB",$this->ENV)
+                sprintf("Error: 'user' is not set for '%s' DB", $env)
             );			
 		}
-		if(!array_key_exists("user",$this->active_db_config)) {
+		if (! array_key_exists('password', $this->_activeDbConfig)) {
             throw new Exception(
-                sprintf("Error: 'user' is not set for '%s' DB",$this->ENV)
+                sprintf("Error: 'password' is not set for '%s' DB", $env)
             );			
 		}
-		if(!array_key_exists("password",$this->active_db_config)) {
-            throw new Exception(
-                sprintf("Error: 'password' is not set for '%s' DB",$this->ENV)
-            );			
-		}
-	}//verify_db_config
+	}
 
     /**
-     * get_adapter_class 
+     * get adapter class 
      * 
-     * @param string $db_type 
+     * @param string $dbType The type of RDBMS
      *
      * @return string
      */
-	private function get_adapter_class($db_type) {
-		$adapter_class = null;
-		switch($db_type) {
-			case 'mysql':
-				$adapter_class = "Ruckusing_MySQLAdapter";
-				break;
-			case 'mssql':
-				$adapter_class = "Ruckusing_MSSQLAdapter";
-				break;
-			case 'pgsql':
-				$adapter_class = "Ruckusing_PostgresAdapter";
-				break;
+    private function _getAdapterClass($dbType)
+    {
+		$adapterClass = null;
+		switch (strtolower($dbType)) {
+        case 'mysql':
+            $adapterClass = 'Ruckusing_MySQLAdapter';
+            break;
+        case 'mssql':
+            throw new Exception('Adapter not implemented!');
+            $adapterClass = 'Ruckusing_MSSQLAdapter';
+            break;
+        case 'pgsql':
+            throw new Exception('Adapter not implemented!');
+            $adapterClass = 'Ruckusing_PostgresAdapter';
+            break;
 		}
-		return $adapter_class;
+		return $adapterClass;
 	}
 	
-	
-	/*
-	*/
     /**
 	 * DB adapters are classes in lib/classes/adapters
 	 * and they follow the file name syntax of "class.<DB Name>Adapter.php".
 	 * 
-	 * See the function "get_adapter_class" in this class for examples.
+	 * See the function "_getAdapterClass" in this class for examples.
      * 
-     * @param string $adapter_dir 
+     * @param string $adapter_dir Directory path of adapters
      *
      * @return void
      */
-	private function load_all_adapters($adapter_dir) {
-		if(!is_dir($adapter_dir)) {
-			trigger_error(sprintf("Adapter dir: %s does not exist", $adapter_dir));
+    private function _loadAllAdapters($adapter_dir)
+    {
+		if (! is_dir($adapter_dir)) {
+            trigger_error(
+                sprintf("Adapter dir: %s does not exist", $adapter_dir)
+            );
 			return false;
 		}
 		$files = scandir($adapter_dir);
 		$regex = '/^class\.(\w+)Adapter\.php$/';
-		foreach($files as $f) {			
+		foreach ($files as $f) {			
 			//skip over invalid files
-			if($f == '.' || $f == ".." || !preg_match($regex,$f) ) { continue; }
-			require_once $adapter_dir . '/' . $f;
+			if ($f == '.' || $f == ".." || !preg_match($regex, $f)) continue;
+			include_once $adapter_dir . '/' . $f;
 		}
 	}
-	
-}//class
-
-?>
+}

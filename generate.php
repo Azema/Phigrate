@@ -1,3 +1,5 @@
+#!/usr/bin/env php
+
 <?php
 
 /*
@@ -60,7 +62,7 @@ function main($args) {
   }
   
   //generate a complete migration file
-  $next_version     = Ruckusing_MigratorUtil::generate_timestamp();
+  $next_version     = Ruckusing_MigratorUtil::generateTimestamp();
   $klass            = Ruckusing_NamingUtil::camelcase($migration_name);
   $file_name        = $next_version . '_' . $klass . '.php';
   $full_path        = realpath(RUCKUSING_MIGRATION_DIR) . '/' . $file_name;

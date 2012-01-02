@@ -5,11 +5,11 @@
  * PHP Version 5
  *
  * @category   RuckusingMigrations
- * @package    classes
- * @subpackage task
+ * @package    Classes
+ * @subpackage Task
  * @author     Cody Caughlan <toolbag@gmail.com>
  * @copyright  2010-2011 Cody Caughlan
- * @license    
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
 
@@ -25,184 +25,199 @@ define('RUCKUSING_TASK_DIR', RUCKUSING_BASE . '/lib/tasks');
  * Manager of tasks
  *
  * @category   RuckusingMigrations
- * @package    classes
- * @subpackage task
+ * @package    Classes
+ * @subpackage Task
  * @author     Cody Caughlan <toolbag@gmail.com>
  * @copyright  2010-2011 Cody Caughlan
- * @license    
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
-class Ruckusing_TaskManager  {
-	
+class Ruckusing_TaskManager
+{
     /**
      * adapter 
      * 
      * @var Ruckusing_BaseAdapter
      */
-	private $adapter;
+    private $_adapter;
+
     /**
      * tasks 
      * 
      * @var array
      */
-	private $tasks = array();
+	private $_tasks = array();
 	
     /**
      * __construct 
      * 
-     * @param Ruckusing_BaseAdapter $adapter 
+     * @param Ruckusing_BaseAdapter $adapter Adapter RDBMS
      *
      * @return Ruckusing_TaskManager
      */
-	function __construct($adapter) {
-		$this->set_adapter($adapter);
-		$this->load_all_tasks(RUCKUSING_TASK_DIR);
-	}//__construct
+    function __construct($adapter)
+    {
+		$this->setAdapter($adapter);
+		$this->_loadAllTasks(RUCKUSING_TASK_DIR);
+	}
 	
     /**
-     * set_adapter 
+     * set adapter 
      *
-     * @param Ruckusing_BaseAdapter $adapter
+     * @param Ruckusing_BaseAdapter $adapter Adapter RDBMS
      * 
      * @return void
      */
-	public function set_adapter($adapter) { 
-		$this->adapter = $adapter;
+    public function setAdapter($adapter) 
+    {
+		$this->_adapter = $adapter;
     }
 
     /**
-     * get_adapter 
+     * get adapter 
      * 
      * @return Ruckusing_BaseAdapter
      */
-	public function get_adapter() {
-		return $this->adapter;
+    public function getAdapter()
+    {
+		return $this->_adapter;
 	}
 	
     /**
 	 * Searches for the given task, and if found
 	 * returns it. Otherwise null is returned.
      * 
-     * @param mixed $key 
+     * @param mixed $key The key to identify the task
+     *
      * @return Ruckusing_iTask
      */
-	public function get_task($key) {
-		if( array_key_exists($key, $this->tasks)) {
-			return $this->tasks[$key];
+    public function getTask($key)
+    {
+		if (array_key_exists($key, $this->_tasks)) {
+			return $this->_tasks[$key];
 		} else {
 			return null;
-		}		
+		}
 	}
 
     /**
-     * has_task 
+     * has task 
      * 
-     * @param string $key 
+     * @param string $key The key to identitfy the task
      *
      * @return boolean
      */
-	public function has_task($key) {
-		if( array_key_exists($key, $this->tasks)) {
+    public function hasTask($key)
+    {
+		if (array_key_exists($key, $this->_tasks)) {
 			return true;
 		} else {
 			return false;
-		}		
+		}
 	}
 
-	
-	/*
-	*/
     /**
 	 * Register a new task name under the specified key.
 	 * $obj is a class which implements the iTask interface
 	 * and has an execute() method defined.
      * 
-     * @param string $key 
-     * @param Ruckusing_iTask $obj 
+     * @param string          $key The key to identify task
+     * @param Ruckusing_iTask $obj The task object
      *
      * @return boolean
      */
-	public function register_task($key, $obj) {
-		
-		if( array_key_exists($key, $this->tasks)) {
+    public function registerTask($key, $obj)
+    {
+		if (array_key_exists($key, $this->_tasks)) {
 			trigger_error(sprintf("Task key '%s' is already defined!", $key));
 			return false;
 		}
 		
 		//Reflect on the object and make sure it has an "execute()" method
 		$refl = new ReflectionObject($obj);
-		if( !$refl->hasMethod('execute')) {
-			trigger_error(sprintf("Task '%s' does not have an 'execute' method defined", $key));
+		if (! $refl->hasMethod('execute')) {
+            trigger_error(
+                sprintf(
+                    "Task '%s' does not have an 'execute' method defined",
+                    $key
+                )
+            );
 			return false;
 		}
-		$this->tasks[$key] = $obj;
+		$this->_tasks[$key] = $obj;
 		return true;
 	}
 	
     /**
-     * get_name 
+     * get name 
      * 
      * @return void
      */
-	public function get_name() {
+    public function getName()
+    {
 	}
 	
 	//---------------------
 	// PRIVATE METHODS
 	//---------------------
     /**
-     * load_all_tasks 
+     * load all tasks 
      * 
-     * @param string $task_dir 
+     * @param string $taskDir Directory path of tasks
      *
      * @return void
      * @throws Exception
      */
-	private function load_all_tasks($task_dir) {
-		if(!is_dir($task_dir)) {
-			throw new Exception(sprintf("Task dir: %s does not exist", $task_dir));
+    private function _loadAllTasks($taskDir)
+    {
+		if (!is_dir($taskDir)) {
+            throw new Exception(
+                sprintf("Task dir: %s does not exist", $taskDir)
+            );
 			return false;
 		}
-		$files = scandir($task_dir);
+		$files = scandir($taskDir);
 		$regex = '/^class\.(\w+)\.php$/';
-		foreach($files as $f) {			
+		foreach ($files as $f) {
 			//skip over invalid files
-			if($f == '.' || $f == ".." || !preg_match($regex,$f, $matches) ) { continue; }
-			require_once $task_dir . '/' . $f;
-			$task_name = Ruckusing_NamingUtil::task_from_class_name($matches[1]);
-			$klass = Ruckusing_NamingUtil::class_from_file_name($f);
-			$this->register_task($task_name, new $klass($this->get_adapter()));
+            if ($f == '.' || $f == ".." || !preg_match($regex, $f, $matches)) {
+                continue;
+            }
+			include_once $taskDir . '/' . $f;
+			$taskName = Ruckusing_NamingUtil::taskFromClassName($matches[1]);
+			$klass = Ruckusing_NamingUtil::classFromFileName($f);
+			$this->registerTask($taskName, new $klass($this->getAdapter()));
 		}
-	}//require_tasks
+	}
 	
 	/**
      * Execute the supplied Task object
      *
-     * @param Ruckusing_iTask $task_obj 
+     * @param Ruckusing_iTask $taskObj Task object
      *
      * @return void
 	 */	
-	private function execute_task($task_obj) {		
+    private function _executeTask($taskObj)
+    {
 	}
 	
     /**
      * execute 
      * 
-     * @param string $task_name 
-     * @param array $options 
+     * @param string $taskName The task name 
+     * @param array  $options  The options of task
      *
      * @return string
      */
-	public function execute($task_name, $options) {
-		if (!$this->has_task($task_name)) {
-			throw new Exception("Task '$task_name' is not registered.");
+    public function execute($taskName, $options)
+    {
+		if (! $this->hasTask($taskName)) {
+			throw new Exception("Task '{$taskName}' is not registered.");
 		}
-		$task = $this->get_task($task_name);
+		$task = $this->getTask($taskName);
 		if ($task) {
 			return $task->execute($options);
 		}
-		return "";		
+		return '';
 	}
 }
-
-?>

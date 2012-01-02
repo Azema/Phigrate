@@ -5,247 +5,268 @@
  * PHP Version 5
  *
  * @category  RuckusingMigrations
- * @package   classes
+ * @package   Classes
  * @author    Cody Caughlan <toolbag@gmail.com>
  * @copyright 2010-2011 Cody Caughlan
- * @license   
+ * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
 
 /**
- * @see Ruckusing_iAdapter 
+ * @see Ruckusing_IAdapter 
  */
-require_once RUCKUSING_BASE . '/lib/classes/class.Ruckusing_iAdapter.php';
+require_once RUCKUSING_BASE . '/lib/classes/class.Ruckusing_IAdapter.php';
 
 /**
  * Migration base
  *
  * @category  RuckusingMigrations
- * @package   classes
+ * @package   Classes
  * @author    Cody Caughlan <toolbag@gmail.com>
  * @copyright 2010-2011 Cody Caughlan
- * @license   
+ * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
-class Ruckusing_BaseMigration {
-	
+class Ruckusing_BaseMigration
+{
     /**
      * adapter 
      * 
      * @var Ruckusing_BaseAdapter
      */
-	private $adapter;
+	private $_adapter;
 	
     /**
-     * set_adapter 
+     * set adapter 
      * 
-     * @param Ruckusing_BaseAdapter $adapter 
+     * @param Ruckusing_BaseAdapter $adapter Adapter RDBMS
+     *
      * @return void
      */
-	public function set_adapter($adapter) {
-		$this->adapter = $adapter;
+    public function setAdapter($adapter)
+    {
+		$this->_adapter = $adapter;
 	}
 	
     /**
-     * get_adapter 
+     * get adapter 
      * 
      * @return Ruckusing_BaseAdapter
      */
-	public function get_adapter() {
-		return $this->adapter;
+    public function getAdapter()
+    {
+		return $this->_adapter;
 	}
 	
     /**
-     * create_database 
+     * create database 
      * 
-     * @param string $name 
-     * @param array $options 
+     * @param string $name    The database name
+     * @param array  $options The options definition of the database
      *
      * @return boolean
      */
-	public function create_database($name, $options = null) {
-		return $this->adapter->create_database($name, $options);
+    public function createDatabase($name, $options = null)
+    {
+		return $this->_adapter->createDatabase($name, $options);
 	}
 	
     /**
-     * drop_database 
+     * drop database 
      * 
-     * @param string $name 
+     * @param string $name The database name
      *
      * @return boolean
      */
-	public function drop_database($name) {
-		return $this->adapter->drop_database($name);		
+    public function dropDatabase($name)
+    {
+		return $this->_adapter->dropDatabase($name);		
 	}
 	
     /**
-     * drop_table 
+     * drop table 
      * 
-     * @param string $tbl 
+     * @param string $tbl The table name
      *
      * @return boolean
      */
-	public function drop_table($tbl) {
-		return $this->adapter->drop_table($tbl);				
+    public function dropTable($tbl)
+    {
+		return $this->_adapter->dropTable($tbl);				
 	}
 	
     /**
-     * rename_table 
+     * rename table 
      * 
-     * @param string $name 
-     * @param string $new_name 
+     * @param string $name    The old name of table
+     * @param string $newName The new name of table
      *
      * @return boolean
      */
-	public function rename_table($name, $new_name) {
-		return $this->adapter->rename_table($name, $new_name);						
+    public function renameTable($name, $newName)
+    {
+		return $this->_adapter->renameTable($name, $newName);						
 	}
 		
     /**
-     * rename_column 
+     * rename column 
      * 
-     * @param string $tbl_name 
-     * @param string $column_name 
-     * @param string $new_column_name 
+     * @param string $tblName       The table name where is the column
+     * @param string $columnName    The old column name
+     * @param string $newColumnName The new column name
      *
      * @return boolean
      */
-	public function rename_column($tbl_name, $column_name, $new_column_name) {
-		return $this->adapter->rename_column($tbl_name, $column_name, $new_column_name);
+    public function renameColumn($tblName, $columnName, $newColumnName)
+    {
+		return $this->_adapter->renameColumn($tblName, $columnName, $newColumnName);
 	}
 
     /**
-     * add_column 
+     * add column 
      * 
-     * @param string $table_name 
-     * @param string $column_name 
-     * @param string $type 
-     * @param array $options 
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     * @param string $type       The type generic of the column
+     * @param array  $options    The options definition of the column
      *
      * @return boolean
      */
-	public function add_column($table_name, $column_name, $type, $options = array()) {
-		return $this->adapter->add_column($table_name, $column_name, $type, $options);
+    public function addColumn($tableName, $columnName, $type,
+        $options = array()
+    ) {
+        return $this->_adapter
+            ->addColumn($tableName, $columnName, $type, $options);
 	}
 	
     /**
-     * remove_column 
+     * remove column 
      * 
-     * @param string $table_name 
-     * @param string $column_name 
-     * @return void
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     *
+     * @return boolean
      */
-	public function remove_column($table_name, $column_name) {
-		return $this->adapter->remove_column($table_name, $column_name);
+    public function removeColumn($tableName, $columnName)
+    {
+		return $this->_adapter->removeColumn($tableName, $columnName);
 	}
 
     /**
-     * change_column 
+     * change column 
      * 
-     * @param string $table_name 
-     * @param string $column_name 
-     * @param string $type 
-     * @param array $options 
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     * @param string $type       The type generic of the column
+     * @param array  $options    The options definition of the column
      *
      * @return boolean
      */
-	public function change_column($table_name, $column_name, $type, $options = array()) {
-		return $this->adapter->change_column($table_name, $column_name, $type, $options);	
+    public function changeColumn($tableName, $columnName, $type, 
+        $options = array()
+    ) {
+        return $this->_adapter
+            ->changeColumn($tableName, $columnName, $type, $options);	
 	}
 	
     /**
-     * add_index 
+     * add index 
      * 
-     * @param string $table_name 
-     * @param string $column_name 
-     * @param array $options 
+     * @param string       $tableName  The table name
+     * @param string|array $columnName The column name
+     * @param array        $options    The options defintion of the index
      *
      * @return boolean
      */
-	public function add_index($table_name, $column_name, $options = array()) {
-		return $this->adapter->add_index($table_name, $column_name, $options);			
+    public function addIndex($tableName, $columnName, $options = array())
+    {
+		return $this->_adapter->addIndex($tableName, $columnName, $options);			
 	}
 	
     /**
-     * remove_index 
+     * remove index 
      * 
-     * @param string $table_name 
-     * @param string $column_name 
-     * @param array $options 
+     * @param string       $tableName  The table name
+     * @param string|array $columnName The column name
+     * @param array        $options    The options definition of the index
      *
      * @return boolean
      */
-	public function remove_index($table_name, $column_name, $options = array()) {
-		return $this->adapter->remove_index($table_name, $column_name, $options);
+    public function removeIndex($tableName, $columnName, $options = array())
+    {
+		return $this->_adapter->removeIndex($tableName, $columnName, $options);
 	}
 	
     /**
-     * create_table 
+     * create table 
      * 
-     * @param string $table_name 
-     * @param array $options 
+     * @param string $tableName The table name
+     * @param array  $options   Options definition table
      *
      * @return boolean
      */
-	public function create_table($table_name, $options = array()) {
-		return $this->adapter->create_table($table_name, $options);
+    public function createTable($tableName, $options = array())
+    {
+		return $this->_adapter->createTable($tableName, $options);
 	}
 	
     /**
      * execute 
      * 
-     * @param string $query 
+     * @param string $query Query SQL
      *
      * @return boolean
      */
-	public function execute($query) {
-		return $this->adapter->query($query);
+    public function execute($query)
+    {
+		return $this->_adapter->query($query);
 	}
 	
     /**
-     * select_one 
+     * select one 
      * 
-     * @param string $sql 
+     * @param string $sql Query SQL
      *
      * @return mixed
      */
-	public function select_one($sql) {
-		return $this->adapter->select_one($sql);
+    public function selectOne($sql)
+    {
+		return $this->_adapter->selectOne($sql);
 	}
 
     /**
-     * select_all 
+     * select all 
      * 
-     * @param string $sql 
+     * @param string $sql Query SQL
      *
      * @return mixed
      */
-	public function select_all($sql) {
-		return $this->adapter->select_all($sql);
+    public function selectAll($sql)
+    {
+		return $this->_adapter->selectAll($sql);
     }
 
     /**
      * query 
      * 
-     * @param string $sql 
+     * @param string $sql Query SQL
      *
      * @return boolean
      */
-	public function query($sql) {
-		return $this->adapter->query($sql);		
+    public function query($sql)
+    {
+		return $this->_adapter->query($sql);		
 	}
 	
     /**
-     * quote_string 
+     * quote string 
      * 
-     * @param string $str 
+     * @param string $str String to escape
      *
      * @return string
      */
-	public function quote_string($str) {
-        return $this->adapter->quote_string($str); 
+    public function quoteString($str)
+    {
+        return $this->_adapter->quoteString($str); 
     }
-	
-}//Ruckusing_BaseMigration
-
-?>
+}

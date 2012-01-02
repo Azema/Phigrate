@@ -8,8 +8,8 @@ require_once RUCKUSING_BASE  . '/lib/tasks/class.Ruckusing_DB_Schema.php';
 
 class TaskManagerTest extends PHPUnit_Framework_TestCase {
 
-  protected function setUp() {
-    require RUCKUSING_BASE . '/config/database.inc.php';
+    protected function setUp() {
+        require RUCKUSING_BASE . '/config/database.inc.php';
 
 		if( !is_array($ruckusing_db_config) || !array_key_exists("test", $ruckusing_db_config)) {
 			die("\n'test' DB is not defined in config/database.inc.php\n\n");
@@ -20,15 +20,12 @@ class TaskManagerTest extends PHPUnit_Framework_TestCase {
 		$logger = Ruckusing_Logger::instance(RUCKUSING_BASE . '/tests/logs/test.log');
 
 		$this->adapter = new Ruckusing_MySQLAdapter($test_db, $logger);
-		$this->adapter->logger->log("Test run started: " . date('Y-m-d g:ia T') );
+		$this->adapter->getLogger()->log("Test run started: " . date('Y-m-d g:ia T') );
+    } //setUp()
 		
-  } //setUp()
-		
-  public function test_db_schema_creation() {
-    $schema = new Ruckusing_DB_Schema($this->adapter);
-    $schema->execute(array());
-    $this->assertEquals(true, file_exists(RUCKUSING_DB_DIR . '/schema.txt') );
-  }
-  
+    public function test_db_schema_creation() {
+        $schema = new Ruckusing_DB_Schema($this->adapter);
+        $schema->execute(array());
+        $this->assertEquals(true, file_exists(RUCKUSING_DB_DIR . '/schema.txt') );
+    }
 }
-?>
