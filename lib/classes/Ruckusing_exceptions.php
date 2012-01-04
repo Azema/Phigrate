@@ -122,6 +122,33 @@ class Ruckusing_MissingTableException extends Exception
 }
 
 /**
+ * Class exception of missing config DBs
+ *
+ * @category   RuckusingMigrations
+ * @package    Classes
+ * @subpackage Exception
+ * @author     Cody Caughlan <toolbag@gmail.com>
+ * @copyright  2010-2011 Cody Caughlan
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
+ * @link       https://github.com/ruckus/ruckusing-migrations
+ */
+class Ruckusing_MissingConfigDbException extends Exception
+{
+    /**
+     * __construct 
+     * 
+     * @param string $msg  Exception message
+     * @param int    $code Exception code
+     *
+     * @return void
+     */
+    public function __construct($msg = '', $code = 0)
+    {
+        parent::__construct($msg, $code);
+    }
+}
+
+/**
  * Class exception of missing adapter
  *
  * @category   RuckusingMigrations
@@ -203,6 +230,33 @@ class Ruckusing_InvalidTableDefinitionException extends Exception
 }
 
 /**
+ * Class exception of invalid task
+ *
+ * @category   RuckusingMigrations
+ * @package    Classes
+ * @subpackage Exception
+ * @author     Cody Caughlan <toolbag@gmail.com>
+ * @copyright  2010-2011 Cody Caughlan
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
+ * @link       https://github.com/ruckus/ruckusing-migrations
+ */
+class Ruckusing_InvalidTaskException extends Exception
+{
+    /**
+     * __construct 
+     * 
+     * @param string $msg  Exception message
+     * @param int    $code Exception code
+     *
+     * @return void
+     */
+    public function __construct($msg = '', $code = 0)
+    {
+        parent::__construct($msg, $code);
+    }
+}
+
+/**
  * Class exception of invalid column type
  *
  * @category   RuckusingMigrations
@@ -214,6 +268,33 @@ class Ruckusing_InvalidTableDefinitionException extends Exception
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
 class Ruckusing_InvalidColumnTypeException extends Exception
+{
+    /**
+     * __construct 
+     * 
+     * @param string $msg  Exception message
+     * @param int    $code Exception code
+     *
+     * @return void
+     */
+    public function __construct($msg = '', $code = 0)
+    {
+        parent::__construct($msg, $code);
+    }
+}
+
+/**
+ * Class exception of invalid adapter type
+ *
+ * @category   RuckusingMigrations
+ * @package    Classes
+ * @subpackage Exception
+ * @author     Cody Caughlan <toolbag@gmail.com>
+ * @copyright  2010-2011 Cody Caughlan
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
+ * @link       https://github.com/ruckus/ruckusing-migrations
+ */
+class Ruckusing_InvalidAdapterTypeException extends Exception
 {
     /**
      * __construct 
