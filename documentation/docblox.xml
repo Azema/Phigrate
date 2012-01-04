@@ -20,6 +20,10 @@
             <errors>documentation/log/{DATE}.errors.log</errors>
         </paths>
     </logging>
+    <markers>
+        <item>TODO</item>
+        <item>FIXME</item>
+    </markers>
     <!--
     <transformations>
         <template name="default"/>
