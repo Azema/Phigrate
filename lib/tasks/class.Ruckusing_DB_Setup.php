@@ -67,7 +67,7 @@ class Ruckusing_DB_Setup implements Ruckusing_ITask
 		echo 'Started: ' . date('Y-m-d g:ia T') . "\n\n";		
 		echo "[db:setup]: \n";
 		//it doesnt exist, create it
-		if (! $this->_adapter->table_exists(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
+		if (! $this->_adapter->tableExists(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
 			echo sprintf("\tCreating table: %s", RUCKUSING_TS_SCHEMA_TBL_NAME);
             $this->_adapter->createSchemaVersionTable();
 			echo "\n\tDone.\n";
@@ -79,4 +79,23 @@ class Ruckusing_DB_Setup implements Ruckusing_ITask
 		}
 		echo "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";		
 	}
+
+    /**
+     * Return the usage of the task
+     * 
+     * @return string
+     */
+    public function help()
+    {
+        $output =<<<USAGE
+Task: \033[36mdb:setup\033[0m
+
+A basic task to initialize your DB for migrations is available. One should 
+always run this task when first starting out.
+
+This task not take arguments.
+
+USAGE;
+        return $output;
+    }
 }

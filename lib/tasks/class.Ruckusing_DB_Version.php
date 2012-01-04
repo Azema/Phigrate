@@ -63,7 +63,7 @@ class Ruckusing_DB_Version implements Ruckusing_ITask
     {
 		echo 'Started: ' . date('Y-m-d g:ia T') . "\n\n";		
 		echo "[db:version]: \n";
-		if (! $this->_adapter->table_exists(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
+		if (! $this->_adapter->tableExists(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
 			//it doesnt exist, create it
             echo "\tSchema version table (" . RUCKUSING_TS_SCHEMA_TBL_NAME 
                 . ") does not exist. Do you need to run 'db:setup'?";
@@ -90,4 +90,23 @@ class Ruckusing_DB_Version implements Ruckusing_ITask
 		}
 		echo "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";		
 	}
+
+    /**
+     * Return the usage of the task
+     * 
+     * @return string
+     */
+    public function help()
+    {
+        $output =<<<USAGE
+Task: \033[36mdb:version\033[0m
+
+It is always possible to ask the framework (really the DB) what version it is 
+currently at.
+
+This task not take arguments.
+
+USAGE;
+        return $output;
+    }
 }
