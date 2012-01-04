@@ -1,100 +1,187 @@
 #!/usr/bin/env php
 
 <?php
-
-/*
-  Generator for migrations.
-  Usage: php generate.php <migration name>
-  Call with no arguments to see usage info.
-*/
-
+/**
+ * Rucksing Migrations
+ *
+ * PHP Version 5
+ *
+ * @category  RuckusingMigrations
+ * @package   Main
+ * @author    Cody Caughlan <toolbag@gmail.com>
+ * @copyright 2010-2011 Cody Caughlan
+ * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
+ * @link      https://github.com/ruckus/ruckusing-migrations
+ *
+ * Generator for migrations.
+ * Usage: php generate.php <migration name>
+ * Call with no arguments to see usage info.
+ */
 
 if (!defined('RUCKUSING_BASE')) define('RUCKUSING_BASE', dirname(__FILE__));
+/**
+ * Config file
+ */
 require_once RUCKUSING_BASE . '/config/config.inc.php';
+/**
+ * @see Ruckusing_NamingUtil
+ */
 require_once RUCKUSING_BASE  . '/lib/classes/util/class.Ruckusing_NamingUtil.php';
+/**
+ * @see Ruckusing_MigratorUtil
+ */
 require_once RUCKUSING_BASE  . '/lib/classes/util/class.Ruckusing_MigratorUtil.php';
 
 if (!isset($argv))
-    $argv = "";
-$args = parse_args($argv);
+    $argv = '';
+$args = parseArgs($argv);
 main($args);
 
 
 //-------------------
 
-/*
-  Parse command line arguments.
-*/
-function parse_args($argv) {
-  $num_args = count($argv);
-  if($num_args < 2) {
-   print_help(true); 
-  }
-  $migration_name = $argv[1];
-  return array('name' => $migration_name);
+/**
+ * Parse command line arguments
+ * 
+ * @param array $argv Arguments of command line
+ *
+ * @return array
+ */
+function parseArgs($argv)
+{
+    if (count($argv) < 2 || $argv[1] == 'help') printHelp(true);
+
+    $migrationName = $argv[1];
+    return array('name' => $migrationName);
 }
 
-
-/*
-  Print a usage scenario for this script.
-  Optionally take a boolean on whether to immediately die or not.
-*/
-function print_help($exit = false) {
-  echo "\nusage: php generate.php <migration name>\n\n";
-  echo "\tWhere <migration name> is a descriptive name of the migration, joined with underscores.\n";
-  echo "\tExamples: add_index_to_users | create_users_table | remove_pending_users\n\n";
-  if($exit) { exit; }
+/**
+ * Print a usage scenario for this script.
+ * Optionally take a boolean on whether to immediately die or not.
+ * 
+ * @param boolean $exit Flag to exit script generate
+ *
+ * @return void
+ */
+function printHelp($exit = false)
+{
+    echo "\nusage: php generate.php <migration name>\n\n"
+        . "\tWhere <migration name> is a descriptive name of the migration, "
+        . "joined with underscores.\n\tExamples: add_index_to_users | "
+        . "create_users_table | remove_pending_users\n\n";
+    if ($exit) exit;
 }
 
-function main($args) {
-  //input sanity check
-  if(!is_array($args) || (is_array($args) && !array_key_exists('name', $args)) ) {
-    print_help(true);
-  }
-  $migration_name = $args['name'];
-  
-  //clear any filesystem stats cache
-  clearstatcache();
-  
-  //check to make sure our migration directory exists
-  if(!is_dir(RUCKUSING_MIGRATION_DIR)) {
-   die_with_error("ERROR: migration directory '" . RUCKUSING_MIGRATION_DIR . "' does not exist. Specify MIGRATION_DIR in config/config.inc.php and try again.");
-  }
-  
-  //generate a complete migration file
-  $next_version     = Ruckusing_MigratorUtil::generateTimestamp();
-  $klass            = Ruckusing_NamingUtil::camelcase($migration_name);
-  $file_name        = $next_version . '_' . $klass . '.php';
-  $full_path        = realpath(RUCKUSING_MIGRATION_DIR) . '/' . $file_name;
-  $template_str     = get_template($klass);
+/**
+ * The main function of this script
+ * 
+ * @param array $args Arguments of command line
+ *
+ * @return void
+ */
+function main($args)
+{
+    //input sanity check
+    if (! is_array($args) 
+        || (is_array($args) && ! array_key_exists('name', $args))
+    ) {
+        printHelp(true);
+    }
+    $migrationName = $args['name'];
     
-  //check to make sure our destination directory is writable
-  if(!is_writable(RUCKUSING_MIGRATION_DIR . '/')) {
-    die_with_error("ERROR: migration directory '" . RUCKUSING_MIGRATION_DIR . "' is not writable by the current user. Check permissions and try again.");
-  }
+    //clear any filesystem stats cache
+    clearstatcache();
+    
+    //check to make sure our migration directory exists
+    if (! is_dir(RUCKUSING_MIGRATION_DIR)) {
+        dieWithError(
+            "ERROR: migration directory '" . RUCKUSING_MIGRATION_DIR 
+            . "' does not exist. Specify MIGRATION_DIR in "
+            . "config/config.inc.php and try again."
+        );
+    }
+    
+    //generate a complete migration file
+    $timestamp   = Ruckusing_MigratorUtil::generateTimestamp();
+    // @TODO Check the class name is not duplicated
+    $klass       = Ruckusing_NamingUtil::camelcase($migrationName);
+    $fileName    = $timestamp . '_' . $klass . '.php';
+    $fullPath    = realpath(RUCKUSING_MIGRATION_DIR) . '/' . $fileName;
+    $templateStr = getTemplate($klass);
+    
+    //check to make sure our destination directory is writable
+    if (! is_writable(RUCKUSING_MIGRATION_DIR . '/')) {
+        dieWithError(
+            "ERROR: migration directory '" . RUCKUSING_MIGRATION_DIR 
+            . "' is not writable by the current user. "
+            . "Check permissions and try again."
+        );
+    }
 
-  //write it out!
-  $file_result = file_put_contents($full_path, $template_str);
-	if($file_result === FALSE) {
-		die_with_error("Error writing to migrations directory/file. Do you have sufficient privileges?");
-	} else {
-  	echo "\nCreated migration: {$file_name}\n\n";
-	}
+    //write it out!
+    $fileResult = file_put_contents($fullPath, $templateStr);
+    if ($fileResult === false) {
+        dieWithError(
+            'Error writing to migrations directory/file. '
+            . 'Do you have sufficient privileges?'
+            . "\nOr the file is maybe double ({$fileName})?";
+        );
+    } else {
+        echo "\nCreated migration: {$fileName}\n\n";
+    }
 }
 
-function die_with_error($str) {
-  die("\n{$str}\n");
+/**
+ * die with error 
+ * 
+ * @param string $str Message to display
+ *
+ * @return void
+ */
+function dieWithError($str)
+{
+    die("\n{$str}\n");
 }
 
-function get_template($klass) {
-$template = <<<TPL
+/**
+ * get template 
+ * 
+ * @param string $klass The class name
+ *
+ * @return string
+ */
+function getTemplate($klass)
+{
+    $template = <<<TPL
 <?php\n
-class $klass extends Ruckusing_BaseMigration {\n\n\tpublic function up() {\n\n\t}//up()
-\n\tpublic function down() {\n\n\t}//down()
+/*
+ * For documentation on the methods of migration
+ *
+ * @see https://github.com/Azema/ruckusing-migrations/wiki/Migration-Methods
+ */
+class $klass extends Ruckusing_BaseMigration
+{
+    /**
+     * up 
+     * 
+     * @return void
+     */
+    public function up()
+    {
+        // Add your code here
+    }
+
+    /**
+     * down 
+     * 
+     * @return void
+     */
+    public function down()
+    {
+        // Add your code here
+    }
 }
-?>
 TPL;
-return $template;
+    return $template;
 }
 
-?>
