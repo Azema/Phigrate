@@ -475,7 +475,7 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
     public function executeDdl($ddl)
     {
         $result = $this->query($ddl);
-        // @TODO Check result
+        // TODO : Check result
 		return true;
 	}
 	
@@ -490,7 +490,7 @@ class Ruckusing_MySQLAdapter extends Ruckusing_BaseAdapter
     {
 		$ddl = sprintf('DROP TABLE IF EXISTS %s', $this->identifier($tbl));
         $result = $this->query($ddl);
-        // @TODO Check result
+        // TODO : Check result
 		return true;
 	}
 	

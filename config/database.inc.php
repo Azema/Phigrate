@@ -15,15 +15,23 @@ $ruckusing_db_config = array(
         'password'  => 'rucku'
     ),
 
-	'test' 					=> array(
+	'test' => array(
         'type' 			=> 'mysql',
         'host' 			=> 'localhost',
         'port'			=> 3306,
         'database' 	=> 'ruckusing_migrations_test',
         'user' 			=> 'rucku_test',
         'password' 	=> 'rucku'
-	)
+	),
 	
+	'toto' => array(
+        'type' 			=> 'sqlite',
+        'host' 			=> 'localhost',
+        'port'			=> 3306,
+        'database' 	=> 'ruckusing_migrations_test',
+        'user' 			=> 'rucku_test',
+        'password' 	=> 'rucku'
+	),
 );
 
 

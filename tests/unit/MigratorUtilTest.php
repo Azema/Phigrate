@@ -8,26 +8,28 @@ require_once RUCKUSING_BASE  . '/lib/classes/util/class.Ruckusing_MigratorUtil.p
 require_once RUCKUSING_BASE  . '/lib/classes/class.Ruckusing_BaseAdapter.php';
 require_once RUCKUSING_BASE  . '/lib/classes/class.Ruckusing_IAdapter.php';
 require_once RUCKUSING_BASE  . '/lib/classes/adapters/class.Ruckusing_MySQLAdapter.php';
-require_once RUCKUSING_BASE  . '/config/database.inc.php';
 require_once RUCKUSING_BASE  . '/config/config.inc.php';
 
 define('RUCKUSING_TEST_HOME', RUCKUSING_BASE . '/tests');
 
-class MigratorUtilTest extends PHPUnit_Framework_TestCase {
-
-    protected function setUp() {
-        global $ruckusing_db_config;
-        
+class MigratorUtilTest extends PHPUnit_Framework_TestCase
+{
+    public function __construct()
+    {
+        require RUCKUSING_BASE  . '/config/database.inc.php';
         if( !is_array($ruckusing_db_config) || !array_key_exists("test", $ruckusing_db_config)) {
             die("\n'test' DB is not defined in config/database.inc.php\n\n");
         }
 
-        $test_db = $ruckusing_db_config['test'];
-
+        $this->test_db = $ruckusing_db_config['test'];
         //setup our log
-        $logger = Ruckusing_Logger::instance(RUCKUSING_BASE . '/tests/logs/test.log');
-
-        $this->adapter = new Ruckusing_MySQLAdapter($test_db, $logger);
+        $this->logger = Ruckusing_Logger::instance(RUCKUSING_BASE . '/tests/logs/test.log');
+        $this->logger->setPriority(Ruckusing_Logger::DEBUG);
+    }
+    
+    protected function setUp()
+    {
+        $this->adapter = new Ruckusing_MySQLAdapter($this->test_db, $this->logger);
         $this->adapter->getLogger()->log("Test run started: " . date('Y-m-d g:ia T') );
 
         //create the schema table if necessary
