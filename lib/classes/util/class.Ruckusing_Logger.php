@@ -27,6 +27,23 @@
 class Ruckusing_Logger
 {
     /**
+     * @var string Log type Error 
+     */
+    const ERROR = 1;
+    /**
+     * @var string Log type Warning 
+     */
+    const WARNING = 2;
+    /**
+     * @var string Log type Info 
+     */
+    const INFO = 3;
+    /**
+     * @var string Log type Debug 
+     */
+    const DEBUG = 4;
+
+    /**
      * Instance of logger
      *
      * @var Ruckusing_Logger 
@@ -48,17 +65,34 @@ class Ruckusing_Logger
     private $_fp;
 
     /**
+     * _priority 
+     * 
+     * @var integer
+     */
+    private $_priority = 99;
+
+    /**
      * __construct 
      * 
      * @param string $file Path of file to write logs
      *
      * @return Ruckusing_Logger
      */
-    public function __construct($file)
+    protected function __construct($file)
     {
         $this->_file = $file;
         $this->_fp = fopen($this->_file, "a+");
-        //register_shutdown_function(array("Logger", "close_log"));
+    }
+
+    /**
+     * Close the file descriptor
+     * 
+     * @return void
+     */
+    public function __destruct()
+    {
+        $this->debug(__METHOD__);
+        $this->close();
     }
   
     /**
@@ -68,7 +102,7 @@ class Ruckusing_Logger
      *
      * @return Ruckusing_Logger
      */
-    public static function instance($logfile)
+    public static function instance($logfile = null)
     {
         if (isset(self::$_instance)) {
             return self::$_instance;
@@ -76,29 +110,113 @@ class Ruckusing_Logger
         self::$_instance = new Ruckusing_Logger($logfile);
         return self::$_instance; 
     }
-  
+
     /**
-     * log a message in file
+     * set priority of log
+     * 
+     * @param mixed $priority The priority of log
+     *
+     * @return Ruckusing_Logger
+     */
+    public function setPriority($priority)
+    {
+        $this->_priority = $priority;
+        return $this;
+    }
+
+    /**
+     * Log a message with debug type
      * 
      * @param string $msg Message to log
      *
      * @return void
+     */
+    public function debug($msg)
+    {
+        $this->log($msg, 'debug');
+    }
+
+    /**
+     * Log a message with info type
+     * 
+     * @param string $msg Message to log
+     *
+     * @return void
+     */
+    public function info($msg)
+    {
+        $this->log($msg, 'info');
+    }
+  
+    /**
+     * Log a message with warn type
+     * 
+     * @param string $msg Message to log
+     *
+     * @return void
+     */
+    public function warn($msg)
+    {
+        $this->log($msg, 'warn');
+    }
+  
+    /**
+     * Log a message with err type
+     * 
+     * @param string $msg Message to log
+     *
+     * @return void
+     */
+    public function err($msg)
+    {
+        $this->log($msg, 'err');
+    }
+  
+    /**
+     * log a message in file
+     * 
+     * @param string $msg  Message to log
+     * @param string $type Type of log (default: info)
+     *
+     * @return void
      * @throws Exception
      */
-    public function log($msg)
+    public function log($msg, $type = 'info')
     {
-        if ($this->_fp) {
-            $ts = date('M d H:i:s', time());
-            $line = sprintf("%s [info] %s\n", $ts, $msg); 
+        $prioOfType = $this->_getPriorityFromType($type);
+        if ($this->_fp && $prioOfType <= $this->_priority) {
+            $ts = date('M d H:i:s');
+            $line = sprintf("%s [%s] %s\n", $ts, strtoupper($type), $msg); 
             fwrite($this->_fp, $line);
-        } else {
-            throw new Exception(
-                sprintf(
-                    "Error: logfile '%s' not open for writing!", 
-                    $this->_file
-                )
-            );
         }
+    }
+
+    /**
+     * get priority from type 
+     * 
+     * @param string $type The type of log
+     *
+     * @return integer
+     */
+    private function _getPriorityFromType($type)
+    {
+        $priority = 0;
+        switch (strtolower($type)) {
+            case 'err':
+                $priority = self::ERROR;
+                break;
+            case 'warn':
+                $priority = self::WARNING;
+                break;
+            case 'debug':
+                $priority = self::DEBUG;
+                break;
+            case 'info':
+            default:
+                $priority = self::INFO;
+                break;
+        }
+        return $priority;
     }
   
     /**
@@ -108,8 +226,14 @@ class Ruckusing_Logger
      */
     public function close()
     {
+        $this->debug(__METHOD__);
         if ($this->_fp) {
-            fclose($this->_fp);
+            $closed = fclose($this->_fp);
+            if ($closed) {
+                $this->_fp = null;
+            } else {
+                echo 'Error closing the log file';
+            }
         }
     }
   
