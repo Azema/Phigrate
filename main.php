@@ -107,6 +107,13 @@ function getEnvironment($args)
     return $env;
 }
 
+/**
+ * getLogger : Return an instance of logger
+ * 
+ * @param string $env Environment
+ *
+ * @return Ruckusing_Logger
+ */
 function getLogger($env)
 {
     //initialize logger
