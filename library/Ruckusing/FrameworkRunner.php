@@ -122,11 +122,7 @@ class Ruckusing_FrameworkRunner
     /**
      * __construct 
      * 
-     * @param array            $config   Config of application
-     * @param array            $configDb Config of DB
-     * @param array            $argv     Arguments of the command line
-     * @param string           $env      Environment
-     * @param Ruckusing_Logger $logger   Instance logger
+     * @param array $argv Arguments of the command line
      *
      * @return Ruckusing_FrameworkRunner
      */
