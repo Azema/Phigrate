@@ -44,25 +44,70 @@
  * Call with no arguments to see usage info.
  */
 
-set_error_handler('scrErrorHandler', E_ALL);
-set_exception_handler('scrExceptionHandler');
-
 if (!defined('RUCKUSING_BASE')) define('RUCKUSING_BASE', dirname(__FILE__));
 
-//requirements
-require_once RUCKUSING_BASE . '/lib/classes/util/class.Ruckusing_Logger.php';
-require_once RUCKUSING_BASE . '/config/database.inc.php';
-require_once RUCKUSING_BASE . '/lib/classes/class.Ruckusing_FrameworkRunner.php';
-require_once RUCKUSING_BASE . '/lib/classes/Ruckusing_exceptions.php';
+// DB table where the version info is stored
+if (!defined('RUCKUSING_SCHEMA_TBL_NAME')) {
+	define('RUCKUSING_SCHEMA_TBL_NAME', 'schema_info');
+}
 
+if (!defined('RUCKUSING_TS_SCHEMA_TBL_NAME')) {
+	define('RUCKUSING_TS_SCHEMA_TBL_NAME', 'schema_migrations');
+}
+
+set_error_handler('scrErrorHandler', E_ALL);
+set_exception_handler('scrExceptionHandler');
+spl_autoload_register('loader', true, true);
+set_include_path(
+    implode(PATH_SEPARATOR, array(
+        RUCKUSING_BASE . '/library',
+        get_include_path(),
+    ))
+);
+
+// Parse args of command line
 if (!isset($argv))
     $argv = '';
 $args = parseArgs($argv);
+
+// Get environment
 $env = getEnvironment($args);
-$logger = getLogger($env);
-$main = new Ruckusing_FrameworkRunner($ruckusing_db_config, $args, $env, $logger);
+
+/*
+ *  Config application
+ */
+$configFile = RUCKUSING_BASE . '/config/application.ini';
+// Get config application file from command line
+if (array_key_exists('config', $args)) {
+    $configFile = $args['config'];
+}
+$config = getConfigFromFile($configFile, $env);
+
+// Task directory
+if (array_key_exists('taskdir', $args)) {
+    $config['task.dir'] = $args['taskdir'];
+}
+// Migration directory
+if (array_key_exists('migrationdir', $args)) {
+    $config['migration.dir'] = $args['migrationdir'];
+}
+/*
+ *  Config DB
+ */
+$configDbFile = RUCKUSING_BASE . '/config/database.ini';
+// Get config DB file from command line
+if (array_key_exists('configDb', $args)) {
+    $configDbFile = $args['configDb'];
+}
+$configDb = getConfigFromFile($configDbFile, $env);
+
+// Get logger of application
+$logger = getLogger($config, $env);
+
+$main = new Ruckusing_FrameworkRunner($config, $configDb, $args, $env, $logger);
 $output = $main->execute();
 echo "\n", $output, "\n";
+// It's good
 exit(0);
 
 /**
@@ -74,12 +119,63 @@ exit(0);
  */
 function parseArgs($argv)
 {
+    /*
+    * Configuration des options passées dans la ligne de commande
+    */
+    $shortOptions = 'hc:t:m:';
+    $longOptions = array(
+        'help', // sans valeur
+        'configuration:', // necéssite le chemin du fichier
+        'taskdir:', // nécessite le chemin des tâches
+        'migrationdir:', // necéssite le chemin des migrations
+    );
     $nbArgs = count($argv);
     if ($nbArgs < 2) {
         printHelp(true);
     } elseif ($nbArgs == 2) {
         if ($argv[1] == 'help') {
             printHelp(true);
+        }
+    } else {
+        $args = array();
+        for ($i = 1; $i < $nbArgs; $i++) {
+            switch ($argv[$i]) {
+                // help for command line
+                case '-h':
+                case '--help':
+                case '-?':
+                    printHelp(true);
+                    break;
+                // configuration file path
+                case '-c':
+                case '--configuration':
+                    $i++;
+                    $args['config'] = $argv[$i];
+                    break;
+                // configuration db file path
+                case '-d':
+                case '--database':
+                    $i++;
+                    $args['configDb'] = $argv[$i];
+                    break;
+                // task directory
+                case '-t':
+                case '--taskdir':
+                    $i++;
+                    $args['taskdir'] = $argv[$i];
+                    break;
+                // migration directory
+                case '-m':
+                case '--migrationdir':
+                    $i++;
+                    $args['migrationdir'] = $argv[$i];
+                    break;
+                // other
+                default:
+                    $args[] = $argv[$i];
+                    break;
+            }
+            $argv = $args;
         }
     }
     return $argv;
@@ -96,12 +192,10 @@ function getEnvironment($args)
 {
     $env = 'development';
     $nbArgs = count($args);
-    if ($nbArgs > 2) {
-        for ($i = $nbArgs-1; $i >= 1; $i--) {
-            if (preg_match('/^ENV=(\w+)$/',$args[$i], $match)) {
-                $env = $match[1];
-                break;
-            }
+    for ($i = $nbArgs-1; $i >= 1; $i--) {
+        if (preg_match('/^ENV=(\w+)$/',$args[$i], $match)) {
+            $env = $match[1];
+            break;
         }
     }
     return $env;
@@ -114,10 +208,13 @@ function getEnvironment($args)
  *
  * @return Ruckusing_Logger
  */
-function getLogger($env)
+function getLogger($config, $env)
 {
     //initialize logger
     $log_dir = RUCKUSING_BASE . '/logs';
+    if (array_key_exists('log.dir', $config)) {
+        $log_dir = $config['log.dir'];
+    }
     if (is_dir($log_dir) && ! is_writable($log_dir)) {
         die(
             "\n\nCannot write to log directory: "
@@ -136,6 +233,39 @@ function getLogger($env)
     }
 
     return $logger;
+}
+
+/**
+ * getConfigFromFile : Return sectionName from filename 
+ * 
+ * @param string $filename    The config file name
+ * @param string $sectionName The section name
+ *
+ * @return array
+ */
+function getConfigFromFile($filename, $sectionName)
+{
+    if (! is_file($filename)) {
+        throw new Exception('Config file not found (' . $filename . ')');
+    }
+    $ini_array = parse_ini_file($filename, true);
+    if (! array_key_exists($sectionName, $ini_array)) {
+        $found = false;
+        foreach ($ini_array as $name => $section) {
+            if (preg_match('/^'.$sectionName.'\s?:\s?(\w+)$/', $name, $matches)) {
+                $sectionExtended = getConfigFromFile($filename, $matches[1]);
+                $config = array_merge($sectionExtended, $section);
+                $found = true;
+                break;
+            }
+        }
+        if (! $found) {
+            throw new Exception('Section "' . $sectionName . '" not found in config file : ' . $filename);
+        }
+    } else {
+        $config = $ini_array[$sectionName];
+    }
+    return $config;
 }
 
 /**
@@ -222,9 +352,18 @@ function scrErrorHandler($errno, $errstr, $errfile, $errline)
  */
 function scrExceptionHandler($exception)
 {
-    echo 'Error: ' . $exception->getMessage() . "\n";
-        //. "\nbacktrace: \n" . $exception->getTraceAsString();
+    echo 'Error: ' . $exception->getMessage() . "\n"
+        . "\nbacktrace: \n" . $exception->getTraceAsString() . "\n";
     exit(1); // exit with error
 }
 
+function loader($classname)
+{
+    //echo 'load: ' . $classname . PHP_EOL;
+    $filename = str_replace('_', '/', $classname) . '.php';
+    if (is_file(RUCKUSING_BASE . '/library/' . $filename)) {
+        $filename = RUCKUSING_BASE . '/library/' . $filename;
+    }
+    include_once $filename;
+}
 ?>
