@@ -51,7 +51,7 @@ class Ruckusing_Util_Naming
      */
     public static function taskNameFromNamespaceAndBasename($namespace, $basename)
     {
-        return strtolower($namespace . '::' . $basename);
+        return strtolower($namespace . ':' . $basename);
 	}
 
     /**
@@ -66,7 +66,7 @@ class Ruckusing_Util_Naming
         //strip namespace
         $klass = str_replace(self::CLASS_NS_PREFIX, '', $klass);
         $klass = strtolower($klass);
-        $klass = str_replace('_', '::', $klass);
+        $klass = str_replace('_', ':', $klass);
         return $klass;
 	}
 
@@ -103,7 +103,7 @@ class Ruckusing_Util_Naming
         if (is_file($fileName)) {
             $parts = explode(DIRECTORY_SEPARATOR, $fileName);
             $namespace = $parts[count($parts)-2];
-			$fileName = $parts[count($parts)-1];
+			$fileName = substr($parts[count($parts)-1], 0, -4);
         }
         return self::CLASS_NS_PREFIX . ucfirst($namespace) 
             . '_' . ucfirst($fileName);

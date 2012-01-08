@@ -60,14 +60,16 @@ class Ruckusing_Task_Manager
     /**
      * __construct 
      * 
-     * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
+     * @param Ruckusing_Adapter_Base $adapter  Adapter RDBMS
+     * @param string                 $tasksDir The path of directory of tasks
      *
      * @return Ruckusing_Task_Manager
      */
-    function __construct($adapter)
+    function __construct($adapter, $tasksDir)
     {
-        $this->setAdapter($adapter);
         $this->_logger = Ruckusing_Logger::instance();
+        $this->setAdapter($adapter);
+        $this->setDirectoryOfTasks($tasksDir);
         $this->_loadAllTasks();
     }
 
@@ -82,8 +84,8 @@ class Ruckusing_Task_Manager
     public function setDirectoryOfTasks($tasksDir)
     {
         $this->_logger->debug(__METHOD__ . ' Start');
-        if (! is_dir($taskDir)) {
-            $msg = 'Task dir: "' . $taskDir . '" does not exist!';
+        if (! is_dir($tasksDir)) {
+            $msg = 'Task dir: "' . $tasksDir . '" does not exist!';
             $this->_logger->err($msg);
             require_once 'Ruckusing/Exception/Argument.php';
             throw new Ruckusing_Exception_Argument($msg);
@@ -130,9 +132,10 @@ class Ruckusing_Task_Manager
         $this->_logger->debug(__METHOD__ . ' Start');
         $this->_logger->debug('TaskName: ' . $key);
         if (! $this->hasTask($key)) {
-            $this->_logger->err('Task (' . $key . ') is not registered.');
+            $msg = 'Task (' . $key . ') is not registered.';
+            $this->_logger->err($msg);
             require_once 'Ruckusing/Exception/InvalidTask.php';
-            throw new Ruckusing_Exception_InvalidTask("Task '{$key}' is not registered.");
+            throw new Ruckusing_Exception_InvalidTask($msg);
         }
         $this->_logger->debug(__METHOD__ . ' End');
         return $this->_tasks[$key];
@@ -161,12 +164,12 @@ class Ruckusing_Task_Manager
      * $obj is a class which implements the ITask interface
      * and has an execute() method defined.
      * 
-     * @param string          $taskName The name of task
-     * @param Ruckusing_ITask $taskObj  The task object
+     * @param string               $taskName The name of task
+     * @param Ruckusing_Task_ITask $taskObj  The task object
      *
      * @return boolean
      */
-    public function registerTask($taskName, Ruckusing_ITask $taskObj)
+    public function registerTask($taskName, Ruckusing_Task_ITask $taskObj)
     {
         $this->_logger->debug(__METHOD__ . ' Start');
 
@@ -176,7 +179,7 @@ class Ruckusing_Task_Manager
             return false;
         }
 
-        if (! $taskObj instanceof Ruckusing_ITask) {
+        if (! $taskObj instanceof Ruckusing_Task_ITask) {
             $msg = 'Task (' . $taskName . ') does not implement Ruckusing_ITask';
             $this->_logger->warn($msg);
             trigger_error($msg);
@@ -185,66 +188,6 @@ class Ruckusing_Task_Manager
         $this->_tasks[$taskName] = $taskObj;
         $this->_logger->debug(__METHOD__ . ' End');
         return true;
-    }
-    
-    /**
-     * get name 
-     * 
-     * @TODO: Voir si cette methode est utilisée
-     *
-     * @return void
-     */
-    public function getName()
-    {
-    }
-    
-    //---------------------
-    // PRIVATE METHODS
-    //---------------------
-    /**
-     * load all tasks 
-     * 
-     * @param string $taskDir Directory path of tasks
-     *
-     * @return void
-     * @throws Ruckusing_Exception_Argument
-     */
-    private function _loadAllTasks()
-    {
-        $this->_logger->debug(__METHOD__ . ' Start');
-        if (! isset($this->_tasksDir)) {
-            $msg = 'Please: you must specify the directory of tasks!';
-            $this->_logger->err($msg);
-            throw new Ruckusing_Exception_Argument($msg);
-        }
-        $namespaces = scandir($this->_tasksDir);
-        $regex = '/^(\w+)\.php$/';
-        foreach ($namespaces as $namespace) {
-            //skip over invalid files
-            if ($namespace == '.' || $namespace == '..' || ! is_dir($namespace)) {
-                continue;
-            }
-
-            $files = scandir($namespace);
-            foreach ($files as $file) {
-                $ext = substr($file, -4);
-                $basename = substr($file, 0, -4);
-                //skip over invalid files
-                if ($file == '.' || $file == '..' || $ext != '.php') {
-                    continue;
-                }
-                $this->_logger->debug('include ' . $namespace . '/' . $file);
-                include_once $this->_tasksDir . '/' . $namespace . '/' . $file;
-                $klass = Ruckusing_Util_Naming::classFromFileName($file);
-                $this->_logger->debug('className ' . $klass);
-                $taskName = Ruckusing_Util_Naming::taskFromClassName($klass);
-                $this->_logger->debug('TaskName: ' . $taskName);
-                $taskObj = new $klass($this->getAdapter());
-                $this->_logger->debug('obj: ' . get_class($taskObj));
-                $this->registerTask($taskName, $taskObj);
-            }
-        }
-        $this->_logger->debug(__METHOD__ . ' End');
     }
     
     /**
@@ -278,5 +221,68 @@ class Ruckusing_Task_Manager
         $output = $task->help();
         $this->_logger->debug(__METHOD__ . ' End');
         return $output;
+    }
+    
+    /**
+     * get name 
+     * 
+     * @TODO: Voir si cette methode est utilisée
+     *
+     * @return void
+     */
+    public function getName()
+    {
+    }
+    
+    //---------------------
+    // PRIVATE METHODS
+    //---------------------
+    /**
+     * load all tasks 
+     * 
+     * @param string $taskDir Directory path of tasks
+     *
+     * @return void
+     * @throws Ruckusing_Exception_Argument
+     */
+    private function _loadAllTasks()
+    {
+        $this->_logger->debug(__METHOD__ . ' Start');
+        if (! isset($this->_tasksDir)) {
+            $msg = 'Please: you must specify the directory of tasks!';
+            $this->_logger->err($msg);
+            throw new Ruckusing_Exception_Argument($msg);
+        }
+        $namespaces = scandir($this->_tasksDir);
+        $this->_logger->debug('Task dir: ' . $this->_tasksDir);
+        $regex = '/^(\w+)\.php$/';
+        foreach ($namespaces as $namespace) {
+            $this->_logger->debug('Namespace: ' . $namespace);
+            //skip over invalid files
+            if ($namespace == '.' || $namespace == '..' || ! is_dir($this->_tasksDir . '/' . $namespace)) {
+                continue;
+            }
+            $this->_logger->debug('Namespace: ' . $namespace);
+
+            $files = scandir($this->_tasksDir . '/' . $namespace);
+            foreach ($files as $file) {
+                $ext = substr($file, -4);
+                $basename = substr($file, 0, -4);
+                //skip over invalid files
+                if ($file == '.' || $file == '..' || $ext != '.php') {
+                    continue;
+                }
+                $this->_logger->debug('include ' . $namespace . '/' . $file);
+                //include_once $this->_tasksDir . '/' . $namespace . '/' . $file;
+                $klass = Ruckusing_Util_Naming::classFromFileName($this->_tasksDir . '/' . $namespace . '/' . $file);
+                $this->_logger->debug('className ' . $klass);
+                $taskName = Ruckusing_Util_Naming::taskFromClassName($klass);
+                $this->_logger->debug('TaskName: ' . $taskName);
+                $taskObj = new $klass($this->getAdapter());
+                $this->_logger->debug('obj: ' . get_class($taskObj));
+                $this->registerTask($taskName, $taskObj);
+            }
+        }
+        $this->_logger->debug(__METHOD__ . ' End');
     }
 }

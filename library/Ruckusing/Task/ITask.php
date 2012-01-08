@@ -5,8 +5,7 @@
  * PHP Version 5
  *
  * @category   RuckusingMigrations
- * @package    Classes
- * @subpackage Task
+ * @package    Ruckusing_Task
  * @author     Cody Caughlan <toolbag@gmail.com>
  * @copyright  2010-2011 Cody Caughlan
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
@@ -17,14 +16,13 @@
  * Interface that all tasks must implement.
  *
  * @category   RuckusingMigrations
- * @package    Classes
- * @subpackage Task
+ * @package    Ruckusing_Task
  * @author     Cody Caughlan <toolbag@gmail.com>
  * @copyright  2010-2011 Cody Caughlan
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
-interface Ruckusing_ITask
+interface Ruckusing_Task_ITask
 {
     /**
      * execute the task

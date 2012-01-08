@@ -113,20 +113,20 @@ class Ruckusing_FrameworkRunner
      *
      * @return Ruckusing_FrameworkRunner
      */
-    function __construct($db, $argv, $env, $logger)
+    function __construct($config, $configDb, $argv, $env, $logger)
     {
         $this->setLogger($logger);
         $this->_logger->debug(__METHOD__ . ' Start');
         $this->_env = $env;
         try {
             //include all adapters
-            $this->_loadAllAdapters(RUCKUSING_BASE . '/library/Adapter');
+            $this->_loadAllAdapters(RUCKUSING_BASE . '/library/Ruckusing/Adapter');
             // initialize DB
-            $this->_dbConfig = $db;
+            $this->_dbConfig = $configDb;
             $this->initializeDb();
             //parse arguments
             $this->_parseArgs($argv);
-            $this->initTasks();
+            $this->initTasks($config);
         } catch (Exception $e) {
             $this->_logger->err('Exception: ' . $e->getMessage());
             throw $e;
@@ -181,15 +181,15 @@ class Ruckusing_FrameworkRunner
     
     /**
      * initialize tasks 
+     *
+     * @param array $config Config application
      * 
      * @return void
      */
-    public function initTasks()
+    public function initTasks($config)
     {
         $this->_logger->debug(__METHOD__ . ' Start');
-        $this->_taskMgr = new Ruckusing_Task_Manager($this->_adapter);
-        // TODO : get directory of tasks from config file
-        $this->_taskMgr->setDirectoryOfTasks(RUCKUSING_BASE . '/lib/tasks');
+        $this->_taskMgr = new Ruckusing_Task_Manager($this->_adapter, $config['task.dir']);
         $this->_logger->debug(__METHOD__ . ' End');
     }
     
@@ -203,14 +203,13 @@ class Ruckusing_FrameworkRunner
         $this->_logger->debug(__METHOD__ . ' Start');
         try {
             $this->_verifyDbConfig();
-            $configDb = $this->_dbConfig[$this->_env];
-            $this->_logger->debug('Config configDb ' . var_export($configDb, true));
-            $adapter = $this->_getAdapterClass($configDb['type']);
+            $this->_logger->debug('Config DB ' . var_export($this->_dbConfig, true));
+            $adapter = $this->_getAdapterClass($this->_dbConfig['type']);
             $this->_logger->debug('adapter ' . $adapter);
             //construct our adapter         
-            $this->_adapter = new $adapter($configDb, $this->_logger);
+            $this->_adapter = new $adapter($this->_dbConfig, $this->_logger);
         } catch (Ruckusing_Exception $rex) {
-            $this->_logger->warn('Exception: ' . $ex->getMessage());
+            $this->_logger->warn('Exception: ' . $rex->getMessage());
             //trigger_error(sprintf("\n%s\n", $ex->getMessage()));
             throw $ex;
         } catch (Exception $ex) {
@@ -329,36 +328,33 @@ class Ruckusing_FrameworkRunner
     {
         $this->_logger->debug(__METHOD__ . ' Start');
         $env = $this->_env;
-        if (! is_array($this->_dbConfig) 
-            || ! array_key_exists($env, $this->_dbConfig)
-        ) {
+        if (! is_array($this->_dbConfig)) {
             $msg = '(' . $env . ') DB is not configured!';
             $this->_logger->err($msg);
             throw new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
         }
-        $this->_activeDbConfig = $this->_dbConfig[$env];
         $exception = null;
-        if (! array_key_exists('type', $this->_activeDbConfig)) {
+        if (! array_key_exists('type', $this->_dbConfig)) {
             $msg = '"type" is not set for "' . $env . '" DB';
             $this->_logger->err($msg);
             $exception = new Ruckusing_Exception_MissingAdapterType('Error: ' . $msg);
         }
-        if (! array_key_exists('host', $this->_activeDbConfig)) {
+        if (! array_key_exists('host', $this->_dbConfig)) {
             $msg = '"host" is not set for "' . $env . '" DB';
             $this->_logger->err($msg);
             $exception = new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
         }
-        if (! array_key_exists('database', $this->_activeDbConfig)) {
+        if (! array_key_exists('database', $this->_dbConfig)) {
             $msg = '"database" is not set for "' . $env . '" DB';
             $this->_logger->err($msg);
             $exception = new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
         }
-        if (! array_key_exists('user', $this->_activeDbConfig)) {
+        if (! array_key_exists('user', $this->_dbConfig)) {
             $msg = '"user" is not set for "' . $env . '" DB';
             $this->_logger->err($msg);
             $exception = new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
         }
-        if (! array_key_exists('password', $this->_activeDbConfig)) {
+        if (! array_key_exists('password', $this->_dbConfig)) {
             $msg = '"password" is not set for "' . $env . '" DB';
             $this->_logger->err($msg);
             $exception = new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
