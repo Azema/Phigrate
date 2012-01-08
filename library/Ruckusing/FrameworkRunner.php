@@ -40,18 +40,18 @@ class Ruckusing_FrameworkRunner
     private $_db = null;
 
     /**
-     * the currently active config 
-     * 
-     * @var mixed
-     */
-    private $_activeDbConfig;
-
-    /**
-     * all available DB configs (e.g. test,development, production)
+     * Available config of application
      * 
      * @var array
      */
-    private $_dbConfig = array();
+    private $_config = array();
+
+    /**
+     * Available DB config (e.g. test,development, production)
+     * 
+     * @var array
+     */
+    private $_configDb = array();
 
     /**
      * task manager 
@@ -90,6 +90,20 @@ class Ruckusing_FrameworkRunner
     private $_taskOptions = '';
 
     /**
+     * Directory of tasks
+     * 
+     * @var string
+     */
+    private $_taskDir;
+
+    /**
+     * Directory migration
+     * 
+     * @var string
+     */
+    private $_migrationDir;
+
+    /**
      * Environment
      * default is development 
      * but can also be one 'test', 'production', etc...
@@ -116,19 +130,16 @@ class Ruckusing_FrameworkRunner
      *
      * @return Ruckusing_FrameworkRunner
      */
-    function __construct($config, $configDb, $argv, $env, $logger)
+    function __construct($argv)
     {
-        $this->setLogger($logger);
-        $this->_logger->debug(__METHOD__ . ' Start');
-        $this->_env = $env;
         try {
+            //parse arguments
+            $this->_parseArgs($argv);
+            $this->getLogger()->debug(__METHOD__ . ' Start');
             //include all adapters
             $this->_loadAllAdapters(RUCKUSING_BASE . '/library/Ruckusing/Adapter');
             // initialize DB
-            $this->_dbConfig = $configDb;
             $this->initializeDb();
-            //parse arguments
-            $this->_parseArgs($argv);
             $this->initTasks($config);
         } catch (Exception $e) {
             $this->_logger->err('Exception: ' . $e->getMessage());
@@ -138,18 +149,50 @@ class Ruckusing_FrameworkRunner
     }
 
     /**
-     * setLogger 
+     * getLogger 
      * 
-     * @param Ruckusing_Logger $logger The logger
-     *
-     * @return Ruckusing_FrameworkRunner
+     * @return Ruckusing_Logger
      */
-    public function setLogger(Ruckusing_Logger $logger)
+    public function getLogger()
     {
-        $this->_logger = $logger;
-        return $this;
+        if (! isset($this->_logger)) {
+            $this->_logger = $this->_initLogger();
+        }
+        return $this->_logger();
     }
-    
+
+    /**
+     * getConfig : Return the config application
+     * 
+     * @return array
+     */
+    public function getConfig()
+    {
+        if (! isset($this->_config)) {
+            $this->_config = $this->_getConfigFromFile(
+                $this->_getConfigFile(),
+                $this->_env
+            );
+        }
+        return $this->_config;
+    }
+
+    /**
+     * getConfigDb : Return the config DB
+     * 
+     * @return array
+     */
+    public function getConfigDb()
+    {
+        if (! isset($this->_configDb)) {
+            $this->_configDb = $this->_getConfigFromFile(
+                $this->_getConfigDbFile(),
+                $this->_env
+            );
+        }
+        return $this->_configDb;
+    }
+
     //-------------------------
     // PUBLIC METHODS
     //------------------------- 
@@ -192,10 +235,50 @@ class Ruckusing_FrameworkRunner
     public function initTasks($config)
     {
         $this->_logger->debug(__METHOD__ . ' Start');
-        $this->_taskMgr = new Ruckusing_Task_Manager($this->_adapter, $config['task.dir']);
+        $this->_taskMgr = new Ruckusing_Task_Manager(
+            $this->_adapter, $this->_taskDir
+        );
         $this->_logger->debug(__METHOD__ . ' End');
     }
-    
+
+    /**
+     * getTaskDir : Return the directory of tasks
+     * 
+     * @return string
+     */
+    public function getTaskDir()
+    {
+        if (! isset($this->_taskDir)) {
+            if (! array_key_exists('task.dir', $this->getConfig())) {
+                throw new Ruckusing_Exception(
+                    'Please, inform the variable "task.dir" '
+                    . 'in the configuration file'
+                );
+            }
+            $this->_taskDir = $this->_config['task.dir'];
+        }
+        return $this->_taskDir;
+    }
+
+    /**
+     * getMigrationDir : Return the directory of migrations
+     * 
+     * @return string
+     */
+    public function getMigrationDir()
+    {
+        if (! isset($this->_migrationDir)) {
+            if (! array_key_exists('migration.dir', $this->getConfig())) {
+                throw new Ruckusing_Exception(
+                    'Please, inform the variable "migration.dir" '
+                    . 'in the configuration file'
+                );
+            }
+            $this->_migrationDir = $this->_config['migration.dir'];
+        }
+        return $this->_migrationDir;
+    }
+
     /**
      * initialize db 
      * 
@@ -206,11 +289,12 @@ class Ruckusing_FrameworkRunner
         $this->_logger->debug(__METHOD__ . ' Start');
         try {
             $this->_verifyDbConfig();
-            $this->_logger->debug('Config DB ' . var_export($this->_dbConfig, true));
-            $adapter = $this->_getAdapterClass($this->_dbConfig['type']);
+            $configDb = $this->getConfigDb();
+            $this->_logger->debug('Config DB ' . var_export($configDb, true));
+            $adapter = $this->_getAdapterClass($configDb['type']);
             $this->_logger->debug('adapter ' . $adapter);
             //construct our adapter         
-            $this->_adapter = new $adapter($this->_dbConfig, $this->_logger);
+            $this->_adapter = new $adapter($configDb, $this->_logger);
         } catch (Ruckusing_Exception $rex) {
             $this->_logger->warn('Exception: ' . $rex->getMessage());
             //trigger_error(sprintf("\n%s\n", $ex->getMessage()));
@@ -240,34 +324,66 @@ class Ruckusing_FrameworkRunner
      */
     private function _parseArgs($argv)
     {
-        $this->_logger->debug(__METHOD__ . ' Start');
         $num_args = count($argv);
 
         if ($num_args >= 2) {
             $options = array();
-            for ($i = $num_args-1; $i >= 1; $i--) {
-                $arg = $argv[$i];
-                $this->_logger->debug(
-                    'arg: ' . $arg . ' - index: ' . $i
-                );
-                if (strpos($arg, ':') !== false) {
-                    $this->_curTaskName = $arg;
-                    continue;
-                } elseif ($arg == 'help') {
-                    $this->_helpTask = true;
-                    continue;
-                } elseif (strpos($arg, '=') !== false) {
-                    list($key, $value) = explode('=', $arg);
-                    $options[$key] = $value;
+            for ($i = 1; $i < $nbArgs; $i++) {
+                switch ($argv[$i]) {
+                    // help for command line
+                    case '-h':
+                    case '--help':
+                    case '-?':
+                        printHelp(true);
+                        break;
+                    // configuration file path
+                    case '-c':
+                    case '--configuration':
+                        $i++;
+                        $this->_configFile = $argv[$i];
+                        break;
+                    // configuration db file path
+                    case '-d':
+                    case '--database':
+                        $i++;
+                        $this->_configDbFile = $argv[$i];
+                        break;
+                    // task directory
+                    case '-t':
+                    case '--taskdir':
+                        $i++;
+                        $this->_taskdir = $argv[$i];
+                        break;
+                    // migration directory
+                    case '-m':
+                    case '--migrationdir':
+                        $i++;
+                        $this->_migrationDir = $argv[$i];
+                        break;
+                    // other
+                    default:
+                        $arg = $argv[$i];
+                        if (strpos($arg, ':') !== false) {
+                            $this->_curTaskName = $arg;
+                            continue;
+                        } elseif ($arg == 'help') {
+                            $this->_helpTask = true;
+                            continue;
+                        } elseif (strpos($arg, '=') !== false) {
+                            list($key, $value) = explode('=', $arg);
+                            if ($key == 'ENV') {
+                                $this->_env = $value;
+                            }
+                            $options[$key] = $value;
+                        }
+                        break;
                 }
             }
-            $options['ENV'] = $this->_env;
             $this->_taskOptions = $options;
         }
         if ($num_args < 2 || !isset($this->_curTaskName)) {
             throw new InvalidArgumentException('No task found!');
         }
-        $this->_logger->debug(__METHOD__ . ' End');
     }
 
     /**
@@ -283,36 +399,42 @@ class Ruckusing_FrameworkRunner
         $this->_adapter->createSchemaVersionTable();
         //insert all existing records into our new table
         $migrator_util = new Ruckusing_Util_Migrator($this->_adapter);
-        $files = $migrator_util->getMigrationFiles(RUCKUSING_MIGRATION_DIR, 'up');
+        $files = $migrator_util->getMigrationFiles(
+            $this->getMigrationDir(), 'up'
+        );
         foreach ($files as $file) {
             if ((int)$file['version'] >= PHP_INT_MAX) {
                 //its new style like '20081010170207' so its not a candidate
                 continue;
             }
-            //query old table, if it less than or equal to our max version, then its a candidate for insertion     
-            $query_sql = sprintf(
+            // query old table, if it less than or equal to our max version, 
+            // then its a candidate for insertion     
+            $querySql = sprintf(
                 'SELECT version FROM %s WHERE version >= %d', 
                 RUCKUSING_SCHEMA_TBL_NAME, 
                 $file['version']
             );
-            $existing_version_old_style = $this->_adapter->selectOne($query_sql);
-            if (count($existing_version_old_style) > 0) {
-                //make sure it doesnt exist in our new table, who knows how it got inserted?
-                $new_vers_sql = sprintf(
+            $existingVersionOldStyle = $this->_adapter->selectOne($querySql);
+            if (count($existingVersionOldStyle) > 0) {
+                // make sure it doesnt exist in our new table, 
+                // who knows how it got inserted?
+                $newVersSql = sprintf(
                     'SELECT version FROM %s WHERE version = %d', 
                     RUCKUSING_TS_SCHEMA_TBL_NAME, 
                     $file['version']
                 );
-                $existing_version_new_style = $this->_adapter->selectOne($new_vers_sql);
-                if (empty($existing_version_new_style)) {       
-                    // use printf & %d to force it to be stripped of any leading zeros, we *know* this represents an old version style
+                $existingVersionNewStyle = $this->_adapter
+                    ->selectOne($newVersSql);
+                if (empty($existingVersionNewStyle)) {       
+                    // use printf & %d to force it to be stripped of any 
+                    // leading zeros, we *know* this represents an old version style
                     // so we dont have to worry about PHP and integer overflow
-                    $insert_sql = sprintf(
+                    $insertSql = sprintf(
                         'INSERT INTO %s (version) VALUES (%d)', 
                         RUCKUSING_TS_SCHEMA_TBL_NAME,
                         $file['version']
                     );
-                    $this->_adapter->query($insert_sql);
+                    $this->_adapter->query($insertSql);
                 }
             }
         }
@@ -321,6 +443,73 @@ class Ruckusing_FrameworkRunner
     //-------------------------
     // PRIVATE METHODS
     //------------------------- 
+    
+    /**
+     * _getConfigFile : Return the filename of config application 
+     * 
+     * @return string
+     */
+    private function _getConfigFile()
+    {
+        if (!isset($this->_configFile)) {
+            $this->_configFile = RUCKUSING_BASE . '/config/application.ini';
+        }
+        return $this->_configFile;
+    }
+
+    /**
+     * _getConfigDbFile : Return the filename of config DB
+     * 
+     * @return string
+     */
+    private function _getConfigDbFile()
+    {
+        if (!isset($this->_configDbFile)) {
+            $this->_configDbFile = RUCKUSING_BASE . '/config/databases.ini';
+        }
+        return $this->_configDbFile;
+    }
+
+    /**
+     * getConfigFromFile : Return sectionName from filename 
+     * 
+     * @param string $filename    The config file name
+     * @param string $sectionName The section name
+     *
+     * @return array
+     */
+    private function _getConfigFromFile($filename, $sectionName)
+    {
+        if (! is_file($filename)) {
+            throw new Exception('Config file not found (' . $filename . ')');
+        }
+        $ini_array = parse_ini_file($filename, true);
+        if (! array_key_exists($sectionName, $ini_array)) {
+            $found = false;
+            $regExp = '/^'.$sectionName.'\s?:\s?(\w+)$/';
+            foreach ($ini_array as $name => $section) {
+                if (preg_match($regExp, $name, $matches)) {
+                    $sectionExtended = $this->_getConfigFromFile(
+                        $filename, 
+                        $matches[1]
+                    );
+                    $config = array_merge($sectionExtended, $section);
+                    $found = true;
+                    break;
+                }
+            }
+            if (! $found) {
+                throw new Exception(
+                    'Section "' . $sectionName 
+                    . '" not found in config file : ' . $filename
+                );
+            }
+        } else {
+            $config = $ini_array[$sectionName];
+        }
+        return $config;
+    }
+
     /**
      * verify db config 
      * 
@@ -331,33 +520,34 @@ class Ruckusing_FrameworkRunner
     {
         $this->_logger->debug(__METHOD__ . ' Start');
         $env = $this->_env;
-        if (! is_array($this->_dbConfig)) {
+        $configDb = $this->getConfigDb();
+        if (! is_array($configDb)) {
             $msg = '(' . $env . ') DB is not configured!';
             $this->_logger->err($msg);
             throw new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
         }
         $exception = null;
-        if (! array_key_exists('type', $this->_dbConfig)) {
+        if (! array_key_exists('type', $configDb)) {
             $msg = '"type" is not set for "' . $env . '" DB';
             $this->_logger->err($msg);
             $exception = new Ruckusing_Exception_MissingAdapterType('Error: ' . $msg);
         }
-        if (! array_key_exists('host', $this->_dbConfig)) {
+        if (! array_key_exists('host', $configDb)) {
             $msg = '"host" is not set for "' . $env . '" DB';
             $this->_logger->err($msg);
             $exception = new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
         }
-        if (! array_key_exists('database', $this->_dbConfig)) {
+        if (! array_key_exists('database', $configDb)) {
             $msg = '"database" is not set for "' . $env . '" DB';
             $this->_logger->err($msg);
             $exception = new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
         }
-        if (! array_key_exists('user', $this->_dbConfig)) {
+        if (! array_key_exists('user', $configDb)) {
             $msg = '"user" is not set for "' . $env . '" DB';
             $this->_logger->err($msg);
             $exception = new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
         }
-        if (! array_key_exists('password', $this->_dbConfig)) {
+        if (! array_key_exists('password', $configDb)) {
             $msg = '"password" is not set for "' . $env . '" DB';
             $this->_logger->err($msg);
             $exception = new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
@@ -366,6 +556,38 @@ class Ruckusing_FrameworkRunner
             throw $exception;
         }
         $this->_logger->debug(__METHOD__ . ' End');
+    }
+
+    /**
+     * Initialize and return an instance of logger
+     * 
+     * @return Ruckusing_Logger
+     */
+    private function _initLogger()
+    {
+        //initialize logger
+        $log_dir = RUCKUSING_BASE . '/logs';
+        if (array_key_exists('log.dir', $this->getConfig())) {
+            $log_dir = $this->_config['log.dir'];
+        }
+        if (is_dir($log_dir) && ! is_writable($log_dir)) {
+            throw new Exception(
+                "\n\nCannot write to log directory: "
+                . "{$log_dir}\n\nCheck permissions.\n\n"
+            );
+        }
+        $logger = Ruckusing_Logger::instance($log_dir . '/' . $env . '.log');
+
+        if (array_key_exists('log.priority', $this->getConfig())) {
+            $priority = $this->_config['log.priority'];
+        } elseif ($this->_env == 'development') {
+            $priority = Ruckusing_Logger::DEBUG;
+        } elseif ($this->_env == 'production') {
+            $priority = Ruckusing_Logger::INFO;
+        }
+        $logger->setPriority($priority);
+
+        return $logger;
     }
 
     /**
