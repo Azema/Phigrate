@@ -6,8 +6,9 @@
  *
  * @category  RuckusingMigrations
  * @package   Ruckusing
- * @author    Cody Caughlan <toolbag@gmail.com>
- * @copyright 2010-2011 Cody Caughlan
+ * @author    Cody Caughlan <codycaughlan % gmail . com>
+ * @author    Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright 2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
@@ -23,8 +24,9 @@ require_once 'Ruckusing/Task/Manager.php';
  *
  * @category  RuckusingMigrations
  * @package   Ruckusing
- * @author    Cody Caughlan <toolbag@gmail.com>
- * @copyright 2010-2011 Cody Caughlan
+ * @author    Cody Caughlan <codycaughlan % gmail . com>
+ * @author    Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright 2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
@@ -106,10 +108,11 @@ class Ruckusing_FrameworkRunner
     /**
      * __construct 
      * 
-     * @param array            $db     Config environment of DBs
-     * @param array            $argv   Arguments of the command line
-     * @param string           $env    Environment
-     * @param Ruckusing_Logger $logger Instance logger
+     * @param array            $config   Config of application
+     * @param array            $configDb Config of DB
+     * @param array            $argv     Arguments of the command line
+     * @param string           $env      Environment
+     * @param Ruckusing_Logger $logger   Instance logger
      *
      * @return Ruckusing_FrameworkRunner
      */

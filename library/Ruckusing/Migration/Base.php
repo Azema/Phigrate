@@ -5,9 +5,10 @@
  * PHP Version 5
  *
  * @category  RuckusingMigrations
- * @package   Classes
- * @author    Cody Caughlan <toolbag@gmail.com>
- * @copyright 2010-2011 Cody Caughlan
+ * @package   Ruckusing_Migration
+ * @author    Cody Caughlan <codycaughlan % gmail . com>
+ * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright 2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
@@ -21,9 +22,10 @@ require_once RUCKUSING_BASE . '/lib/classes/class.Ruckusing_IAdapter.php';
  * Migration base
  *
  * @category  RuckusingMigrations
- * @package   Classes
- * @author    Cody Caughlan <toolbag@gmail.com>
- * @copyright 2010-2011 Cody Caughlan
+ * @package   Ruckusing_Migration
+ * @author    Cody Caughlan <codycaughlan % gmail . com>
+ * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright 2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */

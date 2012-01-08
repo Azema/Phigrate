@@ -5,10 +5,10 @@
  * PHP Version 5
  *
  * @category   RuckusingMigrations
- * @package    Ruckusing
- * @subpackage Ruckusing_Adapter
- * @author     Cody Caughlan <toolbag@gmail.com>
- * @copyright  2010-2011 Cody Caughlan
+ * @package    Ruckusing_Adapter
+ * @author     Cody Caughlan <codycaughlan % gmail . com>
+ * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
@@ -17,10 +17,10 @@
  * Interface of adapters
  *
  * @category   RuckusingMigrations
- * @package    Ruckusing
- * @subpackage Ruckusing_Adapter
- * @author     Cody Caughlan <toolbag@gmail.com>
- * @copyright  2010-2011 Cody Caughlan
+ * @package    Ruckusing_Adapter
+ * @author     Cody Caughlan <codycaughlan % gmail . com>
+ * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */

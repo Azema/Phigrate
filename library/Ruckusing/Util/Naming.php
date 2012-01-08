@@ -5,9 +5,10 @@
  * PHP Version 5
  *
  * @category   RuckusingMigrations
- * @package    Rucksing_Util
- * @author     Cody Caughlan <toolbag@gmail.com>
- * @copyright  2010-2011 Cody Caughlan
+ * @package    Ruckusing_Util
+ * @author     Cody Caughlan <codycaughlan % gmail . com>
+ * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
@@ -26,9 +27,10 @@
  * Using this convention one can easily go back and forth between task names and PHP Class names.
  *
  * @category   RuckusingMigrations
- * @package    Rucksing_Util
- * @author     Cody Caughlan <toolbag@gmail.com>
- * @copyright  2010-2011 Cody Caughlan
+ * @package    Ruckusing_Util
+ * @author     Cody Caughlan <codycaughlan % gmail . com>
+ * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */

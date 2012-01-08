@@ -6,8 +6,9 @@
  *
  * @category   RuckusingMigrations
  * @package    Ruckusing_Adapter
- * @author     Cody Caughlan <toolbag@gmail.com>
- * @copyright  2010-2011 Cody Caughlan
+ * @author     Cody Caughlan <codycaughlan % gmail . com>
+ * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
@@ -17,8 +18,9 @@
  *
  * @category   RuckusingMigrations
  * @package    Ruckusing_Adapter
- * @author     Cody Caughlan <toolbag@gmail.com>
- * @copyright  2010-2011 Cody Caughlan
+ * @author     Cody Caughlan <codycaughlan % gmail . com>
+ * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
@@ -52,7 +54,9 @@ class Ruckusing_Adapter_TableDefinition
     /**
      * __construct 
      * 
-     * @param Ruckusing_Adapter_Base $adapter Adapter MySQL
+     * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
+     * @param string                 $name    The table name
+     * @param array                  $options The table options
      *
      * @return Ruckusing_Adapter_TableDefinition
      */
@@ -98,5 +102,26 @@ class Ruckusing_Adapter_TableDefinition
     public function toSql()
     {
 		return join(",", $this->_columns);
-	}
+    }
+
+    /**
+     * column
+     * 
+     * @param string $column_name The column name
+     * @param string $type        The type generic of the column
+     * @param array  $options     The options defintion of the column
+     *
+     * @return void
+     */
+    abstract public function column($column_name, $type, $options = array());
+
+    /**
+     * finish 
+     * 
+     * @param boolean $wants_sql Flag to get SQL generated
+     *
+     * @return mixed
+     * @throws Ruckusing_Exception_InvalidTableDefinition
+     */
+    abstract public function finish($wants_sql = false);
 }

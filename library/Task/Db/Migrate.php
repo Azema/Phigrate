@@ -4,24 +4,28 @@
  *
  * PHP Version 5
  *
- * @category  RuckusingMigrations
- * @package   Tasks
- * @author    Cody Caughlan <toolbag@gmail.com>
- * @copyright 2010-2011 Cody Caughlan
- * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link      https://github.com/ruckus/ruckusing-migrations
+ * @category   RuckusingMigrations
+ * @package    Task
+ * @subpackage Db
+ * @author     Cody Caughlan <codycaughlan % gmail . com>
+ * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
+ * @link       https://github.com/ruckus/ruckusing-migrations
  */
 
 /**
  * This is the primary work-horse method, it runs all migrations available,
  * up to the current version.
  *
- * @category  RuckusingMigrations
- * @package   Tasks
- * @author    Cody Caughlan <toolbag@gmail.com>
- * @copyright 2010-2011 Cody Caughlan
- * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link      https://github.com/ruckus/ruckusing-migrations
+ * @category   RuckusingMigrations
+ * @package    Task
+ * @subpackage Db
+ * @author     Cody Caughlan <codycaughlan % gmail . com>
+ * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
+ * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
+ * @link       https://github.com/ruckus/ruckusing-migrations
  */
 class Task_Db_Migrate implements Ruckusing_Task_ITask
 {

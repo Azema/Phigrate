@@ -5,10 +5,10 @@
  * PHP Version 5
  *
  * @category   RuckusingMigrations
- * @package    Classes
- * @subpackage Exception
- * @author     Cody Caughlan <toolbag@gmail.com>
- * @copyright  2010-2011 Cody Caughlan
+ * @package    Ruckusing_Exception
+ * @author     Cody Caughlan <codycaughlan % gmail . com>
+ * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
@@ -22,10 +22,10 @@ require_once 'Ruckusing/Exception.php';
  * Class exception of missing adapter type
  *
  * @category   RuckusingMigrations
- * @package    Classes
- * @subpackage Ruckusing_Exception
- * @author     Cody Caughlan <toolbag@gmail.com>
- * @copyright  2010-2011 Cody Caughlan
+ * @package    Ruckusing_Exception
+ * @author     Cody Caughlan <codycaughlan % gmail . com>
+ * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */

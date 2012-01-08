@@ -11,7 +11,7 @@
         <target>documentation/api</target>
     </transformer>
     <files>
-        <directory>lib</directory>
+        <directory>library</directory>
     </files>
     <logging>
         <level>warn</level>
