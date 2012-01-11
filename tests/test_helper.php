@@ -20,7 +20,20 @@ if(!defined('RUCKUSING_MIGRATION_DIR')) {
 	define('RUCKUSING_MIGRATION_DIR', RUCKUSING_DB_DIR . '/migrate');
 }
 
-require RUCKUSING_BASE . '/lib/classes/util/class.Ruckusing_Logger.php';
+spl_autoload_register('loader', true, true);
 
-
-?>
+set_include_path(
+    implode(PATH_SEPARATOR, array(
+        RUCKUSING_BASE . '/library',
+        get_include_path(),
+    ))
+);
+function loader($classname)
+{
+    //echo 'load: ' . $classname . PHP_EOL;
+    $filename = str_replace('_', '/', $classname) . '.php';
+    if (is_file(RUCKUSING_BASE . '/library/' . $filename)) {
+        $filename = RUCKUSING_BASE . '/library/' . $filename;
+        include_once $filename;
+    }
+}

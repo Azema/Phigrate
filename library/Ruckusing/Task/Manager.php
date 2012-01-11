@@ -14,9 +14,9 @@
  */
 
 /**
- * @see Ruckusing_Task_Naming 
+ * @see Ruckusing_Util_Naming 
  */
-require_once 'Ruckusing/Task/Naming.php';
+require_once 'Ruckusing/Util/Naming.php';
 
 /**
  * Manager of tasks
@@ -53,6 +53,13 @@ class Ruckusing_Task_Manager
     private $_tasksDir;
 
     /**
+     * _migrationDir 
+     * 
+     * @var string
+     */
+    private $_migrationDir;
+
+    /**
      * _logger 
      * 
      * @var Ruckusing_Logger
@@ -67,11 +74,12 @@ class Ruckusing_Task_Manager
      *
      * @return Ruckusing_Task_Manager
      */
-    function __construct($adapter, $tasksDir)
+    function __construct($adapter, $tasksDir, $migrationsDir)
     {
         $this->_logger = Ruckusing_Logger::instance();
         $this->setAdapter($adapter);
         $this->setDirectoryOfTasks($tasksDir);
+        $this->setDirectoryOfMigrations($migrationsDir);
         $this->_loadAllTasks();
     }
 
@@ -95,6 +103,29 @@ class Ruckusing_Task_Manager
         $this->_tasksDir = $tasksDir;
         return $this;
         $this->_logger->debug(__METHOD__ . ' End');
+    }
+    
+    /**
+     * set directory of migrations 
+     * 
+     * @param string $migrationsDir The path of directory of migrations
+     *
+     * @return Ruckusing_Task_Manager
+     * @throws Ruckusing_Exception_Argument
+     */
+    public function setDirectoryOfMigrations($migrationsDir)
+    {
+        $this->_logger->debug(__METHOD__ . ' Start');
+        if (! is_dir($migrationsDir)) {
+            $msg = 'Migration dir: "' . $migrationsDir . '" does not exist!';
+            $this->_logger->err($msg);
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument($msg);
+        }
+        $this->_migrationDir = $migrationsDir;
+        $this->_logger->debug('migrationDir: ' . $this->_migrationDir);
+        $this->_logger->debug(__METHOD__ . ' End');
+        return $this;
     }
     
     /**
@@ -187,6 +218,8 @@ class Ruckusing_Task_Manager
             trigger_error($msg);
             return false;
         }
+        $this->_logger->debug('migrationDir: ' . $this->_migrationDir);
+        $taskObj->setDirectoryOfMigrations($this->_migrationDir);
         $this->_tasks[$taskName] = $taskObj;
         $this->_logger->debug(__METHOD__ . ' End');
         return true;

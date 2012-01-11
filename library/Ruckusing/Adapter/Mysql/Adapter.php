@@ -113,9 +113,8 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     public function __construct($dsn, $logger)
     {
-		parent::__construct($dsn);
+		parent::__construct($dsn, $logger);
 		$this->_connect($dsn);
-		$this->setLogger($logger);
 	}
 	
     /**
@@ -126,6 +125,49 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     public function supportsMigrations()
     {
 	    return true;
+    }
+	
+    /**
+     * check DB infos 
+     * 
+     * @param array $dsn DB Infos
+     *
+     * @return boolean
+     * @throws Ruckusing_Exception_Argument
+     */
+    public function checkDsn($dsn)
+    {
+        if (! is_array($dsn)) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument(
+                'The argument DSN must be a array!'
+            );
+        }
+        if (! array_key_exists('host', $dsn)) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument(
+                'The argument DSN must be contains index "host"'
+            );
+        }
+        if (! array_key_exists('database', $dsn)) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument(
+                'The argument DSN must be contains index "database"'
+            );
+        }
+        if (! array_key_exists('user', $dsn)) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument(
+                'The argument DSN must be contains index "user"'
+            );
+        }
+        if (! array_key_exists('password', $dsn)) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument(
+                'The argument DSN must be contains index "password"'
+            );
+        }
+        return true;
     }
 	
     /**
@@ -260,7 +302,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     public function columnDefinition($columnName, $type, $options = null)
     {
-        $col = new Ruckusing_Adapter_ColumnDefinition(
+        $col = new Ruckusing_Adapter_Mysql_ColumnDefinition(
             $this, 
             $columnName, 
             $type, 
@@ -403,7 +445,10 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     public function query($query)
     {
 		$this->getLogger()->log($query);
-		$query_type = $this->_determineQueryType($query);
+        $queryType = $this->_determineQueryType($query);
+        if ($queryType == self::SQL_UNKNOWN_QUERY_TYPE) {
+            return false;
+        }
 		$data = array();
         $res = mysql_query($query, $this->_conn);
         // Check error
@@ -416,7 +461,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
                 )
             );
         }
-		if ($query_type == self::SQL_SELECT || $query_type == self::SQL_SHOW) {		  
+		if ($queryType == self::SQL_SELECT || $queryType == self::SQL_SHOW) {
             while ($row = mysql_fetch_assoc($res)) {
                 $data[] = $row; 
             }
@@ -492,8 +537,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     {
 		$ddl = sprintf('DROP TABLE IF EXISTS %s', $this->identifier($tbl));
         $result = $this->query($ddl);
-        // TODO : Check result
-		return true;
+		return $result;
 	}
 	
     /**
@@ -510,7 +554,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
 	}
 	
     /**
-     * quote string 
+     * escape string
      * 
      * @param string $str String to escape
      *
@@ -530,21 +574,8 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     public function identifier($str)
     {
-        return('`' . $str . '`');
+        return '`' . $str . '`';
     }
-	
-    /**
-     * quote a value
-     * 
-     * @param string $value  String to quote
-     * @param string $column Column name
-     *
-     * @return string
-     */
-    public function quote($value, $column)
-    {
-        return $this->quoteString($value);
-	}
 	
     /**
      * rename table 
@@ -1134,25 +1165,22 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     /**
      * connect 
      * 
-     * @param array $dsn DSN config to connect at DB
-     *
      * @return void
      */
-    private function _connect($dsn)
+    private function _connect()
     {
-		$this->_dbConnect($dsn);
+		$this->_dbConnect($this->getDsn());
 	}
 	
     /**
      * db connect 
      * 
-     * @param array $dsn DSN config to connect at DB
+     * @param array $dbInfo DSN config to connect at DB
      *
      * @return boolean
      */
-    private function _dbConnect($dsn)
+    private function _dbConnect($dbInfo)
     {
-        $dbInfo = $this->getDsn();
         if ($dbInfo) {
             //we might have a port
             $host = $dbInfo['host'];
@@ -1216,6 +1244,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
                 $table = $row[0];
                 $this->_tables[$table] = true;
             }
+            $this->_tablesLoaded = true;
 		}
     }
 

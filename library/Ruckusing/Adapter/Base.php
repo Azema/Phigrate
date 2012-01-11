@@ -24,20 +24,14 @@
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
-class Ruckusing_Adapter_Base
+abstract class Ruckusing_Adapter_Base
 {
     /**
      * dsn 
      * 
-     * @var string
+     * @var array
      */
-	protected $_dsn;
-    /**
-     * db 
-     * 
-     * @var mixed
-     */
-    protected $_db;
+    protected $_dsn;
 
     /**
      * connection to DB
@@ -56,13 +50,15 @@ class Ruckusing_Adapter_Base
     /**
      * __construct 
      * 
-     * @param array $dsn Config DB for connect it
+     * @param array            $dsn    Config DB for connect it
+     * @param Ruckusing_Logger $logger The logger
      *
      * @return Ruckusing_Adapter_Base
      */
-    function __construct($dsn)
+    function __construct($dsn, $logger)
     {
-		$this->setDsn($dsn);
+        $this->setDsn($dsn);
+        $this->setLogger($logger);
 	}
 	
     /**
@@ -70,11 +66,19 @@ class Ruckusing_Adapter_Base
      * 
      * @param array $dsn Config DB for connect it
      *
-     * @return void
+     * @return Ruckusing_Adapter_Base
      */
     public function setDsn($dsn) 
     {
-		$this->_dsn = $dsn;
+        if (! is_array($dsn)) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument(
+                'The argument DSN must be a array!'
+            );
+        }
+        $this->checkDsn($dsn);
+        $this->_dsn = $dsn;
+        return $this;
     }
 
     /**
@@ -88,28 +92,6 @@ class Ruckusing_Adapter_Base
 	}	
 
     /**
-     * set db
-     *
-     * @param mixed $db The connection to DB
-     *
-     * @return void 
-     */
-    public function setDb($db) 
-    {
-		$this->_db = $db;
-    }
-
-    /**
-     * get db 
-     * 
-     * @return mixed
-     */
-    public function getDb()
-    {
-		return $this->_db;
-	}	
-	
-    /**
      * set logger 
      * 
      * @param Ruckusing_Logger $logger The logger
@@ -118,7 +100,14 @@ class Ruckusing_Adapter_Base
      */
     public function setLogger($logger)
     {
-		$this->_logger = $logger;
+        if (! $logger instanceof Ruckusing_Logger) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument(
+                'Logger parameter must be instance of Ruckusing_Logger'
+            );
+        }
+        $this->_logger = $logger;
+        return $this;
 	}
 
     /**
@@ -141,6 +130,6 @@ class Ruckusing_Adapter_Base
      */
     public function hasTable($tbl)
     {
-		return $this->tableExists($tbl);
+		return $this->tableExists($tbl, true);
 	}
 }

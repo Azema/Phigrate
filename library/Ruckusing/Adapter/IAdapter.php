@@ -27,16 +27,6 @@
 interface Ruckusing_Adapter_IAdapter
 {
     /**
-     * quote 
-     * 
-     * @param string $value  The string to escape
-     * @param string $column The column name
-     *
-     * @return string
-     */
-    public function quote($value, $column);
-
-    /**
      * supports migrations ?
      * 
      * @return boolean
@@ -73,7 +63,17 @@ interface Ruckusing_Adapter_IAdapter
      *
      * @return string
      */
-	public function quoteString($str);
+    public function quoteString($str);
+
+    /**
+     * check DB infos 
+     * 
+     * @param array $dsn DB Infos
+     *
+     * @return void
+     * @throws Ruckusing_Exception_Argument
+     */
+    public function checkDsn($dsn);
 	
 	//database level operations
     /**

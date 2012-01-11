@@ -35,7 +35,14 @@ class Task_Db_Schema implements Ruckusing_Task_ITask
      * 
      * @var Ruckusing_BaseAdapter
      */
-	private $_adapter = null;
+    private $_adapter = null;
+
+    /**
+     * _migrationDir 
+     * 
+     * @var string
+     */
+    private $_migrationDir;
 	
     /**
      * __construct 
@@ -44,10 +51,23 @@ class Task_Db_Schema implements Ruckusing_Task_ITask
      *
      * @return Ruckusing_DB_Schema
      */
-    function __construct($adapter)
+    public function __construct($adapter)
     {
 		$this->_adapter = $adapter;
-	}
+    }
+
+    /**
+     * setDirectoryMigration : Define directory of migrations
+     * 
+     * @param string $migrationDir Directory of migrations
+     *
+     * @return Task_Db_Schema
+     */
+    public function setDirectoryOfMigrations($migrationDir)
+    {
+        $this->_migrationDir = $migrationDir;
+        return $this;
+    }
 	
     /**
      * Primary task entry point
@@ -63,7 +83,7 @@ class Task_Db_Schema implements Ruckusing_Task_ITask
             echo "[db:schema]: \n";
             $schema = $this->_adapter->schema();
             //write to disk
-            $schema_file = RUCKUSING_DB_DIR . '/schema.txt';
+            $schema_file = $this->_migrationDir . '/schema.txt';
             file_put_contents($schema_file, $schema, LOCK_EX);
             echo "\tSchema written to: $schema_file\n\n";
             echo "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";							

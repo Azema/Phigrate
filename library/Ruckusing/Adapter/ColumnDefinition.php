@@ -24,7 +24,7 @@
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
-class Ruckusing_Adapter_ColumnDefinition
+abstract class Ruckusing_Adapter_ColumnDefinition
 {
     /**
      * name 

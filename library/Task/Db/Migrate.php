@@ -75,6 +75,13 @@ class Task_Db_Migrate implements Ruckusing_Task_ITask
      * @var Ruckusing_Logger
      */
     private $_logger;
+
+    /**
+     * _migrationDir 
+     * 
+     * @var string
+     */
+    private $_migrationDir;
 	
     /**
      * __construct 
@@ -211,6 +218,19 @@ execution of migrations is all handled by just a regular ol' task.
 USAGE;
         $this->_logger->debug(__METHOD__ . ' End');
         return $output;
+    }
+	
+    /**
+     * setDirectoryOfMigrations : Define directory of migrations
+     * 
+     * @param string $migrationDir Directory of migrations
+     *
+     * @return Migration_Db_Schema
+     */
+    public function setDirectoryOfMigrations($migrationDir)
+    {
+        $this->_migrationDir = $migrationDir;
+        return $this;
     }
 	
     /**

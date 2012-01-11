@@ -14,9 +14,9 @@
  */
 
 /**
- * @see Ruckusing_IAdapter 
+ * @see Ruckusing_Adapter_IAdapter 
  */
-require_once RUCKUSING_BASE . '/lib/classes/class.Ruckusing_IAdapter.php';
+require_once 'Ruckusing/Adapter/IAdapter.php';
 
 /**
  * Migration base

@@ -36,7 +36,14 @@ class Task_Db_Setup implements Ruckusing_Task_ITask
      * 
      * @var Ruckusing_BaseAdapter
      */
-	private $_adapter = null;
+    private $_adapter = null;
+
+    /**
+     * _migrationDir 
+     * 
+     * @var string
+     */
+    private $_migrationDir;
 	
     /**
      * __construct 
@@ -49,6 +56,19 @@ class Task_Db_Setup implements Ruckusing_Task_ITask
     {
 		$this->_adapter = $adapter;
 	}
+	
+    /**
+     * setDirectoryOfMigrations : Define directory of migrations
+     * 
+     * @param string $migrationDir Directory of migrations
+     *
+     * @return Migration_Db_Schema
+     */
+    public function setDirectoryOfMigrations($migrationDir)
+    {
+        $this->_migrationDir = $migrationDir;
+        return $this;
+    }
 	
     /**
      * Primary task entry point

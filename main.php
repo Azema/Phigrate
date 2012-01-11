@@ -16,6 +16,17 @@
  *
  * Usage: php main.php [ENV=environment] <task> [task parameters]
  * 
+ * Options:
+ *     -c, --configuration  Path to the configuration file of application.
+ * 
+ *     -d, --database       Path to the configuration file of databases.
+ * 
+ *     -t, --taskdir        Path of the directory of the tasks.
+ * 
+ *     -m, --migrationdir   Path of the directory of the migrations.
+ * 
+ * ###########
+ * 
  * ENV: The ENV command line parameter can be used to specify a different 
  * database to run against, as specific in the configuration file (config/database.inc.php).
  * By default, ENV is "development"
@@ -116,9 +127,9 @@ Ruckusing Migrations v{$version} at {$dateVersion}
 Usage: php main.php [options] [help] [ENV=environment] <task> [task parameters]
 
 Options:
-    -c, --configuration  Path to the configuration file of application.
+    -c, --configuration  Path to the configuration file (INI) of application.
 
-    -d, --database       Path to the configuration file of databases.
+    -d, --database       Path to the configuration file (INI) of databases.
 
     -t, --taskdir        Path of the directory of the tasks.
 
