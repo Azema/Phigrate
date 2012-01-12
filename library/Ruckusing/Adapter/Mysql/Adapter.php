@@ -936,9 +936,15 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      * @param string $tableName The table name
      *
      * @return array
+     * @throws Ruckusing_Exception_Argument
      */
     public function indexes($tableName)
     {
+		if (empty($tableName)) {
+            throw new Ruckusing_Exception_Argument(
+                'Missing table name parameter'
+            );
+		}
 		$sql = sprintf('SHOW KEYS FROM %s', $this->identifier($tableName));
 		$result = $this->selectAll($sql);
 		$indexes = array();
@@ -1155,7 +1161,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     public function __toString()
     {
-		return 'Ruckusing_Adapter_Mysql_Adapter, version ' . $this->_version;
+		return 'Ruckusing_Adapter_Mysql_Adapter, version: ' . $this->_version;
 	}
 
 	

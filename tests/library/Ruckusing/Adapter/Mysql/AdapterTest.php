@@ -239,8 +239,18 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers Ruckusing_Adapter_Mysql_Adapter::startTransaction
+     * @covers Ruckusing_Adapter_Mysql_Adapter::_beginTransaction
      */
     public function testStartTransaction()
+    {
+        $this->object->startTransaction();
+    }
+
+    /**
+     * @covers Ruckusing_Adapter_Mysql_Adapter::startTransaction
+     * @covers Ruckusing_Adapter_Mysql_Adapter::_beginTransaction
+     */
+    public function testStartTransactionException()
     {
         $this->setExpectedException(
             'PHPUnit_Framework_Error', 
@@ -252,11 +262,20 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers Ruckusing_Adapter_Mysql_Adapter::commitTransaction
+     * @covers Ruckusing_Adapter_Mysql_Adapter::_commit
      */
     public function testCommitTransaction()
     {
         $this->object->startTransaction();
         $this->object->commitTransaction();
+    }
+
+    /**
+     * @covers Ruckusing_Adapter_Mysql_Adapter::commitTransaction
+     * @covers Ruckusing_Adapter_Mysql_Adapter::_commit
+     */
+    public function testCommitTransactionException()
+    {
         $this->setExpectedException(
             'PHPUnit_Framework_Error', 
             'Transaction not started'
@@ -266,11 +285,20 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers Ruckusing_Adapter_Mysql_Adapter::rollbackTransaction
+     * @covers Ruckusing_Adapter_Mysql_Adapter::_rollback
      */
     public function testRollbackTransaction()
     {
         $this->object->startTransaction();
         $this->object->rollbackTransaction();
+    }
+
+    /**
+     * @covers Ruckusing_Adapter_Mysql_Adapter::rollbackTransaction
+     * @covers Ruckusing_Adapter_Mysql_Adapter::_rollback
+     */
+    public function testRollbackTransactionException()
+    {
         $this->setExpectedException(
             'PHPUnit_Framework_Error', 
             'Transaction not started'
@@ -893,8 +921,66 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers Ruckusing_Adapter_Mysql_Adapter::indexes
+     */
+    public function testIndexes()
+    {
+        try {
+            $this->object->indexes('');
+            $this->fail('indexes does not accept empty string for table name!');
+        } catch (Ruckusing_Exception_Argument $ex) {
+            $msg = 'Missing table name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        $sql = "CREATE TABLE `users` (id int(11) NOT NULL, name varchar(20), age int(3), "
+            . "title varchar(20), extid int(5) NOT NULL, PRIMARY KEY (id));";
+        $this->object->executeDdl($sql);
+        $this->object->addIndex('users', 'name');
+        $this->object->addIndex('users', 'extid', array('unique' => true));
+        $expected = array(
+            array(
+                'name' => 'idx_users_extid',
+                'unique' => true
+            ),
+            array(
+                'name' => 'idx_users_name',
+                'unique' => false
+            ),
+        );
+        $this->assertSame($expected, $this->object->indexes('users'));
+    }
+
+    /**
+     * @covers Ruckusing_Adapter_Mysql_Adapter::hasIndex
+     */
+    public function testHasIndex()
+    {
+        try {
+            $this->object->hasIndex('', '');
+            $this->fail('hasIndex does not accept empty string for table name!');
+        } catch (Ruckusing_Exception_Argument $ex) {
+            $msg = 'Missing table name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->hasIndex('users', '');
+            $this->fail('hasIndex does not accept empty string for column name!');
+        } catch (Ruckusing_Exception_Argument $ex) {
+            $msg = 'Missing column name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        $sql = "CREATE TABLE `users` (name varchar(20), age int(3), "
+            . "title varchar(20));";
+        $this->object->executeDdl($sql);
+        $this->object->addIndex('users', 'name');
+        
+        $this->assertTrue($this->object->hasIndex('users', 'name'));
+        $this->assertFalse($this->object->hasIndex('users', 'age'));
+        $this->assertFalse($this->object->hasIndex('users', 'title'));
+    }
+
+    /**
      * @covers Ruckusing_Adapter_Mysql_Adapter::addIndex
-     * @todo   Implement testAddIndex().
      */
     public function testAddIndex()
     {
@@ -950,40 +1036,64 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         }
     }
 
+    public function testMultiColumnIndex()
+    {
+        //create it
+        $this->object->executeDdl('CREATE TABLE `users` (name varchar(20), age int(3));');
+        $this->object->addIndex('users', array('name', 'age'));
+        
+        $this->assertTrue($this->object->hasIndex('users', array('name', 'age')));
+    }
+
     /**
      * @covers Ruckusing_Adapter_Mysql_Adapter::removeIndex
-     * @todo   Implement testRemoveIndex().
      */
     public function testRemoveIndex()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        try {
+            $this->object->removeIndex('', '');
+            $this->fail('removeIndex does not accept empty string for table name!');
+        } catch (Ruckusing_Exception_Argument $ex) {
+            $msg = 'Missing table name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->removeIndex('users', '');
+            $this->fail('removeIndex does not accept empty string for column name!');
+        } catch (Ruckusing_Exception_Argument $ex) {
+            $msg = 'Missing column name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        //create it
+        $this->object->executeDdl('CREATE TABLE `users` (name varchar(20), age int(3));');
+        $this->object->addIndex('users', 'name');
+        
+        $this->assertTrue($this->object->hasIndex('users', 'name'));
+        
+        //drop it
+        $this->object->removeIndex('users', 'name');
+        $this->assertFalse($this->object->hasIndex('users', 'name'));
     }
 
-    /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::hasIndex
-     * @todo   Implement testHasIndex().
-     */
-    public function testHasIndex()
+    public function testRemoveIndexWithCustomIndexName()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
-    }
-
-    /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::indexes
-     * @todo   Implement testIndexes().
-     */
-    public function testIndexes()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        //create it
+        $this->object->executeDdl('CREATE TABLE `users` ( name varchar(20), age int(3));');	
+        $this->object->addIndex('users', 'name', array('name' => 'my_special_index'));
+        
+        $this->assertTrue($this->object->hasIndex(
+            'users',
+            'name',
+            array('name' => 'my_special_index')
+        ));
+        
+        //drop it
+        $this->object->removeIndex('users', 'name', array('name' => 'my_special_index'));
+        $this->assertFalse($this->object->hasIndex(
+            'users',
+            'name',
+            array('name' => 'my_special_index')
+        ));
     }
 
     /**
@@ -1011,38 +1121,57 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers Ruckusing_Adapter_Mysql_Adapter::__toString
+     */
+    public function testToString()
+    {
+        $this->assertFalse($this->object->hasTable(RUCKUSING_TS_SCHEMA_TBL_NAME));
+        $this->object->createSchemaVersionTable();
+        $this->assertTrue($this->object->hasTable(RUCKUSING_TS_SCHEMA_TBL_NAME));
+        $expected = 'Ruckusing_Adapter_Mysql_Adapter, version: 1.0';
+        $return = $this->object->setCurrentVersion('firstVersion');
+        $this->assertTrue($return);
+        $this->assertEquals($expected, (string)$this->object);
+        $this->assertEquals($expected, $this->object->__toString());
+    }
+
+    /**
      * @covers Ruckusing_Adapter_Mysql_Adapter::setCurrentVersion
-     * @todo   Implement testSetCurrentVersion().
      */
     public function testSetCurrentVersion()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        $this->assertFalse($this->object->hasTable(RUCKUSING_TS_SCHEMA_TBL_NAME));
+        $this->object->createSchemaVersionTable();
+        $this->assertTrue($this->object->hasTable(RUCKUSING_TS_SCHEMA_TBL_NAME));
+        $return = $this->object->setCurrentVersion('firstVersion');
+        $this->assertTrue($return);
+        $expected = array('version' => 'firstVersion');
+        $actual = $this->object->selectOne(
+            'SELECT version FROM ' . RUCKUSING_TS_SCHEMA_TBL_NAME . ';'
         );
+        $this->assertEquals($expected, $actual);
     }
 
     /**
      * @covers Ruckusing_Adapter_Mysql_Adapter::removeVersion
-     * @todo   Implement testRemoveVersion().
      */
     public function testRemoveVersion()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        $this->assertFalse($this->object->hasTable(RUCKUSING_TS_SCHEMA_TBL_NAME));
+        $this->object->createSchemaVersionTable();
+        $this->assertTrue($this->object->hasTable(RUCKUSING_TS_SCHEMA_TBL_NAME));
+        $return = $this->object->setCurrentVersion('firstVersion');
+        $this->assertTrue($return);
+        $expected = array('version' => 'firstVersion');
+        $actual = $this->object->selectOne(
+            'SELECT version FROM ' . RUCKUSING_TS_SCHEMA_TBL_NAME . ';'
         );
-    }
-
-    /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::__toString
-     * @todo   Implement test__toString().
-     */
-    public function test__toString()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        $this->assertEquals($expected, $actual);
+        $return = $this->object->removeVersion('firstVersion');
+        $this->assertTrue($return);
+        $actual = $this->object->selectOne(
+            'SELECT version FROM ' . RUCKUSING_TS_SCHEMA_TBL_NAME . ';'
         );
+        $this->assertNull($actual);
     }
 }
