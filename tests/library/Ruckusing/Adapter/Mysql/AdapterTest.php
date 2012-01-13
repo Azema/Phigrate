@@ -58,8 +58,70 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             $this->object->dropTable('contacts');
         }
 
+        if ($this->object->hasTable('v_users')) {
+            $this->object->executeDdl("DROP VIEW `v_users`;");
+        }
+
         $this->object = null;
         parent::tearDown();
+    }
+
+    public function testConnect()
+    {
+        $dsn = array(
+            'type' => 'mysql',
+            'host' => 'localhost',
+            'database' => 'ruckutest',
+            'user' => 'toto',
+            'password' => 'pass',
+        );
+        try {
+            new Ruckusing_Adapter_Mysql_Adapter($dsn, $this->_logger);
+        } catch (Ruckusing_Exception_AdapterConnexion $e) {
+            $msg = 'Could not connect to the DB, check host / user / password';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $dsn = array(
+            'type' => 'mysql',
+            'host' => 'localhost',
+            'database' => 'ruckutest',
+            'user' => 'rucku',
+            'password' => 'rucku',
+        );
+        try {
+            new Ruckusing_Adapter_Mysql_Adapter($dsn, $this->_logger);
+        } catch (Ruckusing_Exception_AdapterConnexion $e) {
+            $msg = 'Could not select the DB, check permissions on host';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+    }
+
+    public function testDetermineQueryType()
+    {
+        $query = '';
+        $this->assertFalse($this->object->query($query));
+        $query = 'UNKNOWN `name`';
+        $this->assertFalse($this->object->query($query));
+
+        $this->object->executeDdl('CREATE TABLE `users` (name varchar(20));');
+        $query = 'SELECT * FROM `users`;';
+        $actual = $this->object->query($query);
+        $this->assertInternalType('array', $actual);
+        $this->assertEmpty($actual);
+        $query = 'INSERT INTO `users` VALUES (\'test\');';
+        $actual = $this->object->query($query);
+        $this->assertTrue($actual);
+        $query = 'ALTER TABLE `users` CHANGE `name` `name` VARCHAR(50);';
+        $actual = $this->object->query($query);
+        $this->assertTrue($actual);
+        $query = 'DROP TABLE IF EXISTS `new_users`;';
+        $this->object->query($query);
+        $query = 'RENAME TABLE `users` TO `new_users`;';
+        $actual = $this->object->query($query);
+        $this->assertTrue($actual);
+        $query = 'SET NAMES \'utf8\';';
+        $actual = $this->object->query($query);
+        $this->assertTrue($actual);
     }
 
     public function testSetDsn()
@@ -466,6 +528,8 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
      */
     public function testSchema()
     {
+        $this->object->executeDdl("CREATE TABLE `users` ( name varchar(20) );");
+        $this->object->executeDdl("CREATE VIEW `v_users` AS SELECT `name` FROM `users`;");
         $schema = $this->object->schema();
         $this->assertNotEmpty($schema);
     }
@@ -1098,26 +1162,93 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers Ruckusing_Adapter_Mysql_Adapter::typeToSql
-     * @todo   Implement testTypeToSql().
      */
     public function testTypeToSql()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        try {
+            $this->object->typeToSql('unknown', '');
+        } catch (Ruckusing_Exception_Argument $e) {
+            $msg = "Error: I dont know what column type of 'unknown' maps to for MySQL.
+You provided: unknown
+Valid types are: 
+\tstring\n\ttext\n\tmediumtext\n\tinteger\n\tsmallinteger\n\tbiginteger\n\tfloat
+\tdecimal\n\tdatetime\n\ttimestamp\n\ttime\n\tdate\n\tbinary\n\tboolean\n";
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        try {
+            $this->object->typeToSql('decimal', array('scale' => 4));
+        } catch (Ruckusing_Exception_Argument $e) {
+            $msg = 'Error adding decimal column: precision cannot '
+                . 'be empty if scale is specified';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $type = $this->object->typeToSql('integer', array('limit' => 12));
+        $this->assertEquals('int(12)', $type);
+        $type = $this->object->typeToSql('integer');
+        $this->assertEquals('int(11)', $type);
+        $type = $this->object->typeToSql('decimal', array('precision' => 2));
+        $this->assertEquals('decimal(2)', $type);
+        $type = $this->object->typeToSql('decimal', array('precision' => 2, 'scale' => 4));
+        $this->assertEquals('decimal(2, 4)', $type);
     }
 
     /**
      * @covers Ruckusing_Adapter_Mysql_Adapter::addColumnOptions
+     * @covers Ruckusing_Adapter_Mysql_Adapter::_isSqlMethodCall
      * @todo   Implement testAddColumnOptions().
      */
     public function testAddColumnOptions()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        try {
+            $this->object->addColumnOptions(
+                'int', 
+                array('default' => 'sp_call()')
+            );
+            $this->fail(
+                'addColumnOptions does not accept function '
+                . 'calls as "default" option!'
+            );
+        } catch (Exception $e) {
+            $msg = 'MySQL does not support function calls '
+                . 'as default values, constants only.';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $colOpts = $this->object->addColumnOptions('int', '');
+        $this->assertInternalType('string', $colOpts);
+        $this->assertEmpty($colOpts);
+        $colOpts = $this->object->addColumnOptions('int', array('unsigned' => true));
+        $this->assertInternalType('string', $colOpts);
+        $this->assertEquals(' UNSIGNED', $colOpts);
+        $colOpts = $this->object->addColumnOptions('int', array('auto_increment' => true));
+        $this->assertInternalType('string', $colOpts);
+        $this->assertEquals(' auto_increment', $colOpts);
+        $colOpts = $this->object->addColumnOptions('int', array('null' => false));
+        $this->assertInternalType('string', $colOpts);
+        $this->assertEquals(' NOT NULL', $colOpts);
+        $colOpts = $this->object->addColumnOptions('int', array('after' => 'name'));
+        $this->assertInternalType('string', $colOpts);
+        $this->assertEquals(' AFTER `name`', $colOpts);
+        $colOpts = $this->object->addColumnOptions('int', array('default' => 1));
+        $this->assertInternalType('string', $colOpts);
+        $this->assertEquals(' DEFAULT 1', $colOpts);
+        $colOpts = $this->object->addColumnOptions('int', array('default' => true));
+        $this->assertInternalType('string', $colOpts);
+        $this->assertEquals(" DEFAULT '1'", $colOpts);
+        $colOpts = $this->object->addColumnOptions('int', array('default' => 'string'));
+        $this->assertInternalType('string', $colOpts);
+        $this->assertEquals(" DEFAULT 'string'", $colOpts);
+        $colOpts = $this->object->addColumnOptions(
+            'int', 
+            array(
+                'unsigned' => true,
+                'auto_increment' => true,
+                'null' => false,
+                'after' => 'name',
+                'default' => 1
+            )
         );
+        $this->assertInternalType('string', $colOpts);
+        $this->assertEquals(' UNSIGNED auto_increment DEFAULT 1 NOT NULL AFTER `name`', $colOpts);
     }
 
     /**

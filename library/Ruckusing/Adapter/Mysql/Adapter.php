@@ -377,20 +377,18 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
 		$final = '';
         $views = '';
 		$this->_loadTables(true);
-		foreach ($this->_tables as $tbl => $idx) {
+        foreach ($this->_tables as $tbl => $idx) {
 			if ($tbl == 'schema_info') continue;
 
 			$stmt = sprintf('SHOW CREATE TABLE %s', $this->identifier($tbl));
-			$result = $this->query($stmt);
+            $result = $this->query($stmt);
 
             if (is_array($result) && count($result) == 1) {
                 $row = $result[0];
-                if (count($row) == 2) {
-                    if (isset($row['Create Table'])) {
-                        $final .= $row['Create Table'] . ";\n\n";
-                    } else if (isset($row['Create View'])) {
-                        $views .= $row['Create View'] . ";\n\n";
-                    }
+                if (isset($row['Create Table'])) {
+                    $final .= $row['Create Table'] . ";\n\n";
+                } else if (isset($row['Create View'])) {
+                    $views .= $row['Create View'] . ";\n\n";
                 }
             }
 		}
@@ -977,7 +975,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
 		
 		if (! array_key_exists($type, $natives)) {
             $error = sprintf(
-                "Error: I dont know what column type "
+                'Error: I dont know what column type '
                 . "of '%s' maps to for MySQL.",
                 $type
             );
@@ -1008,30 +1006,20 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
 		$native_type = $natives[$type];
 		if (is_array($native_type) && array_key_exists('name', $native_type)) {
 			$column_type_sql = $native_type['name'];
-		} else {
-			return $native_type;
 		}
 		if ($type == 'decimal') {
 			//ignore limit, use precison and scale
-			if (!isset($precision) || array_key_exists('precision', $native_type)) {
-				$precision = $native_type['precision'];
-			}
-			if (!isset($scale) || array_key_exists('scale', $native_type)) {
-				$scale = $native_type['scale'];
-			}
 			if (isset($precision)) {
-				if (is_int($scale)) {
+				if (isset($scale) && is_int($scale)) {
 					$column_type_sql .= sprintf('(%d, %d)', $precision, $scale);
 				} else {
 					$column_type_sql .= sprintf('(%d)', $precision);						
 				}//scale
-			} else {
-				if ($scale) {
-                    throw new Ruckusing_Exception_Argument(
-                        'Error adding decimal column: precision cannot '
-                        . 'be empty if scale is specified'
-                    );
-				}
+			} elseif ($scale) {
+                throw new Ruckusing_Exception_Argument(
+                    'Error adding decimal column: precision cannot '
+                    . 'be empty if scale is specified'
+                );
 			}//precision
 		} else {
 			//not a decimal column
@@ -1058,7 +1046,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     {
 		$sql = '';
 
-        if (!is_array($options) || empty($options)) {
+        if (! is_array($options) || empty($options)) {
             return $sql;
         }
 
@@ -1068,14 +1056,6 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         ) {
 			$sql .= ' UNSIGNED';
 		}
-        /*
-        if($type === 'primary_key') {
-      		if(is_array($options) && array_key_exists('auto_increment', $options) && $options['auto_increment'] === true) {
-      			$sql .= ' auto_increment';
-      		}
-      		$sql .= ' PRIMARY KEY';
-        }
-        */
 
         // auto_increment
         if (array_key_exists('auto_increment', $options) 
@@ -1086,7 +1066,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
 
         // default value
         if (array_key_exists('default', $options) 
-            && $options['default'] !== null
+            && isset($options['default'])
         ) {
 			if ($this->_isSqlMethodCall($options['default'])) {
 				//$default_value = $options['default'];
@@ -1094,16 +1074,15 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
                     'MySQL does not support function calls '
                     . 'as default values, constants only.'
                 );
-			} else {
-                if (is_int($options['default'])) {			    
-                    $default_format = '%d';
-                } elseif (is_bool($options['default'])) {
-                    $default_format = "'%d'";
-                } else {
-                    $default_format = "'%s'";
-                }
-                $default_value = sprintf($default_format, $options['default']);			
+			}
+            if (is_int($options['default'])) {			    
+                $default_format = '%d';
+            } elseif (is_bool($options['default'])) {
+                $default_format = "'%d'";
+            } else {
+                $default_format = "'%s'";
             }
+            $default_value = sprintf($default_format, $options['default']);			
 			$sql .= sprintf(' DEFAULT %s', $default_value);
 		}
 
@@ -1187,36 +1166,29 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     private function _dbConnect($dbInfo)
     {
-        if ($dbInfo) {
-            //we might have a port
-            $host = $dbInfo['host'];
-            if (! empty($dbInfo['port'])) {
-                $host .= ':' . $dbInfo['port'];
-            }
-            $this->_conn = mysql_connect(
-                $host, 
-                $dbInfo['user'], 
-                $dbInfo['password']
-            );
-            if (! $this->_conn) {
-                die(
-                    "\n\nCould not connect to the DB, "
-                    . "check host / user / password\n\n"
-                );
-            }
-            if (! mysql_select_db($dbInfo['database'], $this->_conn)) {
-                die(
-                    "\n\nCould not select the DB, "
-                    . "check permissions on host\n\n"
-                );
-            }
-            return true;
-        } else {
-            die(
-                "\n\nCould not extract DB connection "
-                . "information from: " . var_export($dsn, true) ."\n\n"
+        //we might have a port
+        $host = $dbInfo['host'];
+        if (! empty($dbInfo['port'])) {
+            $host .= ':' . $dbInfo['port'];
+        }
+        $this->_conn = @mysql_connect(
+            $host, 
+            $dbInfo['user'], 
+            $dbInfo['password']
+        );
+        if (! $this->_conn) {
+            require_once 'Ruckusing/Exception/AdapterConnexion.php';
+            throw new Ruckusing_Exception_AdapterConnexion(
+                'Could not connect to the DB, check host / user / password'
             );
         }
+        if (! mysql_select_db($dbInfo['database'], $this->_conn)) {
+            require_once 'Ruckusing/Exception/AdapterConnexion.php';
+            throw new Ruckusing_Exception_AdapterConnexion(
+                'Could not select the DB, check permissions on host'
+            );
+        }
+        return true;
     }
 	
 	//Delegate to PEAR
@@ -1266,9 +1238,6 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         $query = strtolower(trim($query));
         $match = array();
         preg_match('/^(\w)*/i', $query, $match);
-        if (empty($match)) {
-            return self::SQL_UNKNOWN_QUERY_TYPE;
-        }
         $type = $match[0];
         switch (strtolower($type)) {
         case 'select':
@@ -1294,21 +1263,6 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         default:
                 return self::SQL_UNKNOWN_QUERY_TYPE;
         }
-	}
-	
-    /**
-     * is select 
-     * 
-     * @param integer $query_type Type of query SQL
-     *
-     * @return boolean
-     */
-    private function _isSelect($query_type)
-    {
-		if ($query_type == self::SQL_SELECT) {
-			return true;
-		}
-		return false;
 	}
 	
     /**

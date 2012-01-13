@@ -70,7 +70,7 @@ abstract class Ruckusing_Adapter_Base
      */
     public function setDsn($dsn) 
     {
-        if (! is_array($dsn)) {
+        if (! is_array($dsn) || empty($dsn)) {
             require_once 'Ruckusing/Exception/Argument.php';
             throw new Ruckusing_Exception_Argument(
                 'The argument DSN must be a array!'
