@@ -65,16 +65,6 @@ interface Ruckusing_Adapter_IAdapter
      */
     public function quoteString($str);
 
-    /**
-     * check DB infos 
-     * 
-     * @param array $dsn DB Infos
-     *
-     * @return void
-     * @throws Ruckusing_Exception_Argument
-     */
-    public function checkDsn($dsn);
-	
 	//database level operations
     /**
      * database exists 

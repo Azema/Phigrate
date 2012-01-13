@@ -31,9 +31,6 @@ require_once 'Ruckusing/Adapter/Mysql/TableDefinition.php';
  */
 require_once 'Ruckusing/Util/Naming.php';	
 
-/** @var integer max length of an identifier like a column or index name */
-define('MAX_IDENTIFIER_LENGTH', 64);
-
 /**
  * Class of mysql adapter
  *
@@ -72,6 +69,9 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     /** @var integer Query type set */
     const SQL_SET = 1024;
 
+    /** @var integer max length of an identifier like a column or index name */
+    const MAX_IDENTIFIER_LENGTH = 64;
+
     /**
      * Name of adapter 
      * 
@@ -104,20 +104,6 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
 	protected $_inTrx = false;
 
     /**
-     * __construct 
-     * 
-     * @param array            $dsn    Config DB for connect it
-     * @param Ruckusing_Logger $logger Logger
-     *
-     * @return Ruckusing_Adapter_Mysql_Adapter
-     */
-    public function __construct($dsn, $logger)
-    {
-		parent::__construct($dsn, $logger);
-		$this->_connect($dsn);
-	}
-	
-    /**
      * supports migrations ?
      * 
      * @return boolean
@@ -125,49 +111,6 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     public function supportsMigrations()
     {
 	    return true;
-    }
-	
-    /**
-     * check DB infos 
-     * 
-     * @param array $dsn DB Infos
-     *
-     * @return boolean
-     * @throws Ruckusing_Exception_Argument
-     */
-    public function checkDsn($dsn)
-    {
-        if (! is_array($dsn)) {
-            require_once 'Ruckusing/Exception/Argument.php';
-            throw new Ruckusing_Exception_Argument(
-                'The argument DSN must be a array!'
-            );
-        }
-        if (! array_key_exists('host', $dsn)) {
-            require_once 'Ruckusing/Exception/Argument.php';
-            throw new Ruckusing_Exception_Argument(
-                'The argument DSN must be contains index "host"'
-            );
-        }
-        if (! array_key_exists('database', $dsn)) {
-            require_once 'Ruckusing/Exception/Argument.php';
-            throw new Ruckusing_Exception_Argument(
-                'The argument DSN must be contains index "database"'
-            );
-        }
-        if (! array_key_exists('user', $dsn)) {
-            require_once 'Ruckusing/Exception/Argument.php';
-            throw new Ruckusing_Exception_Argument(
-                'The argument DSN must be contains index "user"'
-            );
-        }
-        if (! array_key_exists('password', $dsn)) {
-            require_once 'Ruckusing/Exception/Argument.php';
-            throw new Ruckusing_Exception_Argument(
-                'The argument DSN must be contains index "password"'
-            );
-        }
-        return true;
     }
 	
     /**
@@ -385,6 +328,8 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
 
             if (is_array($result) && count($result) == 1) {
                 $row = $result[0];
+                $createTable = 'Create Table';
+                $createView = 'Create View';
                 if (isset($row['Create Table'])) {
                     $final .= $row['Create Table'] . ";\n\n";
                 } else if (isset($row['Create View'])) {
@@ -447,20 +392,15 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         if ($queryType == self::SQL_UNKNOWN_QUERY_TYPE) {
             return false;
         }
-		$data = array();
-        $res = mysql_query($query, $this->_conn);
+        $data = array();
+        $pdoStmt = $this->getConnexion()->query($query, PDO::FETCH_ASSOC);
         // Check error
-        if ($this->_isError($res)) { 
-            trigger_error(
-                sprintf(
-                    "Error executing 'query' with:\n%s\n\nReason: %s\n\n",
-                    $query, 
-                    mysql_error($this->_conn)
-                )
-            );
+        if ($this->_isError($pdoStmt)) {
+            $error = $this->getConnexion()->errorInfo();
+            throw new Ruckusing_Exception_AdapterQuery($error[2]);
         }
-		if ($queryType == self::SQL_SELECT || $queryType == self::SQL_SHOW) {
-            while ($row = mysql_fetch_assoc($res)) {
+        if ($queryType == self::SQL_SELECT || $queryType == self::SQL_SHOW) {
+            foreach ($pdoStmt as $row) {
                 $data[] = $row; 
             }
 			return $data;
@@ -479,7 +419,8 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     {
 		$query_type = $this->_determineQueryType($query);
         if ($query_type != self::SQL_SELECT && $query_type != self::SQL_SHOW) {
-            trigger_error(
+            require_once 'Ruckusing/Exception/AdapterQuery.php';
+            throw new Ruckusing_Exception_AdapterQuery(
                 'Query for selectOne() is not one of SELECT or SHOW: ' 
                 . $query
             );
@@ -499,7 +440,8 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     {
         $query_type = $this->_determineQueryType($query);
         if ($query_type != self::SQL_SELECT && $query_type != self::SQL_SHOW) {
-            trigger_error(
+            require_once 'Ruckusing/Exception/AdapterQuery.php';
+            throw new Ruckusing_Exception_AdapterQuery(
                 'Query for selectAll() is not one of SELECT or SHOW: ' 
                 . $query
             );
@@ -519,9 +461,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     public function executeDdl($ddl)
     {
-        $result = $this->query($ddl);
-        // TODO : Check result
-		return true;
+        return $this->query($ddl);
 	}
 	
     /**
@@ -837,7 +777,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
 		}
         $indexName = $this->_getIndexName($tableName, $columnName, $options);
 		// Check length index name
-		if (strlen($indexName) > MAX_IDENTIFIER_LENGTH) {
+		if (strlen($indexName) > self::MAX_IDENTIFIER_LENGTH) {
             $msg = 'The auto-generated index name is too long for '
                 . 'MySQL (max is 64 chars). Considering using \'name\' option '
                 . 'parameter to specify a custom name for this index. '
@@ -1146,49 +1086,29 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
 	
 	//-----------------------------------
 	// PRIVATE METHODS
-	//-----------------------------------	
+    //-----------------------------------	
+
     /**
-     * connect 
+     * initialize DSN MySQL with URI or array config
      * 
-     * @return void
+     * @return string
      */
-    private function _connect()
+    protected function _initDsn()
     {
-		$this->_dbConnect($this->getDsn());
-	}
-	
-    /**
-     * db connect 
-     * 
-     * @param array $dbInfo DSN config to connect at DB
-     *
-     * @return boolean
-     */
-    private function _dbConnect($dbInfo)
-    {
-        //we might have a port
-        $host = $dbInfo['host'];
-        if (! empty($dbInfo['port'])) {
-            $host .= ':' . $dbInfo['port'];
+        if (array_key_exists('uri', $this->_dbConfig)) {
+            $dsn = 'uri:' . $this->_dbConfig['uri'];
+        } else {
+            $dsn = 'mysql:dbname=' . $this->_dbConfig['database'];
+            if (array_key_exists('socket', $this->_dbConfig)) {
+                $dsn .= ';socket=' . $this->_dbConfig['socket'];
+            } elseif (array_key_exists('host', $this->_dbConfig)) {
+                $dsn .= ';host=' . $this->_dbConfig['host'];
+                if (array_key_exists('port', $this->_dbConfig)) {
+                    $dsn .= ';port=' . $this->_dbConfig['port'];
+                }
+            }
         }
-        $this->_conn = @mysql_connect(
-            $host, 
-            $dbInfo['user'], 
-            $dbInfo['password']
-        );
-        if (! $this->_conn) {
-            require_once 'Ruckusing/Exception/AdapterConnexion.php';
-            throw new Ruckusing_Exception_AdapterConnexion(
-                'Could not connect to the DB, check host / user / password'
-            );
-        }
-        if (! mysql_select_db($dbInfo['database'], $this->_conn)) {
-            require_once 'Ruckusing/Exception/AdapterConnexion.php';
-            throw new Ruckusing_Exception_AdapterConnexion(
-                'Could not select the DB, check permissions on host'
-            );
-        }
-        return true;
+        return $dsn;
     }
 	
 	//Delegate to PEAR
@@ -1217,8 +1137,8 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
 		if ($this->_tablesLoaded == false || $reload) {
 			$this->_tables = array(); //clear existing structure
 			$qry = 'SHOW TABLES';
-			$res = mysql_query($qry, $this->_conn);
-			while ($row = mysql_fetch_row($res)) {
+			$res = $this->getConnexion()->query($qry);
+			foreach ($res as $row) {
                 $table = $row[0];
                 $this->_tables[$table] = true;
             }
@@ -1316,7 +1236,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         if ($this->_inTrx === true) {
             throw new Exception('Transaction already started');
         }
-        mysql_query('BEGIN', $this->_conn);
+        $this->getConnexion()->beginTransaction();
         $this->_inTrx = true;
     }
   
@@ -1330,7 +1250,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         if ($this->_inTrx === false) {
             throw new Exception('Transaction not started');
         }
-        mysql_query('COMMIT', $this->_conn);
+        $this->getConnexion()->commit();
         $this->_inTrx = false; 
     }
   
@@ -1344,7 +1264,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         if ($this->_inTrx === false) {
             throw new Exception('Transaction not started');
         }
-        mysql_query('ROLLBACK', $this->_conn);
+        $this->getConnexion()->rollBack();
         $this->_inTrx = false; 
     }
 }

@@ -82,7 +82,8 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         try {
             new Ruckusing_Adapter_Mysql_Adapter($dsn, $this->_logger);
         } catch (Ruckusing_Exception_AdapterConnexion $e) {
-            $msg = 'Could not connect to the DB, check host / user / password';
+            $msg = "SQLSTATE[28000] [1045] Access denied for "
+                . "user 'toto'@'localhost' (using password: YES)";
             $this->assertEquals($msg, $e->getMessage());
         }
         $dsn = array(
@@ -95,7 +96,8 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         try {
             new Ruckusing_Adapter_Mysql_Adapter($dsn, $this->_logger);
         } catch (Ruckusing_Exception_AdapterConnexion $e) {
-            $msg = 'Could not select the DB, check permissions on host';
+            $msg = "SQLSTATE[42000] [1044] Access denied for "
+                . "user 'rucku'@'localhost' to database 'ruckutest'";
             $this->assertEquals($msg, $e->getMessage());
         }
     }
@@ -128,59 +130,81 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($actual);
     }
 
-    public function testSetDsn()
+    public function testSetDbConfig()
     {
-        $expected = array(
+        $dbConfig = array(
+            'uri' => 'file:///path/to/dsnfile'
+        );
+        $expected = 'uri:file:///path/to/dsnfile';
+        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
+        $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
+        $this->assertEquals($expected, $actual->getDsn());
+
+        $dbConfig = array(
             'host' => 'testhost',
             'database' => 'ruckutest',
             'user' => 'toto',
             'password' => 'pass',
         );
-        $actual = $this->object->setDsn($expected);
+        $expected = 'mysql:dbname=ruckutest;host=testhost';
+        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
         $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
-        $this->assertSame($expected, $this->object->getDsn());
-        $dsn = 'dsn';
+        $this->assertEquals($expected, $actual->getDsn());
+
+        $dbConfig = array(
+            'database' => 'ruckutest',
+            'socket' => '/tmp/mysqld.sock',
+            'user' => 'toto',
+            'password' => 'pass',
+        );
+        $expected = 'mysql:dbname=ruckutest;socket=/tmp/mysqld.sock';
+        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
+        $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
+        $this->assertEquals($expected, $actual->getDsn());
+
+        $dbConfig = 'dbConfig';
         try {
-            $this->object->setDsn($dsn);
-            $this->fail('checkDsn do not accept string argument!');
+            $this->object->setDbConfig($dbConfig);
+            $this->fail('checkDbConfig do not accept string argument!');
         } catch (Ruckusing_Exception_Argument $ex) {
-            $msg = 'The argument DSN must be a array!';
+            $msg = 'The argument dbConfig must be a array!';
             $this->assertEquals($msg, $ex->getMessage());
         }
     }
 
     public function testGetDsn()
     {
-        $this->assertSame($this->_dsn, $this->object->getDsn());
+        $expected = 'mysql:dbname=ruckusing_migrations_test;host=localhost;port=3306';
+        $this->assertEquals($expected, $this->object->getDsn());
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::checkDsn
+     * @covers Ruckusing_Adapter_Base::checkDbConfig
      */
-    public function testCheckDsn()
+    public function testCheckDbConfig()
     {
         $dsn = 'dsn';
         try {
-            $this->object->checkDsn($dsn);
-            $this->fail('checkDsn do not accept string argument!');
+            $this->object->checkDbConfig($dsn);
+            $this->fail('checkDbConfig do not accept string argument!');
         } catch (Ruckusing_Exception_Argument $ex) {
-            $msg = 'The argument DSN must be a array!';
+            $msg = 'The argument dbConfig must be a array!';
             $this->assertEquals($msg, $ex->getMessage());
         }
         $dsn = array();
         try {
-            $this->object->checkDsn($dsn);
-            $this->fail('checkDsn wait for the "host" argument!');
+            $this->object->checkDbConfig($dsn);
+            $this->fail('checkDbConfig wait for the "database" argument!');
         } catch (Ruckusing_Exception_Argument $ex) {
-            $msg = 'The argument DSN must be contains index "host"';
+            $msg = 'The argument dbConfig must be contains index "database"';
             $this->assertEquals($msg, $ex->getMessage());
         }
-        $dsn = array('host' => 'localhost');
+        $dsn = array('database' => 'test');
         try {
-            $this->object->checkDsn($dsn);
-            $this->fail('checkDsn wait for the "database" argument!');
+            $this->object->checkDbConfig($dsn);
+            $this->fail('checkDbConfig wait for the "host" argument!');
         } catch (Ruckusing_Exception_Argument $ex) {
-            $msg = 'The argument DSN must be contains index "database"';
+            $msg = 'The argument dbConfig must be contains index "host"';
             $this->assertEquals($msg, $ex->getMessage());
         }
         $dsn = array(
@@ -188,10 +212,10 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'database' => 'test',
         );
         try {
-            $this->object->checkDsn($dsn);
-            $this->fail('checkDsn wait for the "user" argument!');
+            $this->object->checkDbConfig($dsn);
+            $this->fail('checkDbConfig wait for the "user" argument!');
         } catch (Ruckusing_Exception_Argument $ex) {
-            $msg = 'The argument DSN must be contains index "user"';
+            $msg = 'The argument dbConfig must be contains index "user"';
             $this->assertEquals($msg, $ex->getMessage());
         }
         $dsn = array(
@@ -200,10 +224,10 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'user' => 'test',
         );
         try {
-            $this->object->checkDsn($dsn);
-            $this->fail('checkDsn wait for the "password" argument!');
+            $this->object->checkDbConfig($dsn);
+            $this->fail('checkDbConfig wait for the "password" argument!');
         } catch (Ruckusing_Exception_Argument $ex) {
-            $msg = 'The argument DSN must be contains index "password"';
+            $msg = 'The argument dbConfig must be contains index "password"';
             $this->assertEquals($msg, $ex->getMessage());
         }
         $dsn = array(
@@ -212,7 +236,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'user' => 'test',
             'password' => 'test',
         );
-        $this->assertTrue($this->object->checkDsn($dsn));
+        $this->assertTrue($this->object->checkDbConfig($dsn));
     }
 
     /**
@@ -555,7 +579,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
         $this->assertFalse($this->object->tableExists('users'));
         
         //create it
-        $this->object->executeDdl("CREATE TABLE `users` ( name varchar(20) );");
+        $this->object->executeDdl("CREATE TABLE `users` (name varchar(20));");
         
         //now make sure it does exist
         $this->assertFalse($this->object->tableExists('users'));
@@ -576,12 +600,16 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
      */
     public function testExecute()
     {
-        $this->setExpectedException(
-            'PHPUnit_Framework_Error', 
-            'You have an error in your SQL syntax'
-        );
         $query = 'SHOW DATABASE `ruckusing`'; // not correct
-        $this->assertTrue($this->object->execute($query));
+        try {
+            $this->assertTrue($this->object->execute($query));
+        } catch (Ruckusing_Exception_AdapterQuery $e) {
+            $msg = "You have an error in your SQL syntax; "
+                . "check the manual that corresponds to your MySQL "
+                . "server version for the right syntax to use near "
+                . "'DATABASE `ruckusing`' at line 1";
+            $this->assertEquals($msg, $e->getMessage());
+        }
     }
 
     /**
@@ -589,39 +617,46 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
      */
     public function testQuery()
     {
-        $this->setExpectedException(
-            'PHPUnit_Framework_Error', 
-            'You have an error in your SQL syntax'
-        );
         $query = 'SHOW DATABASE `ruckusing`'; // not correct
-        $this->assertTrue($this->object->query($query));
+        try {
+            $this->assertTrue($this->object->query($query));
+        } catch (Ruckusing_Exception_AdapterQuery $e) {
+            $msg = "You have an error in your SQL syntax; "
+                . "check the manual that corresponds to your MySQL "
+                . "server version for the right syntax to use near "
+                . "'DATABASE `ruckusing`' at line 1";
+            $this->assertEquals($msg, $e->getMessage());
+        }
     }
 
     /**
      * @covers Ruckusing_Adapter_Mysql_Adapter::selectOne
-     * @todo   Implement testSelectOne().
      */
     public function testSelectOne()
     {
         $this->object->executeDdl("CREATE TABLE `users` (name varchar(20));");
         $this->object->executeDdl("INSERT INTO `users` (`name`) VALUES ('first'), ('second'), ('third');");
         $expected = array('name' => 'first');
-        $sql = "SELECT name FROM `users`;";
+        $sql = 'SELECT `name` FROM `users`;';
         $actual = $this->object->selectOne($sql);
+        $this->assertSame($expected, $actual);
         $expected = array('name' => 'third');
-        $sql = "SELECT name FROM `users` ORDER BY `name` DESC;";
+        $sql = 'SELECT `name` FROM `users` ORDER BY `name` DESC;';
         $actual = $this->object->selectOne($sql);
         $this->assertSame($expected, $actual);
     }
 
     public function testSelectOneError()
     {
-        $this->setExpectedException(
-            'PHPUnit_Framework_Error', 
-            'selectOne()'
-        );
         $query = 'UPDATE aTable SET id=1';
-        $this->object->selectOne($query);
+        try {
+            $this->object->selectOne($query);
+            $this->fail('method selectOne accept only SELECT or SHOW queries!');
+        } catch (Ruckusing_Exception_AdapterQuery $e) {
+            $msg = 'Query for selectOne() is not one of SELECT or SHOW: '
+                . $query;
+            $this->assertEquals($msg, $e->getMessage());
+        }
     }
 
     /**
@@ -650,12 +685,15 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
 
     public function testSelectAllError()
     {
-        $this->setExpectedException(
-            'PHPUnit_Framework_Error', 
-            'selectAll()'
-        );
         $query = 'DELETE aTable';
-        $this->object->selectAll($query);
+        try {
+            $this->object->selectAll($query);
+            $this->fail('method selectAll accept only SELECT or SHOW queries!');
+        } catch (Ruckusing_Exception_AdapterQuery $e) {
+            $msg = 'Query for selectAll() is not one of SELECT or SHOW: '
+                . $query;
+            $this->assertEquals($msg, $e->getMessage());
+        }
     }
 
     /**

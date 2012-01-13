@@ -36,7 +36,7 @@ abstract class Ruckusing_Adapter_Base
     /**
      * connection to DB
      * 
-     * @var mixed
+     * @var PDO
      */
     protected $_conn;
 
@@ -50,16 +50,91 @@ abstract class Ruckusing_Adapter_Base
     /**
      * __construct 
      * 
-     * @param array            $dsn    Config DB for connect it
+     * @param array            $dbConfig    Config DB for connect it
      * @param Ruckusing_Logger $logger The logger
      *
      * @return Ruckusing_Adapter_Base
      */
-    function __construct($dsn, $logger)
+    function __construct($dbConfig, $logger)
     {
-        $this->setDsn($dsn);
+        $this->setDbConfig($dbConfig);
         $this->setLogger($logger);
 	}
+	
+    /**
+     * set dbConfig 
+     * 
+     * @param array $dbConfig Config DB for connect it
+     *
+     * @return Ruckusing_Adapter_Base
+     */
+    public function setDbConfig($dbConfig) 
+    {
+        if (! is_array($dbConfig) || empty($dbConfig)) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument(
+                'The argument dbConfig must be a array!'
+            );
+        }
+        $this->checkDbConfig($dbConfig);
+        $this->_dbConfig = $dbConfig;
+        return $this;
+    }
+
+    /**
+     * check DB infos 
+     * 
+     * @param array $dbConfig DB Infos
+     *
+     * @return boolean
+     * @throws Ruckusing_Exception_Argument
+     */
+    public function checkDbConfig($dbConfig)
+    {
+        if (! is_array($dbConfig)) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument(
+                'The argument dbConfig must be a array!'
+            );
+        }
+        if (! array_key_exists('uri', $dbConfig)) {
+            if (! array_key_exists('database', $dbConfig)) {
+                require_once 'Ruckusing/Exception/Argument.php';
+                throw new Ruckusing_Exception_Argument(
+                    'The argument dbConfig must be contains index "database"'
+                );
+            }
+            if (!array_key_exists('socket', $dbConfig) 
+                && ! array_key_exists('host', $dbConfig)
+            ) {
+                if (! array_key_exists('host', $dbConfig)) {
+                    require_once 'Ruckusing/Exception/Argument.php';
+                    throw new Ruckusing_Exception_Argument(
+                        'The argument dbConfig must be contains index "host"'
+                    );
+                }
+                if (! array_key_exists('socket', $dbConfig)) {
+                    require_once 'Ruckusing/Exception/Argument.php';
+                    throw new Ruckusing_Exception_Argument(
+                        'The argument dbConfig must be contains index "socket"'
+                    );
+                }
+            }
+            if (! array_key_exists('user', $dbConfig)) {
+                require_once 'Ruckusing/Exception/Argument.php';
+                throw new Ruckusing_Exception_Argument(
+                    'The argument dbConfig must be contains index "user"'
+                );
+            }
+            if (! array_key_exists('password', $dbConfig)) {
+                require_once 'Ruckusing/Exception/Argument.php';
+                throw new Ruckusing_Exception_Argument(
+                    'The argument dbConfig must be contains index "password"'
+                );
+            }
+        }
+        return true;
+    }
 	
     /**
      * set dsn 
@@ -70,13 +145,6 @@ abstract class Ruckusing_Adapter_Base
      */
     public function setDsn($dsn) 
     {
-        if (! is_array($dsn) || empty($dsn)) {
-            require_once 'Ruckusing/Exception/Argument.php';
-            throw new Ruckusing_Exception_Argument(
-                'The argument DSN must be a array!'
-            );
-        }
-        $this->checkDsn($dsn);
         $this->_dsn = $dsn;
         return $this;
     }
@@ -88,8 +156,11 @@ abstract class Ruckusing_Adapter_Base
      */
     public function getDsn()
     {
+        if (! isset($this->_dsn)) {
+            $this->_dsn = $this->_initDsn();
+        }
 		return $this->_dsn;
-	}	
+    }
 
     /**
      * set logger 
@@ -131,5 +202,52 @@ abstract class Ruckusing_Adapter_Base
     public function hasTable($tbl)
     {
 		return $this->tableExists($tbl, true);
-	}
+    }
+
+    /**
+     * getConnexion 
+     * 
+     * @return PDO
+     */
+    public function getConnexion()
+    {
+        if (! isset($this->_conn)) {
+            $this->_conn = $this->_createPdo();
+        }
+        return $this->_conn;
+    }
+
+    /**
+     * Creates a PDO instance to represent a connection
+     * to the requested database.
+     * 
+     * @return PDO
+     * @throws Ruckusing_Exception_AdapterConnexion
+     */
+    protected function _createPdo()
+    {
+        $user = '';
+        if (array_key_exists('user', $this->_dbConfig)) {
+            $user = $this->_dbConfig['user'];
+        }
+        $password = '';
+        if (array_key_exists('password', $this->_dbConfig)) {
+            $password = $this->_dbConfig['password'];
+        }
+        $options = array();
+        if (array_key_exists('options', $this->_dbConfig)) {
+            $options = $this->_dbConfig['options'];
+        }
+        try {
+            $pdo = new PDO($this->getDsn(), $user, $password, $options);
+        } catch (PDOException $e) {
+            throw new Ruckusing_Exception_AdapterConnexion(
+                $e->getMessage(),
+                $e->getCode(),
+                $e->getPrevious()
+            );
+        }
+
+        return $pdo;
+    }
 }
