@@ -9,13 +9,19 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
      */
     protected $object;
 
+    public function __construct()
+    {
+        $this->_adapter = new adapterMock(array(), '');
+    }
+
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
     protected function setUp()
     {
-        $this->object = new Ruckusing_Adapter_Mysql_TableDefinition;
+        parent::setUp();
+        $this->object = new Ruckusing_Adapter_Mysql_TableDefinition($this->_adapter, 'test');
     }
 
     /**
@@ -24,18 +30,168 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
      */
     protected function tearDown()
     {
+        $this->object = null;
+        parent::tearDown();
     }
 
-    /**
-     * @covers Ruckusing_Adapter_Mysql_TableDefinition::column
-     * @todo   Implement testColumn().
-     */
+    public function testConstructor()
+    {
+        try {
+            new Ruckusing_Adapter_Mysql_TableDefinition('string', 'test');
+            $this->fail(
+                'Constructor Mysql TableDefinition '
+                . 'require adapter Ruckusing_Adapter_Base'
+            );
+        } catch (Ruckusing_Exception_MissingAdapter $e) {
+            $msg = 'Invalid MySQL Adapter instance.';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        try {
+            new Ruckusing_Adapter_Mysql_TableDefinition($this->_adapter, '');
+            $this->fail(
+                'Constructor Mysql TableDefinition does not accept empty string'
+            );
+        } catch (Ruckusing_Exception_Argument $e) {
+            $msg = 'Invalid \'name\' parameter';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $options = array(
+            'id' => false,
+        );
+        $table = new Ruckusing_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users',
+            $options
+        );
+        $sql = $table->finish(true);
+        $expected = "CREATE TABLE `users` (
+) ;";
+        $this->assertEquals($expected, $sql);
+        $table = new Ruckusing_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users'
+        );
+        $sql = $table->finish(true);
+        $expected = "CREATE TABLE `users` (
+`id` int(11) UNSIGNED auto_increment NOT NULL,
+,
+ PRIMARY KEY (`id`)) ;";
+        $this->assertEquals($expected, $sql);
+        $options = array(
+            'id' => 'my_id',
+        );
+        $table = new Ruckusing_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users',
+            $options
+        );
+        $sql = $table->finish(true);
+        $expected = "CREATE TABLE `users` (
+`my_id` int(11) UNSIGNED auto_increment NOT NULL,
+ PRIMARY KEY (`my_id`)) ;";
+        $this->assertEquals($expected, $sql);
+        $options = array(
+            'options' => 'CHARSET utf8',
+        );
+        $table = new Ruckusing_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users',
+            $options
+        );
+        $sql = $table->finish(true);
+        $expected = "CREATE TABLE `users` (
+`id` int(11) UNSIGNED auto_increment NOT NULL,
+,
+ PRIMARY KEY (`id`)) CHARSET utf8;";
+        $this->assertEquals($expected, $sql);
+        $options = array(
+            'force' => true,
+        );
+        $table = new Ruckusing_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users',
+            $options
+        );
+        $sql = $table->finish(true);
+        $expected = "CREATE TABLE `users` (
+`id` int(11) UNSIGNED auto_increment NOT NULL,
+,
+ PRIMARY KEY (`id`)) ;";
+        $this->assertEquals($expected, $sql);
+        $options = array(
+            'temporary' => true,
+        );
+        $table = new Ruckusing_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users',
+            $options
+        );
+        $sql = $table->finish(true);
+        $expected = "CREATE TEMPORARY TABLE `users` (
+`id` int(11) UNSIGNED auto_increment NOT NULL,
+,
+ PRIMARY KEY (`id`)) ;";
+        $this->assertEquals($expected, $sql);
+    }
+
     public function testColumn()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        $table = new Ruckusing_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users'
         );
+        $table->column('test', 'integer');
+        $sql = $table->finish(true);
+        $expected = "CREATE TABLE `users` (
+`id` int(11) UNSIGNED auto_increment NOT NULL,
+`test` int(11),
+ PRIMARY KEY (`id`)) ;";
+        $this->assertEquals($expected, $sql);
+        $table = new Ruckusing_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users'
+        );
+        $table->column('test', 'integer', array('primary_key' => true));
+        $sql = $table->finish(true);
+        $expected = "CREATE TABLE `users` (
+`id` int(11) UNSIGNED auto_increment NOT NULL,
+`test` int(11),
+ PRIMARY KEY (`test`,`id`)) ;";
+        $this->assertEquals($expected, $sql);
+        $table = new Ruckusing_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users'
+        );
+        $table->column('test', 'integer', array('auto_increment' => true));
+        $sql = $table->finish(true);
+        $expected = "CREATE TABLE `users` (
+`id` int(11) UNSIGNED auto_increment NOT NULL,
+`test` int(11) auto_increment,
+ PRIMARY KEY (`id`)) ;";
+        $this->assertEquals($expected, $sql);
+        $table = new Ruckusing_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users'
+        );
+        $table->column('test', 'string', array('auto_increment' => true));
+        $sql = $table->finish(true);
+        $expected = "CREATE TABLE `users` (
+`id` int(11) UNSIGNED auto_increment NOT NULL,
+`test` varchar(255) auto_increment,
+ PRIMARY KEY (`id`)) ;";
+        $this->assertEquals($expected, $sql);
+        $table = new Ruckusing_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users'
+        );
+        $table->column('test', 'string');
+        $table->column('test', 'string');
+        $sql = $table->finish(true);
+        $expected = "CREATE TABLE `users` (
+`id` int(11) UNSIGNED auto_increment NOT NULL,
+`test` varchar(255),
+ PRIMARY KEY (`id`)) ;";
+        $this->assertEquals($expected, $sql);
     }
 
     /**
@@ -44,9 +200,46 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
      */
     public function testFinish()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        $table = new Ruckusing_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users'
         );
+        $table->column('test', 'string', array('auto_increment' => true));
+        $table->finish();
+        $expected = array("CREATE TABLE `users` (
+`id` int(11) UNSIGNED auto_increment NOT NULL,
+`test` varchar(255) auto_increment,
+ PRIMARY KEY (`id`)) ;");
+        $queries = $this->_adapter->getConnexion()->getQueries();
+        $this->assertSame($expected, $queries);
+    }
+}
+
+class adapterMock extends Ruckusing_Adapter_Mysql_Adapter
+{
+    public function __construct($dbConfig, $logger)
+    {
+        $this->_conn = new pdoMock();
+        $this->_logger = new logMock();
+    }
+}
+class pdoMock
+{
+    protected $_queries = array();
+
+    public function query($query)
+    {
+        $this->_queries[] = $query;
+    }
+
+    public function getQueries()
+    {
+        return $this->_queries;
+    }
+}
+class logMock
+{
+    public function log($msg)
+    {
     }
 }

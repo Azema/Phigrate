@@ -38,32 +38,32 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
      * 
      * @var Ruckusing_Adapter_Mysql_Adapter
      */
-	protected $_adapter;
+    protected $_adapter;
     /**
      * sql 
      * 
      * @var string
      */
-	protected $_sql = '';
+    protected $_sql = '';
     /**
      * initialized 
      * 
      * @var boolean
      */
-	protected $_initialized = false;
+    protected $_initialized = false;
     /**
      * primary keys 
      * 
      * @var array
      */
-	protected $_primaryKeys = array();
+    protected $_primaryKeys = array();
     /**
      * auto generate id 
      * 
      * @var boolean
      */
-	protected $_autoGenerateId = true;
-	
+    protected $_autoGenerateId = true;
+    
     /**
      * __construct 
      * 
@@ -75,36 +75,30 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
      * @throws Ruckusing_Exception_MissingAdapter
      * @throws Ruckusing_Exception_Argument
      */
-    function __construct($adapter, $name, $options = array())
+    public function __construct($adapter, $name, $options = array())
     {
-		//sanity check
-		if (! $adapter instanceof Ruckusing_Adapter_Base) {
-            throw new Ruckusing_Exception_MissingAdapter(
-                'Invalid MySQL Adapter instance.'
-            );
-		}
-		if (!isset($name) || ! is_string($name) || empty($name)) {
-			throw new Ruckusing_Exception_Argument("Invalid 'name' parameter");
-		}
+        parent::__construct($adapter, $name, $options);
+        $this->_initSql($name, $options);
 
-		$this->_adapter = $adapter;
-		$this->_name = $name;
-		$this->_options = $options;		
-		$this->_initSql($name, $options);
-
-		if (array_key_exists('id', $options)) {
-			if (is_bool($options['id']) && $options['id'] == false) {
+        if (array_key_exists('id', $options)) {
+            if (is_bool($options['id']) && $options['id'] == false) {
                 $this->_autoGenerateId = false;
-			}
-			//if its a string then we want to auto-generate an integer-based
-			//primary key with this name
-			if (is_string($options['id'])) {
-                $this->_autoGenerateId = true;
-                $this->_primaryKeys[] = $options['id'];
+            } elseif (is_string($options['id']) && ! empty($options['id'])) {
+                //if its a string then we want to auto-generate an integer-based
+                //primary key with this name
+                $this->_autoGenerateId = false;
+                $primaryName = $options['id'];
+                $options = array(
+                    'unsigned' => true, 
+                    'null' => false, 
+                    'auto_increment' => true,
+                    'primary_key' => true,
+                );
+                $this->column($primaryName, 'integer', $options);
             }
         }
-	}
-	
+    }
+    
     /**
      * column
      * 
@@ -116,31 +110,36 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
      */
     public function column($column_name, $type, $options = array())
     {
-		//if there is already a column by the same name then silently fail 
-		//and continue
-		if ($this->included($column_name) == true) {
-			return;
-		}
-		
-		$column_options = array();
-		
-		if (array_key_exists('primary_key', $options)) {
-            if ($options['primary_key'] == true) {
+        //if there is already a column by the same name then silently fail 
+        //and continue
+        if ($this->included($column_name) == true) {
+            return;
+        }
+        
+        $column_options = array();
+        
+        if (array_key_exists('primary_key', $options)) {
+            if ($options['primary_key'] === true) {
                 $this->_primaryKeys[] = $column_name;
             }
         }
-	  
-		if (array_key_exists('auto_increment', $options)) {
-            if ($options['auto_increment'] == true) {
+      
+        if (array_key_exists('auto_increment', $options)) {
+            if ($options['auto_increment'] === true) {
                 $column_options['auto_increment'] = true;
             }
         }
         $column_options = array_merge($column_options, $options);
-        $column = new Ruckusing_Adapter_Mysql_ColumnDefinition($this->_adapter, $column_name, $type, $column_options);
+        $column = new Ruckusing_Adapter_Mysql_ColumnDefinition(
+            $this->_adapter,
+            $column_name,
+            $type,
+            $column_options
+        );
         
         $this->_columns[] = $column;
-	}
-	
+    }
+    
     /**
      * keys 
      * 
@@ -151,15 +150,15 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
         $keys = '';
         if (count($this->_primaryKeys) > 0) {
             $lead = ' PRIMARY KEY (';
-            $quoted = array();
-            foreach ($this->_primaryKeys as $key) {
-                $quoted[] = sprintf("%s", $this->_adapter->identifier($key));
-            }
+            $quoted = array_map(
+                array($this->_adapter, 'identifier'),
+                $this->_primaryKeys
+            );
             $keys = ",\n" . $lead . implode(",", $quoted) . ")";
         }
         return $keys;
     }
-	
+    
     /**
      * finish 
      * 
@@ -170,25 +169,25 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
      */
     public function finish($wants_sql = false)
     {
-		if ($this->_initialized == false) {
+        if ($this->_initialized == false) {
             throw new Ruckusing_Exception_InvalidTableDefinition(
                 sprintf(
                     "Table Definition: '%s' has not been initialized", 
                     $this->_name
                 )
             );
-		}
-        $opt_str = null;			
+        }
+        $opt_str = null;            
         if (is_array($this->_options) 
             && array_key_exists('options', $this->_options)
         ) {
-			$opt_str = $this->_options['options'];
-		}
-		
-		$close_sql = sprintf(') %s;', $opt_str);
-		$createTableSql = $this->_sql;
-		
-		if ($this->_autoGenerateId === true) {
+            $opt_str = $this->_options['options'];
+        }
+        
+        $close_sql = sprintf(') %s;', $opt_str);
+        $createTableSql = $this->_sql;
+        
+        if ($this->_autoGenerateId === true) {
             $this->_primaryKeys[] = 'id';
             $primary_id = new Ruckusing_Adapter_Mysql_ColumnDefinition(
                 $this->_adapter, 
@@ -201,18 +200,18 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
                 )
             );
             $createTableSql .= $primary_id->toSql() . ",\n";
-	    }
-	    
-	    $createTableSql .= $this->_columnsToStr();
-	    $createTableSql .= $this->_keys() . $close_sql;
-		
-		if ($wants_sql) {
-			return $createTableSql;
-		} else {
-			return $this->_adapter->executeDdl($createTableSql);			
-		}
-	}
-	
+        }
+        
+        $createTableSql .= $this->_columnsToStr();
+        $createTableSql .= $this->_keys() . $close_sql;
+        
+        if ($wants_sql) {
+            return $createTableSql;
+        } else {
+            return $this->_adapter->executeDdl($createTableSql);            
+        }
+    }
+    
     /**
      * columns to str 
      * 
@@ -220,16 +219,16 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
      */
     protected function _columnsToStr()
     {
-		$str = '';
-		$fields = array();
-		$len = count($this->_columns);
-		for ($i = 0; $i < $len; $i++) {
-			$c = $this->_columns[$i];
-			$fields[] = $c->__toString();
-		}
-		return join(",\n", $fields);
-	}
-	
+        $str = '';
+        $fields = array();
+        $len = count($this->_columns);
+        for ($i = 0; $i < $len; $i++) {
+            $c = $this->_columns[$i];
+            $fields[] = $c->__toString();
+        }
+        return join(",\n", $fields);
+    }
+    
     /**
      * init sql 
      * 
@@ -242,21 +241,21 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
     {
         if (! is_array($options)) $options = array();
 
-		//are we forcing table creation? If so, drop it first
-		if (array_key_exists('force', $options) && $options['force'] == true) {
-			try {
-				$this->_adapter->dropTable($name);
-			} catch (Ruckusing_Exception_MissingTable $e) {
-				//do nothing
-			}
-		}
-		$temp = "";
-		if (array_key_exists('temporary', $options)) {
-			$temp = " TEMPORARY";
-		}
-		$create_sql = sprintf('CREATE%s TABLE ', $temp);
+        //are we forcing table creation? If so, drop it first
+        if (array_key_exists('force', $options) && $options['force'] == true) {
+            try {
+                $this->_adapter->dropTable($name);
+            } catch (Ruckusing_Exception_MissingTable $e) {
+                // do nothing
+            }
+        }
+        $temp = '';
+        if (array_key_exists('temporary', $options)) {
+            $temp = ' TEMPORARY';
+        }
+        $create_sql = sprintf('CREATE%s TABLE ', $temp);
         $create_sql .= sprintf("%s (\n", $this->_adapter->identifier($name));
-		$this->_sql .= $create_sql;
-		$this->_initialized = true;
-	}
+        $this->_sql .= $create_sql;
+        $this->_initialized = true;
+    }
 }

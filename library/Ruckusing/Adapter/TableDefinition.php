@@ -31,26 +31,26 @@ abstract class Ruckusing_Adapter_TableDefinition
      * 
      * @var array
      */
-	protected $_columns = array();
+    protected $_columns = array();
     /**
      * adapter 
      * 
      * @var Ruckusing_Adapter_Base
      */
-	protected $_adapter;
+    protected $_adapter;
     /**
      * name 
      * 
      * @var string
      */
-	protected $_name;
+    protected $_name;
     /**
      * options 
      * 
      * @var mixed
      */
-	protected $_options;
-	
+    protected $_options;
+    
     /**
      * __construct 
      * 
@@ -62,16 +62,27 @@ abstract class Ruckusing_Adapter_TableDefinition
      */
     function __construct($adapter, $name, $options = array())
     {
-		$this->_adapter = $adapter;
-	}
-	
+        //sanity check
+        if (! $adapter instanceof Ruckusing_Adapter_Base) {
+            throw new Ruckusing_Exception_MissingAdapter(
+                'Invalid MySQL Adapter instance.'
+            );
+        }
+        if (empty($name) || ! is_string($name)) {
+            throw new Ruckusing_Exception_Argument("Invalid 'name' parameter");
+        }
+
+        $this->_adapter = $adapter;
+        $this->_name = $name;
+        $this->_options = $options;     
+    }
+    
     /**
-     * included 
-	 * Determine whether or not the given column already exists in our 
-	 * table definition.
-	 * 
-	 * This method is lax enough that it can take either a string column name
-	 * or a Ruckusing_Adpater_ColumnDefinition object.
+     * Determine whether or not the given column already exists in our 
+     * table definition.
+     * 
+     * This method is lax enough that it can take either a string column name
+     * or a Ruckusing_Adpater_ColumnDefinition object.
      * 
      * @param Ruckusing_Adpater_ColumnDefinition|string $column The column to included
      *
@@ -79,21 +90,20 @@ abstract class Ruckusing_Adapter_TableDefinition
      */
     public function included($column)
     {
-		$k = count($this->_columns);
-		for ($i = 0; $i < $k; $i++) {
-			$col = $this->_columns[$i];
-			if (is_string($column) && $col->name == $column) {
-				return true;
-			}
-            if ($column instanceof Ruckusing_Adpater_ColumnDefinition 
+        $nbCols = count($this->_columns);
+        for ($i = 0; $i < $nbCols; $i++) {
+            $col = $this->_columns[$i];
+            if (is_string($column) && $col->name == $column) {
+                return true;
+            } elseif ($column instanceof Ruckusing_Adpater_ColumnDefinition 
                 && $col->name == $column->name
             ) {
-				return true;
-			}
-		}
-		return false;
-	}	
-	
+                return true;
+            }
+        }
+        return false;
+    }   
+    
     /**
      * toSql 
      * 
@@ -101,7 +111,7 @@ abstract class Ruckusing_Adapter_TableDefinition
      */
     public function toSql()
     {
-		return join(",", $this->_columns);
+        return join(',', $this->_columns);
     }
 
     /**
