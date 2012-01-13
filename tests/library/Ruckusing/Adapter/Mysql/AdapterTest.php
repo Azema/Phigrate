@@ -54,6 +54,10 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             $this->object->dropTable('users');
         }
 
+        if ($this->object->hasTable('new_users')) {
+            $this->object->dropTable('new_users');
+        }
+
         if ($this->object->hasTable('contacts')) {
             $this->object->dropTable('contacts');
         }
@@ -532,6 +536,14 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $this->object->executeDdl("CREATE VIEW `v_users` AS SELECT `name` FROM `users`;");
         $schema = $this->object->schema();
         $this->assertNotEmpty($schema);
+        $expected = "CREATE TABLE `users` (
+  `name` varchar(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW `v_users` AS select `users`.`name` AS `name` from `users`;
+
+";
+        $this->assertEquals($expected, $schema);
     }
 
     /**
