@@ -86,7 +86,7 @@ class Ruckusing_Config implements Countable, Iterator
      * facilitate easy access to the data.
      *
      * @param  array   $array
-     * @param  boolean $allowModifications
+     *
      * @return void
      */
     public function __construct(array $array)

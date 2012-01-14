@@ -10,7 +10,7 @@ require_once 'Ruckusing/Adapter/Mysql/Adapter.php';
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/azema/ruckusing-migrations
  */
-class adapterMock extends Ruckusing_Adapter_Mysql_Adapter
+class adapterMock extends Ruckusing_Adapter_Base
 {
     public function __construct($dbConfig, $logger)
     {
@@ -56,7 +56,33 @@ class pdoMock
  */
 class logMock
 {
+    public $debug = array();
+    public $info = array();
+    public $warn = array();
+    public $err = array();
+
+    public function debug($msg)
+    {
+        $this->debug[] = $msg;
+    }
+
+    public function info($msg)
+    {
+        $this->info[] = $msg;
+    }
+
+    public function warn($msg)
+    {
+        $this->warn[] = $msg;
+    }
+
+    public function err($msg)
+    {
+        $this->err[] = $msg;
+    }
+
     public function log($msg)
     {
+        $this->info[] = $msg;
     }
 }

@@ -226,8 +226,6 @@ class Ruckusing_FrameworkRunner
     /**
      * initialize tasks 
      *
-     * @param array $config Config application
-     * 
      * @return void
      */
     public function initTasks()

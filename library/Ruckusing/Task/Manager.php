@@ -69,18 +69,20 @@ class Ruckusing_Task_Manager
     /**
      * __construct 
      * 
-     * @param Ruckusing_Adapter_Base $adapter  Adapter RDBMS
-     * @param string                 $tasksDir The path of directory of tasks
+     * @param Ruckusing_Adapter_Base $adapter       Adapter RDBMS
+     * @param string                 $tasksDir      The path of directory of tasks
+     * @param string                 $migrationsDir The path of directory of migrations.
      *
      * @return Ruckusing_Task_Manager
      */
-    function __construct($adapter, $tasksDir, $migrationsDir)
+    public function __construct(Ruckusing_Adapter_Base $adapter, $tasksDir = null, $migrationsDir = null)
     {
-        $this->_logger = Ruckusing_Logger::instance();
+        $this->_logger = $adapter->getLogger();
         $this->setAdapter($adapter);
-        $this->setDirectoryOfTasks($tasksDir);
-        $this->setDirectoryOfMigrations($migrationsDir);
-        $this->_loadAllTasks();
+        if (isset($tasksDir))
+            $this->setDirectoryOfTasks($tasksDir);
+        if (isset($migrationsDir))
+            $this->setDirectoryOfMigrations($migrationsDir);
     }
 
     /**
@@ -100,9 +102,12 @@ class Ruckusing_Task_Manager
             require_once 'Ruckusing/Exception/Argument.php';
             throw new Ruckusing_Exception_Argument($msg);
         }
-        $this->_tasksDir = $tasksDir;
-        return $this;
+        if (! isset($this->_tasksDir) || $tasksDir != $this->_tasksDir) {
+            $this->_tasksDir = $tasksDir;
+            $this->_loadAllTasks();
+        }
         $this->_logger->debug(__METHOD__ . ' End');
+        return $this;
     }
     
     /**
@@ -164,6 +169,9 @@ class Ruckusing_Task_Manager
     {
         $this->_logger->debug(__METHOD__ . ' Start');
         $this->_logger->debug('TaskName: ' . $key);
+        if (empty($this->_tasks)) {
+            $this->_loadAllTasks();
+        }
         if (! $this->hasTask($key)) {
             $msg = 'Task (' . $key . ') is not registered.';
             $this->_logger->err($msg);
@@ -275,8 +283,6 @@ class Ruckusing_Task_Manager
     /**
      * load all tasks 
      * 
-     * @param string $taskDir Directory path of tasks
-     *
      * @return void
      * @throws Ruckusing_Exception_Argument
      */
@@ -291,6 +297,7 @@ class Ruckusing_Task_Manager
         $namespaces = scandir($this->_tasksDir);
         $this->_logger->debug('Task dir: ' . $this->_tasksDir);
         $regex = '/^(\w+)\.php$/';
+        $this->_tasks = array();
         foreach ($namespaces as $namespace) {
             $this->_logger->debug('Namespace: ' . $namespace);
             //skip over invalid files
@@ -308,7 +315,6 @@ class Ruckusing_Task_Manager
                     continue;
                 }
                 $this->_logger->debug('include ' . $namespace . '/' . $file);
-                //include_once $this->_tasksDir . '/' . $namespace . '/' . $file;
                 $klass = Ruckusing_Util_Naming::classFromFileName($this->_tasksDir . '/' . $namespace . '/' . $file);
                 $this->_logger->debug('className ' . $klass);
                 $taskName = Ruckusing_Util_Naming::taskFromClassName($klass);
