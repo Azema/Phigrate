@@ -13,6 +13,11 @@ class Ruckusing_Adapter_Mysql_ColumnDefinitionTest extends PHPUnit_Framework_Tes
      */
     protected $object;
 
+    /**
+     * @var adapterMock
+     */
+    protected $_adapter;
+
     public function __construct()
     {
         $this->_adapter = new adapterMock(array(), '');

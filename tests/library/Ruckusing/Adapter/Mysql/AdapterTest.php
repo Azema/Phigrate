@@ -770,14 +770,106 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::quoteString
+     * @covers Ruckusing_Adapter_Mysql_Adapter::quote
      */
     public function testQuoteString()
     {
         $string = "string'with'simple'quote";
-        $expected = "string\'with\'simple\'quote";
-        $actual = $this->object->quoteString($string);
+        $expected = "'string\'with\'simple\'quote'";
+        $actual = $this->object->quote($string);
         $this->assertEquals($expected, $actual);
+        $string = 'string"with"simple"quote';
+        $expected = '\'string\"with\"simple\"quote\'';
+        $actual = $this->object->quote($string);
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Test that quote() accepts a string and returns
+     * a quoted string.
+     */
+    public function testAdapterQuote()
+    {
+        $string = 'String without quotes';
+        $value = $this->object->quote($string);
+        $this->assertEquals("'String without quotes'", $value);
+    }
+
+    /**
+     * Test that quote() takes an array and returns
+     * an imploded string of comma-separated, quoted elements.
+     */
+    public function testAdapterQuoteArray()
+    {
+        $array = array("it's", 'all', 'right!');
+        $value = $this->object->quote($array);
+        $this->assertEquals("'it\\'s', 'all', 'right!'", $value);
+    }
+
+    /**
+     * test that quote() accepts a string containing
+     * digits and returns an unquoted string.
+     */
+    public function testAdapterQuoteDigitString()
+    {
+        $string = '123';
+        $value = $this->object->quote($string);
+        $this->assertEquals("'123'", $value);
+    }
+
+    /**
+     * test that quote() escapes a double-quote
+     * character in a string.
+     */
+    public function testAdapterQuoteDoubleQuote()
+    {
+        $string = 'St John"s Wort';
+        $value = $this->object->quote($string);
+        $this->assertEquals("'St John\\\"s Wort'", $value);
+    }
+
+    /**
+     * test that quote() accepts an integer and
+     * returns an unquoted integer.
+     */
+    public function testAdapterQuoteInteger()
+    {
+        $int = 123;
+        $value = $this->object->quote($int);
+        $this->assertEquals(123, $value);
+    }
+
+    /**
+     * test that quote() accepts an float and
+     * returns an unquoted float.
+     */
+    public function testAdapterQuoteFloat()
+    {
+        $float = 123.5487352;
+        $value = $this->object->quote($float);
+        $this->assertEquals(123.548735, $value);
+    }
+
+    /**
+     * test that quote() accepts an array and returns
+     * an imploded string of unquoted elements
+     */
+    public function testAdapterQuoteIntegerArray()
+    {
+        $array = array(1,'2',3);
+        $value = $this->object->quote($array);
+        $this->assertEquals("1, '2', 3", $value);
+    }
+
+    /**
+     * test that quote() escapes a single-quote
+     * character in a string.
+     */
+    public function testAdapterQuoteSingleQuote()
+    {
+        $string = "St John's Wort";
+        $value = $this->object->quote($string);
+        $this->assertEquals("'St John\'s Wort'", $value);
     }
 
     /**

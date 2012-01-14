@@ -492,18 +492,6 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
 	}
 	
     /**
-     * escape string
-     * 
-     * @param string $str String to escape
-     *
-     * @return string
-     */
-    public function quoteString($str)
-    {
-        return mysql_real_escape_string($str); 
-    }
-  
-    /**
      * identifier 
      * 
      * @param string $str Identifier to quote

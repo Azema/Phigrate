@@ -29,7 +29,7 @@ require_once 'Ruckusing/Adapter/IAdapter.php';
  * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
-class Ruckusing_Migration_Base
+abstract class Ruckusing_Migration_Base
 {
     /**
      * adapter 
@@ -261,14 +261,14 @@ class Ruckusing_Migration_Base
 	}
 	
     /**
-     * quote string 
+     * Quote a raw string.
      * 
-     * @param string $str String to escape
+     * @param string|int|float|string[] $value Raw string
      *
      * @return string
      */
-    public function quoteString($str)
+    public function quote($value)
     {
-        return $this->_adapter->quoteString($str); 
+        return $this->_adapter->quote($value); 
     }
 }

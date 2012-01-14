@@ -198,6 +198,28 @@ abstract class Ruckusing_Adapter_Base
     }
 
     /**
+     * Quote a raw string.
+     * 
+     * @param string|int|float|string[] $value Raw string
+     *
+     * @return string
+     */
+    public function quote($value)
+    {
+        if (is_int($value)) {
+            return $value;
+        } elseif (is_float($value)) {
+            return sprintf('%F', $value);
+        } elseif (is_array($value)) {
+            foreach ($value as &$val) {
+                $val = $this->quote($val);
+            }
+            return implode(', ', $value);
+        }
+        return "'" . addcslashes($value, "\000\n\r\\'\"\032") . "'";
+    }
+  
+    /**
      * Creates a PDO instance to represent a connection
      * to the requested database.
      * 

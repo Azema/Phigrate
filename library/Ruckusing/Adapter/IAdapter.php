@@ -57,13 +57,13 @@ interface Ruckusing_Adapter_IAdapter
     public function execute($query);
 
     /**
-     * quote string 
+     * Quote a raw string.
      * 
-     * @param string $str String to escape
+     * @param string|int|float|string[] $value Raw string
      *
      * @return string
      */
-    public function quoteString($str);
+    public function quote($value);
 
 	//database level operations
     /**
