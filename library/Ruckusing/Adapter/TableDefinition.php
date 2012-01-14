@@ -14,6 +14,11 @@
  */
 
 /**
+ * @see Ruckusing_Adapter_ColumnDefinition
+ */
+require_once 'Ruckusing/Adapter/ColumnDefinition.php';
+
+/**
  * Class of table definition
  *
  * @category   RuckusingMigrations
@@ -64,11 +69,13 @@ abstract class Ruckusing_Adapter_TableDefinition
     {
         //sanity check
         if (! $adapter instanceof Ruckusing_Adapter_Base) {
+            require_once 'Ruckusing/Exception/MissingAdapter.php';
             throw new Ruckusing_Exception_MissingAdapter(
                 'Invalid MySQL Adapter instance.'
             );
         }
         if (empty($name) || ! is_string($name)) {
+            require_once 'Ruckusing/Exception/Argument.php';
             throw new Ruckusing_Exception_Argument("Invalid 'name' parameter");
         }
 
@@ -90,14 +97,15 @@ abstract class Ruckusing_Adapter_TableDefinition
      */
     public function included($column)
     {
+        $columnName = '';
+        if ($column instanceof Ruckusing_Adapter_ColumnDefinition) {
+            $columnName = $column->name;
+        } elseif (is_string($column)) {
+            $columnName = $column;
+        }
         $nbCols = count($this->_columns);
         for ($i = 0; $i < $nbCols; $i++) {
-            $col = $this->_columns[$i];
-            if (is_string($column) && $col->name == $column) {
-                return true;
-            } elseif ($column instanceof Ruckusing_Adpater_ColumnDefinition 
-                && $col->name == $column->name
-            ) {
+            if ($this->_columns[$i]->name == $columnName) {
                 return true;
             }
         }

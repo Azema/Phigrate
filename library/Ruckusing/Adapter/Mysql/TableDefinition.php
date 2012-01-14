@@ -207,9 +207,8 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
         
         if ($wants_sql) {
             return $createTableSql;
-        } else {
-            return $this->_adapter->executeDdl($createTableSql);            
         }
+        return $this->_adapter->executeDdl($createTableSql);            
     }
     
     /**

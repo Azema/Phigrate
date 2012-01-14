@@ -11,6 +11,10 @@ if (!defined('RUCKUSING_TS_SCHEMA_TBL_NAME')) {
 	define('RUCKUSING_TS_SCHEMA_TBL_NAME', 'schema_migrations');
 }
 
+/**
+ * @group Ruckusing_Adapter
+ * @group Ruckusing_Adapter_Mysql
+ */
 class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
 {
     /**
@@ -280,7 +284,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
         $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
         $this->assertInstanceOf('PDO', $actual->getConnexion());
-        //ini_set('mysql.default_socket', '/tmp/wrong.sock');
+
         $dbConfig = array(
             'database' => 'ruckusing_migrations_test',
             'socket' => '/tmp/wrong.sock',
@@ -296,7 +300,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             $msg = 'SQLSTATE[HY000] [2002] No such file or directory';
             $this->assertEquals($msg, $e->getMessage());
         }
-        //ini_set('mysql.default_socket', '');
     }
 
     /**

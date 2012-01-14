@@ -61,14 +61,29 @@ abstract class Ruckusing_Adapter_ColumnDefinition
      * __construct 
      * 
      * @param Ruckusing_Adapter_Base $adapter Adapter of RDBMS
-     * @param string                $name    Name column
-     * @param string                $type    Type generic
-     * @param array                 $options Options column
+     * @param string                 $name    Name column
+     * @param string                 $type    Type generic
+     * @param array                  $options Options column
      * 
      * @return Ruckusing_Adapter_ColumnDefinition
      */
     function __construct($adapter, $name, $type, $options = array())
     {
+        //sanity check
+        if (! $adapter instanceof Ruckusing_Adapter_Base) {
+            require_once 'Ruckusing/Exception/MissingAdapter.php';
+            throw new Ruckusing_Exception_MissingAdapter(
+                'Invalid MySQL Adapter instance.'
+            );
+        }
+        if (empty($name) || ! is_string($name)) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument("Invalid 'name' parameter");
+        }
+        if (empty($type) || ! is_string($type)) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument("Invalid 'type' parameter");
+        }
 		$this->_adapter = $adapter;
 		$this->name = $name;
 		$this->type = $type;
