@@ -157,7 +157,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'user' => 'toto',
             'password' => 'pass',
         );
-        $expected = 'mysql:dbname=ruckutest;socket=/tmp/mysqld.sock';
+        $expected = 'mysql:dbname=ruckutest;unix_socket=/tmp/mysqld.sock';
         $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
         $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
         $this->assertEquals($expected, $actual->getDsn());
@@ -183,60 +183,61 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
      */
     public function testCheckDbConfig()
     {
-        $dsn = 'dsn';
+        $dbConfig = 'dsn';
         try {
-            $this->object->checkDbConfig($dsn);
+            $this->object->checkDbConfig($dbConfig);
             $this->fail('checkDbConfig do not accept string argument!');
         } catch (Ruckusing_Exception_Argument $ex) {
             $msg = 'The argument dbConfig must be a array!';
             $this->assertEquals($msg, $ex->getMessage());
         }
-        $dsn = array();
+        $dbConfig = array();
         try {
-            $this->object->checkDbConfig($dsn);
+            $this->object->checkDbConfig($dbConfig);
             $this->fail('checkDbConfig wait for the "database" argument!');
         } catch (Ruckusing_Exception_Argument $ex) {
             $msg = 'The argument dbConfig must be contains index "database"';
             $this->assertEquals($msg, $ex->getMessage());
         }
-        $dsn = array('database' => 'test');
+        $dbConfig = array('database' => 'test');
         try {
-            $this->object->checkDbConfig($dsn);
+            $this->object->checkDbConfig($dbConfig);
             $this->fail('checkDbConfig wait for the "host" argument!');
         } catch (Ruckusing_Exception_Argument $ex) {
-            $msg = 'The argument dbConfig must be contains index "host"';
+            $msg = 'The argument dbConfig must be contains '
+                . 'index "host" or index "socket"';
             $this->assertEquals($msg, $ex->getMessage());
         }
-        $dsn = array(
+        $dbConfig = array(
             'host' => 'localhost',
             'database' => 'test',
         );
         try {
-            $this->object->checkDbConfig($dsn);
+            $this->object->checkDbConfig($dbConfig);
             $this->fail('checkDbConfig wait for the "user" argument!');
         } catch (Ruckusing_Exception_Argument $ex) {
             $msg = 'The argument dbConfig must be contains index "user"';
             $this->assertEquals($msg, $ex->getMessage());
         }
-        $dsn = array(
+        $dbConfig = array(
             'host' => 'localhost',
             'database' => 'test',
             'user' => 'test',
         );
         try {
-            $this->object->checkDbConfig($dsn);
+            $this->object->checkDbConfig($dbConfig);
             $this->fail('checkDbConfig wait for the "password" argument!');
         } catch (Ruckusing_Exception_Argument $ex) {
             $msg = 'The argument dbConfig must be contains index "password"';
             $this->assertEquals($msg, $ex->getMessage());
         }
-        $dsn = array(
+        $dbConfig = array(
             'host' => 'localhost',
             'database' => 'test',
             'user' => 'test',
             'password' => 'test',
         );
-        $this->assertTrue($this->object->checkDbConfig($dsn));
+        $this->assertTrue($this->object->checkDbConfig($dbConfig));
     }
 
     /**
@@ -265,6 +266,37 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $logger = $this->object->getLogger();
         $actual = $this->object->setLogger($logger);
         $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
+    }
+
+    public function testGetConnexion()
+    {
+        $dbConfig = array(
+            'database' => 'ruckusing_migrations_test',
+            'socket' => '/var/run/mysqld/mysqld.sock',
+            'user' => 'rucku',
+            'password' => 'rucku',
+            'options' => array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"),
+        );
+        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
+        $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
+        $this->assertInstanceOf('PDO', $actual->getConnexion());
+        //ini_set('mysql.default_socket', '/tmp/wrong.sock');
+        $dbConfig = array(
+            'database' => 'ruckusing_migrations_test',
+            'socket' => '/tmp/wrong.sock',
+            'user' => 'rucku',
+            'password' => 'rucku',
+        );
+        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
+        $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
+        try {
+            $conn = $actual->getConnexion();
+            $this->fail('The socket path is incorrect');
+        } catch (Ruckusing_Exception_AdapterConnexion $e) {
+            $msg = 'SQLSTATE[HY000] [2002] No such file or directory';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        //ini_set('mysql.default_socket', '');
     }
 
     /**

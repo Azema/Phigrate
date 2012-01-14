@@ -104,21 +104,14 @@ abstract class Ruckusing_Adapter_Base
                     'The argument dbConfig must be contains index "database"'
                 );
             }
-            if (!array_key_exists('socket', $dbConfig) 
+            if (! array_key_exists('socket', $dbConfig) 
                 && ! array_key_exists('host', $dbConfig)
             ) {
-                if (! array_key_exists('host', $dbConfig)) {
-                    require_once 'Ruckusing/Exception/Argument.php';
-                    throw new Ruckusing_Exception_Argument(
-                        'The argument dbConfig must be contains index "host"'
-                    );
-                }
-                if (! array_key_exists('socket', $dbConfig)) {
-                    require_once 'Ruckusing/Exception/Argument.php';
-                    throw new Ruckusing_Exception_Argument(
-                        'The argument dbConfig must be contains index "socket"'
-                    );
-                }
+                require_once 'Ruckusing/Exception/Argument.php';
+                throw new Ruckusing_Exception_Argument(
+                    'The argument dbConfig must be contains '
+                    . 'index "host" or index "socket"'
+                );
             }
             if (! array_key_exists('user', $dbConfig)) {
                 require_once 'Ruckusing/Exception/Argument.php';
@@ -136,19 +129,6 @@ abstract class Ruckusing_Adapter_Base
         return true;
     }
 	
-    /**
-     * set dsn 
-     * 
-     * @param array $dsn Config DB for connect it
-     *
-     * @return Ruckusing_Adapter_Base
-     */
-    public function setDsn($dsn) 
-    {
-        $this->_dsn = $dsn;
-        return $this;
-    }
-
     /**
      * get dsn 
      * 
@@ -235,7 +215,9 @@ abstract class Ruckusing_Adapter_Base
             $password = $this->_dbConfig['password'];
         }
         $options = array();
-        if (array_key_exists('options', $this->_dbConfig)) {
+        if (array_key_exists('options', $this->_dbConfig) 
+            && is_array($this->_dbConfig['options'])
+        ) {
             $options = $this->_dbConfig['options'];
         }
         try {
