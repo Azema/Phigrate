@@ -10,7 +10,7 @@ require_once 'Ruckusing/Adapter/Mysql/Adapter.php';
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/azema/ruckusing-migrations
  */
-class adapterMock extends Ruckusing_Adapter_Base
+class adapterMock extends Ruckusing_Adapter_Mysql_Adapter
 {
     public function __construct($dbConfig, $logger)
     {
