@@ -102,7 +102,7 @@ class Ruckusing_Logger
      *
      * @return Ruckusing_Logger
      */
-    public static function instance($logfile = null)
+    public static function instance($logfile)
     {
         if (isset(self::$_instance)) {
             return self::$_instance;

@@ -142,7 +142,9 @@ class Ruckusing_Config implements Countable, Iterator
      */
     public function __set($name, $value)
     {
-        return false;
+        /** @see Ruckusing_Exception_Config */
+        require_once 'Ruckusing/Exception/Config.php';
+        throw new Ruckusing_Exception_Config('Ruckusing_Config is read only');
     }
     
     /**
@@ -172,7 +174,8 @@ class Ruckusing_Config implements Countable, Iterator
     public function toArray()
     {
         $array = array();
-        foreach ($this->_data as $key => $value) {
+        $data = $this->_data;
+        foreach ($data as $key => $value) {
             if ($value instanceof Ruckusing_Config) {
                 $array[$key] = $value->toArray();
             } else {
@@ -202,6 +205,9 @@ class Ruckusing_Config implements Countable, Iterator
      */
     public function __unset($name)
     {
+        /** @see Ruckusing_Exception_Config */
+        require_once 'Ruckusing/Exception/Config.php';
+        throw new Ruckusing_Exception_Config('Ruckusing_Config is read only');
     }
 
     /**
@@ -271,6 +277,9 @@ class Ruckusing_Config implements Countable, Iterator
      */
     public function getSectionName()
     {
+        if(is_array($this->_loadedSection) && count($this->_loadedSection) == 1) {
+            $this->_loadedSection = $this->_loadedSection[0];
+        }
         return $this->_loadedSection;
     }
 
@@ -282,38 +291,6 @@ class Ruckusing_Config implements Countable, Iterator
     public function areAllSectionsLoaded()
     {
         return $this->_loadedSection === null;
-    }
-
-    /**
-     * Merge another Ruckusing_Config with this one. The items
-     * in $merge will override the same named items in
-     * the current config.
-     *
-     * @param Ruckusing_Config $merge
-     * @return Ruckusing_Config
-     */
-    public function merge(Ruckusing_Config $merge)
-    {
-        foreach ($merge as $key => $item) {
-            if (array_key_exists($key, $this->_data)) {
-                if ($item instanceof Ruckusing_Config 
-                    && $this->$key instanceof Ruckusing_Config
-                ) {
-                    $this->$key = $this->$key
-                        ->merge(new Ruckusing_Config($item->toArray()));
-                } else {
-                    $this->$key = $item;
-                }
-            } else {
-                if($item instanceof Ruckusing_Config) {
-                    $this->$key = new Ruckusing_Config($item->toArray());
-                } else {
-                    $this->$key = $item;
-                }
-            }
-        }
-
-        return $this;
     }
 
     /**
@@ -332,7 +309,7 @@ class Ruckusing_Config implements Countable, Iterator
         while (array_key_exists($extendedSectionCurrent, $this->_extends)) {
             if ($this->_extends[$extendedSectionCurrent] == $extendingSection) {
                 /** @see Ruckusing_Config_Exception */
-                require_once 'Ruckusing/Config/Exception.php';
+                require_once 'Ruckusing/Exception/Config.php';
                 throw new Ruckusing_Exception_Config(
                     'Illegal circular inheritance detected'
                 );
@@ -358,5 +335,42 @@ class Ruckusing_Config implements Countable, Iterator
         } else {
             $this->_loadFileErrorStr .= (PHP_EOL . $errstr);
         }
+    }
+
+    /**
+     * Merge two arrays recursively, overwriting keys of the same name
+     * in $firstArray with the value in $secondArray.
+     *
+     * @param  mixed $firstArray  First array
+     * @param  mixed $secondArray Second array to merge into first array
+     * @return array
+     */
+    protected function _arrayMergeRecursive($firstArray, $secondArray)
+    {
+        if (is_array($firstArray) && is_array($secondArray)) {
+            foreach ($secondArray as $key => $value) {
+                if (array_key_exists($key, $firstArray)) {
+                    $firstArray[$key] = $this->_arrayMergeRecursive(
+                        $firstArray[$key],
+                        $value
+                    );
+                } else {
+                    if($key === 0) {
+                        $firstArray = array(
+                            0 => $this->_arrayMergeRecursive(
+                                $firstArray,
+                                $value
+                            )
+                        );
+                    } else {
+                        $firstArray[$key] = $value;
+                    }
+                }
+            }
+        } else {
+            $firstArray = $secondArray;
+        }
+
+        return $firstArray;
     }
 }

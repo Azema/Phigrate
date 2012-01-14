@@ -44,6 +44,20 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
     protected $_nestSeparator = '.';
 
     /**
+     * String that separates the parent section name
+     *
+     * @var string
+     */
+    protected $_sectionSeparator = ':';
+
+    /**
+     * Whether to skip extends or not
+     *
+     * @var boolean
+     */
+    protected $_skipExtends = false;
+
+    /**
      * Loads the section $section from the config file $filename for
      * access facilitated by nested object properties.
      *
@@ -91,7 +105,7 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
             /**
              * @see Ruckusing_Exception_Config
              */
-            require_once 'Ruckusing/Config/Exception.php';
+            require_once 'Ruckusing/Exception/Config.php';
             throw new Ruckusing_Exception_Config('Filename is not set');
         }
 
@@ -101,9 +115,60 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
             }
         }
 
+        $iniArray = $this->_loadIniFile($filename);
+
+        if (null === $section) {
+            $dataArray = array();
+            foreach ($iniArray as $sectionName => $sectionData) {
+                if(!is_array($sectionData)) {
+                    $dataArray = $this->_arrayMergeRecursive($dataArray, $this->_processKey(array(), $sectionName, $sectionData));
+                } else {
+                    $dataArray[$sectionName] = $this->_processSection($iniArray, $sectionName);
+                }
+            }
+            parent::__construct($dataArray);
+        } else {
+            // Load one or more sections
+            if (! is_array($section)) {
+                $section = array($section);
+            }
+
+            $dataArray = array();
+            foreach ($section as $sectionName) {
+                if (! array_key_exists($sectionName, $iniArray)) {
+                    /**
+                     * @see Ruckusing_Exception_Config
+                     */
+                    require_once 'Ruckusing/Exception/Config.php';
+                    throw new Ruckusing_Exception_Config(
+                        "Section '$section' cannot be found in $filename"
+                    );
+                }
+                $dataArray = $this->_arrayMergeRecursive(
+                    $this->_processSection($iniArray, $sectionName),
+                    $dataArray
+                );
+            }
+            parent::__construct($dataArray);
+        }
+
+        $this->_loadedSection = $section;
+    }
+
+    /**
+     * Load the INI file from disk using parse_ini_file(). Use a private error
+     * handler to convert any loading errors into a Ruckusing_Exception_Config
+     *
+     * @param string $filename
+     * @throws Ruckusing_Exception_Config
+     * @return array
+     */
+    protected function _parseIniFile($filename)
+    {
         set_error_handler(array($this, '_loadFileErrorHandler'));
         $iniArray = parse_ini_file($filename, true); // Warnings and errors are suppressed
         restore_error_handler();
+
         // Check if there was a error while loading file
         if ($this->_loadFileErrorStr !== null) {
             /**
@@ -112,23 +177,41 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
             require_once 'Ruckusing/Exception/Config.php';
             throw new Ruckusing_Exception_Config($this->_loadFileErrorStr);
         }
-        
-        $preProcessedArray = array();
-        foreach ($iniArray as $key => $data)
+
+        return $iniArray;
+    }
+
+    /**
+     * Load the ini file and preprocess the section separator (':' in the
+     * section name (that is used for section extension) so that the resultant
+     * array has the correct section names and the extension information is
+     * stored in a sub-key called ';extends'. We use ';extends' as this can
+     * never be a valid key name in an INI file that has been loaded using
+     * parse_ini_file().
+     *
+     * @param string $filename
+     * @throws Ruckusing_Exception_Config
+     * @return array
+     */
+    protected function _loadIniFile($filename)
+    {
+        $loaded = $this->_parseIniFile($filename);
+        $iniArray = array();
+        foreach ($loaded as $key => $data)
         {
-            $bits = explode(':', $key);
-            $thisSection = trim($bits[0]);
-            switch (count($bits)) {
+            $pieces = explode($this->_sectionSeparator, $key);
+            $thisSection = trim($pieces[0]);
+            switch (count($pieces)) {
                 case 1:
-                    $preProcessedArray[$thisSection] = $data;
+                    $iniArray[$thisSection] = $data;
                     break;
 
                 case 2:
-                    $extendedSection = trim($bits[1]);
-                    $preProcessedArray[$thisSection] = 
-                        array_merge(
-                            array(';extends' => $extendedSection), $data
-                        );
+                    $extendedSection = trim($pieces[1]);
+                    $iniArray[$thisSection] = array_merge(
+                        array(';extends'=>$extendedSection),
+                        $data
+                    );
                     break;
 
                 default:
@@ -143,65 +226,13 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
             }
         }
 
-        if (null === $section) {
-            $dataArray = array();
-            foreach ($preProcessedArray as $sectionName => $sectionData) {
-                if (! is_array($sectionData)) {
-                    $dataArray = 
-                        array_merge_recursive(
-                            $dataArray, 
-                            $this->_processKey(
-                                array(), $sectionName, $sectionData
-                            )
-                        );
-                } else {
-                    $dataArray[$sectionName] = 
-                        $this->_processExtends(
-                            $preProcessedArray, $sectionName
-                        );
-                }
-            }
-            parent::__construct($dataArray);
-        } elseif (is_array($section)) {
-            $dataArray = array();
-            foreach ($section as $sectionName) {
-                if (! isset($preProcessedArray[$sectionName])) {
-                    /**
-                     * @see Ruckusing_Exception_Config
-                     */
-                    require_once 'Ruckusing/Exception/Config.php';
-                    throw new Ruckusing_Exception_Config(
-                        "Section '$sectionName' cannot be found in $filename"
-                    );
-                }
-                $dataArray = array_merge(
-                    $this->_processExtends($preProcessedArray, $sectionName),
-                    $dataArray
-                );
-            }
-            parent::__construct($dataArray);
-        } else {
-            if (! isset($preProcessedArray[$section])) {
-                /**
-                 * @see Ruckusing_Exception_Config
-                 */
-                require_once 'Ruckusing/Exception/Config.php';
-                throw new Ruckusing_Exception_Config(
-                    "Section '$section' cannot be found in $filename"
-                );
-            }
-            parent::__construct(
-                $this->_processExtends($preProcessedArray, $section)
-            );
-        }
-
-        $this->_loadedSection = $section;
+        return $iniArray;
     }
     
     /**
-     * Helper function to process each element in the section and handle
-     * the "extends" inheritance keyword. Passes control to _processKey()
-     * to handle the "dot" sub-property syntax in each key.
+     * Process each element in the section and handle the ";extends" inheritance
+     * key. Passes control to _processKey() to handle the nest separator
+     * sub-property syntax that may be used within the key name.
      *
      * @param  array  $iniArray
      * @param  string $section
@@ -209,7 +240,7 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
      * @throws Ruckusing_Exception_Config
      * @return array
      */
-    protected function _processExtends($iniArray, $section, $config = array())
+    protected function _processSection($iniArray, $section, $config = array())
     {
         $thisSection = $iniArray[$section];
 
@@ -217,14 +248,17 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
             if (strtolower($key) == ';extends') {
                 if (isset($iniArray[$value])) {
                     $this->_assertValidExtend($section, $value);
-                    $config = $this->_processExtends($iniArray, $value, $config);
+
+                    if (! $this->_skipExtends) {
+                        $config = $this->_processSection($iniArray, $value, $config);
+                    }
                 } else {
                     /**
                      * @see Ruckusing_Exception_Config
                      */
-                    require_once 'Ruckusing/Config/Exception.php';
+                    require_once 'Ruckusing/Exception/Config.php';
                     throw new Ruckusing_Exception_Config(
-                        "Section '$section' cannot be found"
+                        "Parent section '$section' cannot be found"
                     );
                 }
             } else {
@@ -250,13 +284,18 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
         if (strpos($key, $this->_nestSeparator) !== false) {
             $pieces = explode($this->_nestSeparator, $key, 2);
             if (strlen($pieces[0]) && strlen($pieces[1])) {
-                if (!isset($config[$pieces[0]])) {
-                    $config[$pieces[0]] = array();
-                } elseif (!is_array($config[$pieces[0]])) {
+                if (! array_key_exists($pieces[0], $config)) {
+                    if ($pieces[0] === '0' && ! empty($config)) {
+                        // convert the current values in $config into an array
+                        $config = array($pieces[0] => $config);
+                    } else {
+                        $config[$pieces[0]] = array();
+                    }
+                } elseif (! is_array($config[$pieces[0]])) {
                     /**
                      * @see Ruckusing_Exception_Config
                      */
-                    require_once 'Ruckusing/Config/Exception.php';
+                    require_once 'Ruckusing/Exception/Config.php';
                     throw new Ruckusing_Exception_Config(
                         'Cannot create sub-key for "'
                         . $pieces[0] .'" as key already exists'
@@ -269,7 +308,7 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
                 /**
                  * @see Ruckusing_Exception_Config
                  */
-                require_once 'Ruckusing/Config/Exception.php';
+                require_once 'Ruckusing/Exception/Config.php';
                 throw new Ruckusing_Exception_Config(
                     'Invalid key "' . $key . '"'
                 );
