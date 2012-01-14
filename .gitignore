@@ -1,7 +1,9 @@
+documentation/api/*
+documentation/log/*.log
 logs/*.log
 tests/logs/*.log
 tests/dummy/db/schema.txt
 .DS_Store
-lib/.DS_Store
+library/.DS_Store
 tests/.DS_Store
 
