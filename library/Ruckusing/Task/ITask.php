@@ -41,4 +41,13 @@ interface Ruckusing_Task_ITask
      * @return string
      */
     public function help();
+
+    /**
+     * setDirectoryOfMigrations 
+     * 
+     * @param string $migrationDir The migration directory path
+     *
+     * @return void
+     */
+    public function setDirectoryOfMigrations($migrationDir);
 }

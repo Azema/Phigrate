@@ -80,7 +80,7 @@ class Ruckusing_Task_Manager
         $this->_logger = $adapter->getLogger();
         $this->setAdapter($adapter);
         if (isset($tasksDir))
-            $this->setDirectoryOfTasks($tasksDir);
+            $this->setDirectoryOfTasks($tasksDir, true);
         if (isset($migrationsDir))
             $this->setDirectoryOfMigrations($migrationsDir);
     }
@@ -88,12 +88,13 @@ class Ruckusing_Task_Manager
     /**
      * set directory of tasks 
      * 
-     * @param string $tasksDir The path of directory of tasks
+     * @param string  $tasksDir The path of directory of tasks
+     * @param boolean $reload   Reload all tasks
      *
      * @return Ruckusing_Task_Manager
      * @throws Ruckusing_Exception_Argument
      */
-    public function setDirectoryOfTasks($tasksDir)
+    public function setDirectoryOfTasks($tasksDir, $reload = false)
     {
         $this->_logger->debug(__METHOD__ . ' Start');
         if (! is_dir($tasksDir)) {
@@ -104,6 +105,9 @@ class Ruckusing_Task_Manager
         }
         if (! isset($this->_tasksDir) || $tasksDir != $this->_tasksDir) {
             $this->_tasksDir = $tasksDir;
+            $this->_tasks = array();
+        }
+        if ($reload) {
             $this->_loadAllTasks();
         }
         $this->_logger->debug(__METHOD__ . ' End');
@@ -142,6 +146,12 @@ class Ruckusing_Task_Manager
      */
     public function setAdapter($adapter) 
     {
+        if (! $adapter instanceof Ruckusing_Adapter_Base) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument(
+                'Adapter must be implement Ruckusing_Adapter_Base!'
+            );
+        }
         $this->_adapter = $adapter;
         return $this;
     }
@@ -154,6 +164,16 @@ class Ruckusing_Task_Manager
     public function getAdapter()
     {
         return $this->_adapter;
+    }
+
+    /**
+     * getLogger 
+     * 
+     * @return Ruckusing_Logger
+     */
+    public function getLogger()
+    {
+        return $this->_logger;
     }
     
     /**
@@ -210,21 +230,22 @@ class Ruckusing_Task_Manager
      *
      * @return boolean
      */
-    public function registerTask($taskName, Ruckusing_Task_ITask $taskObj)
+    public function registerTask($taskName, $taskObj)
     {
         $this->_logger->debug(__METHOD__ . ' Start');
 
         if ($this->hasTask($taskName)) {
-            $this->_logger->warn('Task name ' . $taskName . ' is already defined!');
-            trigger_error(sprintf("Task name '%s' is already defined!", $taskName));
-            return false;
+            $msg = sprintf("Task name '%s' is already defined!", $taskName);
+            $this->_logger->warn($msg);
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument($msg);
         }
 
         if (! $taskObj instanceof Ruckusing_Task_ITask) {
             $msg = 'Task (' . $taskName . ') does not implement Ruckusing_ITask';
             $this->_logger->warn($msg);
-            trigger_error($msg);
-            return false;
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument($msg);
         }
         $this->_logger->debug('migrationDir: ' . $this->_migrationDir);
         $taskObj->setDirectoryOfMigrations($this->_migrationDir);
@@ -264,17 +285,6 @@ class Ruckusing_Task_Manager
         $output = $task->help();
         $this->_logger->debug(__METHOD__ . ' End');
         return $output;
-    }
-    
-    /**
-     * get name 
-     * 
-     * @TODO: Voir si cette methode est utilisée
-     *
-     * @return void
-     */
-    public function getName()
-    {
     }
     
     //---------------------

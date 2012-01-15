@@ -46,22 +46,25 @@ class Ruckusing_Task_ManagerTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Ruckusing_Task_Manager', $this->object);
     }
 
-    /**
-     * @covers Ruckusing_Task_Manager::setDirectoryOfTasks
-     * @todo   Implement testSetDirectoryOfTasks().
-     */
     public function testSetDirectoryOfTasks()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        $this->assertFalse($this->object->hasTask('db:migrate'));
+        try {
+            $path = '/tmp/unknown/tasks';
+            $this->object->setDirectoryOfTasks($path);
+            $this->fail('path of tasks is incorrect!');
+        } catch (Ruckusing_Exception_Argument $e) {
+            $msg = 'Task dir: "' . $path . '" does not exist!';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $path = RUCKUSING_BASE . '/library/Task';
+        $actual = $this->object->setDirectoryOfTasks($path);
+        $this->assertFalse($this->object->hasTask('db:migrate'));
+        $actual = $this->object->setDirectoryOfTasks($path, true);
+        $this->assertInstanceOf('Ruckusing_Task_Manager', $actual);
+        $this->assertTrue($actual->hasTask('db:migrate'));
     }
 
-    /**
-     * @covers Ruckusing_Task_Manager::setDirectoryOfMigrations
-     * @todo   Implement testSetDirectoryOfMigrations().
-     */
     public function testSetDirectoryOfMigrations()
     {
         // Remove the following lines when you implement this test.
@@ -70,52 +73,64 @@ class Ruckusing_Task_ManagerTest extends PHPUnit_Framework_TestCase
         );
     }
 
-    /**
-     * @covers Ruckusing_Task_Manager::setAdapter
-     * @todo   Implement testSetAdapter().
-     */
     public function testSetAdapter()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        try {
+            $this->object->setAdapter('myAdapter');
+            $this->fail('Task_Manager::setAdapter accept only Ruckusing_Adapter_Base argument!');
+        } catch (Ruckusing_Exception_Argument $e) {
+            $msg = 'Adapter must be implement Ruckusing_Adapter_Base!';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $actual = $this->object->setAdapter($this->_adapter);
+        $this->assertInstanceOf('Ruckusing_Task_Manager', $actual);
+        $this->assertSame($this->_adapter, $actual->getAdapter());
     }
 
-    /**
-     * @covers Ruckusing_Task_Manager::getAdapter
-     * @todo   Implement testGetAdapter().
-     */
     public function testGetAdapter()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        $this->assertInstanceOf('Ruckusing_Adapter_Base', $this->object->getAdapter());
     }
 
-    /**
-     * @covers Ruckusing_Task_Manager::getTask
-     * @todo   Implement testGetTask().
-     */
     public function testGetTask()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        try {
+            $this->object->getTask('unknown');
+            $this->fail('Unknown task specified!');
+        } catch (Ruckusing_Exception_Argument $e) {
+            $msg = 'Please: you must specify the directory of tasks!';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+
+        // Set directory of tasks
+        $path = RUCKUSING_BASE . '/library/Task';
+        $actual = $this->object->setDirectoryOfTasks($path);
+        $this->assertInstanceOf('Ruckusing_Task_Manager', $actual);
+
+        try {
+            $task = 'unknwon';
+            $this->object->getTask($task);
+            $this->fail('Unknown task specified!');
+        } catch (Ruckusing_Exception_InvalidTask $e) {
+            $msg = 'Task (' . $task . ') is not registered.';
+            $this->assertEquals($msg, $e->getMessage());
+            $lastErr = array_pop($this->object->getLogger()->err);
+            $this->assertEquals($lastErr, $e->getMessage());
+        }
+        $task = $this->object->getTask('db:migrate');
+        $this->assertInstanceOf('Ruckusing_Task_ITask', $task);
     }
 
-    /**
-     * @covers Ruckusing_Task_Manager::hasTask
-     * @todo   Implement testHasTask().
-     */
     public function testHasTask()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        $this->assertFalse($this->object->hasTask('db:migrate'));
+        // Set directory of tasks
+        $path = RUCKUSING_BASE . '/library/Task';
+        $actual = $this->object->setDirectoryOfTasks($path);
+        $this->assertInstanceOf('Ruckusing_Task_Manager', $actual);
+        $this->assertFalse($this->object->hasTask('db:migrate'));
+        $this->object->getTask('db:migrate');
+        $this->assertTrue($this->object->hasTask('db:migrate'));
     }
 
     /**
@@ -124,10 +139,33 @@ class Ruckusing_Task_ManagerTest extends PHPUnit_Framework_TestCase
      */
     public function testRegisterTask()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        // Set directory of tasks
+        $path = RUCKUSING_BASE . '/library/Task';
+        $actual = $this->object->setDirectoryOfTasks($path, true);
+        $taskName = 'db:migrate';
+        $task = $this->object->getTask($taskName);
+        try {
+            $this->object->registerTask($taskName, $task);
+            $this->fail('Task "' . $taskName . '" is already registered!');
+        } catch (Ruckusing_Exception_Argument $e) {
+            $msg = "Task name '" . $taskName . "' is already defined!";
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $task = 'no task';
+        $taskName = 'my:task';
+        try {
+            $this->object->registerTask($taskName, $task);
+            $this->fail('Task "' . $taskName . '" does not implement ITask!');
+        } catch (Ruckusing_Exception_Argument $e) {
+            $msg = "Task (" . $taskName . ") does not implement Ruckusing_ITask";
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $task = new taskMock();
+        $taskName = 'my:task';
+        $actual = $this->object->registerTask($taskName, $task);
+        $this->assertTrue($actual);
+        $this->assertTrue($this->object->hasTask($taskName));
+        $this->assertInstanceOf('Ruckusing_Task_ITask', $this->object->getTask($taskName));
     }
 
     /**
