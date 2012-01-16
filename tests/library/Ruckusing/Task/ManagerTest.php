@@ -67,10 +67,27 @@ class Ruckusing_Task_ManagerTest extends PHPUnit_Framework_TestCase
 
     public function testSetDirectoryOfMigrations()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        try {
+            $this->object->setDirectoryOfMigrations('/migrateTests');
+            $this->fail('Migration directory does not exists!');
+        } catch (Ruckusing_Exception_Argument $e) {
+            $msg = 'Migration dir: "/migrateTests" does not exist!';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        // Set directory of tasks
+        $path = RUCKUSING_BASE . '/library/Task';
+        $this->object->setDirectoryOfTasks($path, true);
+        $this->object->setDirectoryOfMigrations('/tmp');
+        $task = new taskMock();
+        $taskName = 'my:task';
+        $this->object->registerTask($taskName, $task);
+        $this->assertTrue($this->object->hasTask($taskName));
+        $this->assertInstanceOf(
+            'Ruckusing_Task_ITask',
+            $this->object->getTask($taskName)
         );
+        $task = $this->object->getTask($taskName);
+        $this->assertEquals('/tmp', $task->dir);
     }
 
     public function testSetAdapter()
@@ -135,7 +152,6 @@ class Ruckusing_Task_ManagerTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers Ruckusing_Task_Manager::registerTask
-     * @todo   Implement testRegisterTask().
      */
     public function testRegisterTask()
     {
@@ -170,37 +186,50 @@ class Ruckusing_Task_ManagerTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers Ruckusing_Task_Manager::execute
-     * @todo   Implement testExecute().
      */
     public function testExecute()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        // Set directory of tasks
+        $path = RUCKUSING_BASE . '/library/Task';
+        $this->object->setDirectoryOfTasks($path, true);
+        $task = new taskMock();
+        $taskName = 'my:task';
+        $this->object->registerTask($taskName, $task);
+        $this->assertTrue($this->object->hasTask($taskName));
+        $this->assertInstanceOf(
+            'Ruckusing_Task_ITask',
+            $this->object->getTask($taskName)
         );
+        $args = array(
+            'test' => 'value',
+            'get' => 'task',
+            'execute' => 'manager',
+        );
+        $return = $this->object->execute($taskName, $args);
+        $this->assertInternalType('string', $return);
+        $expected = 'taskMock::execute: ' . implode(', ', $args);
+        $this->assertEquals($expected, $return);
     }
 
     /**
      * @covers Ruckusing_Task_Manager::help
-     * @todo   Implement testHelp().
      */
     public function testHelp()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        // Set directory of tasks
+        $path = RUCKUSING_BASE . '/library/Task';
+        $this->object->setDirectoryOfTasks($path, true);
+        $task = new taskMock();
+        $taskName = 'my:task';
+        $this->object->registerTask($taskName, $task);
+        $this->assertTrue($this->object->hasTask($taskName));
+        $this->assertInstanceOf(
+            'Ruckusing_Task_ITask',
+            $this->object->getTask($taskName)
         );
-    }
-
-    /**
-     * @covers Ruckusing_Task_Manager::getName
-     * @todo   Implement testGetName().
-     */
-    public function testGetName()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        $help = $this->object->help($taskName);
+        $this->assertInternalType('string', $help);
+        $expected = 'my help task';
+        $this->assertEquals($expected, $help);
     }
 }

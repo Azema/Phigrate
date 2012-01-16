@@ -13,7 +13,7 @@ class taskMock implements Ruckusing_Task_ITask
      */
     public function execute($args)
     {
-        return implode(', ', $args);
+        return __METHOD__ . ': ' . implode(', ', $args);
     }
     
     /**

@@ -610,47 +610,6 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
 	}
 	
     /**
-     * rename column 
-     * 
-     * @param string $tableName     Table name
-     * @param string $columnName    Old column name
-     * @param string $newColumnName New column name
-     *
-     * @return boolean
-     * @throws Ruckusing_Exception_Argument
-     */
-    public function renameColumn($tableName, $columnName, $newColumnName)
-    {
-		if (empty($tableName)) {
-            throw new Ruckusing_Exception_Argument(
-                'Missing table name parameter'
-            );
-		}
-		if (empty($columnName)) {
-            throw new Ruckusing_Exception_Argument(
-                'Missing original column name parameter'
-            );
-		}
-		if (empty($newColumnName)) {
-            throw new Ruckusing_Exception_Argument(
-                'Missing new column name parameter'
-            );
-		}
-		$columnInfo = $this->columnInfo($tableName, $columnName);
-		$current_type = $columnInfo['type'];
-        $sql = sprintf(
-            'ALTER TABLE %s CHANGE %s %s %s', 
-		    $this->identifier($tableName), 
-		    $this->identifier($columnName), 
-            $this->identifier($newColumnName),
-            $current_type
-        );
-
-		return $this->executeDdl($sql);
-	}
-
-
-    /**
      * change column 
      * 
      * @param string $tableName  Table name
@@ -695,6 +654,46 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
             $this->typeToSql($type, $options)
         );
         $sql .= $this->addColumnOptions($type, $options);
+
+		return $this->executeDdl($sql);
+	}
+
+    /**
+     * rename column 
+     * 
+     * @param string $tableName     Table name
+     * @param string $columnName    Old column name
+     * @param string $newColumnName New column name
+     *
+     * @return boolean
+     * @throws Ruckusing_Exception_Argument
+     */
+    public function renameColumn($tableName, $columnName, $newColumnName)
+    {
+		if (empty($tableName)) {
+            throw new Ruckusing_Exception_Argument(
+                'Missing table name parameter'
+            );
+		}
+		if (empty($columnName)) {
+            throw new Ruckusing_Exception_Argument(
+                'Missing original column name parameter'
+            );
+		}
+		if (empty($newColumnName)) {
+            throw new Ruckusing_Exception_Argument(
+                'Missing new column name parameter'
+            );
+		}
+		$columnInfo = $this->columnInfo($tableName, $columnName);
+		$current_type = $columnInfo['type'];
+        $sql = sprintf(
+            'ALTER TABLE %s CHANGE %s %s %s', 
+		    $this->identifier($tableName), 
+		    $this->identifier($columnName), 
+            $this->identifier($newColumnName),
+            $current_type
+        );
 
 		return $this->executeDdl($sql);
 	}

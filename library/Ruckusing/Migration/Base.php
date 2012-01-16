@@ -7,7 +7,7 @@
  * @category  RuckusingMigrations
  * @package   Ruckusing_Migration
  * @author    Cody Caughlan <codycaughlan % gmail . com>
- * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @author    Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright 2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
@@ -24,7 +24,7 @@ require_once 'Ruckusing/Adapter/IAdapter.php';
  * @category  RuckusingMigrations
  * @package   Ruckusing_Migration
  * @author    Cody Caughlan <codycaughlan % gmail . com>
- * @author     Manuel HERVO <manuel.hervo % gmail .com>
+ * @author    Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright 2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
@@ -36,18 +36,35 @@ abstract class Ruckusing_Migration_Base
      * 
      * @var Ruckusing_Adapter_Base
      */
-	private $_adapter;
+	protected $_adapter;
 	
+    /**
+     * __construct 
+     * 
+     * @param Ruckusing_Adapter_Base $adapter Adapter of RDBMS
+     *
+     * @return void
+     */
+    public function __construct($adapter)
+    {
+        $this->setAdapter($adapter);
+    }
+
     /**
      * set adapter 
      * 
      * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
      *
-     * @return void
+     * @return Ruckusing_Migration_Base
      */
     public function setAdapter($adapter)
     {
-		$this->_adapter = $adapter;
+        if (! $adapter instanceof Ruckusing_Adapter_Base) {
+            $msg = 'adapter must be implement Ruckusing_Adapter_Base!';
+            throw new Ruckusing_Exception_Argument($msg);
+        }
+        $this->_adapter = $adapter;
+        return $this;
 	}
 	
     /**
@@ -86,6 +103,19 @@ abstract class Ruckusing_Migration_Base
 	}
 	
     /**
+     * create table 
+     * 
+     * @param string $tableName The table name
+     * @param array  $options   Options definition table
+     *
+     * @return Ruckusing_Adapter_TableDefinition
+     */
+    public function createTable($tableName, $options = array())
+    {
+		return $this->_adapter->createTable($tableName, $options);
+	}
+	
+    /**
      * drop table 
      * 
      * @param string $tbl The table name
@@ -108,20 +138,6 @@ abstract class Ruckusing_Migration_Base
     public function renameTable($name, $newName)
     {
 		return $this->_adapter->renameTable($name, $newName);						
-	}
-		
-    /**
-     * rename column 
-     * 
-     * @param string $tblName       The table name where is the column
-     * @param string $columnName    The old column name
-     * @param string $newColumnName The new column name
-     *
-     * @return boolean
-     */
-    public function renameColumn($tblName, $columnName, $newColumnName)
-    {
-		return $this->_adapter->renameColumn($tblName, $columnName, $newColumnName);
 	}
 
     /**
@@ -172,6 +188,20 @@ abstract class Ruckusing_Migration_Base
 	}
 	
     /**
+     * rename column 
+     * 
+     * @param string $tblName       The table name where is the column
+     * @param string $columnName    The old column name
+     * @param string $newColumnName The new column name
+     *
+     * @return boolean
+     */
+    public function renameColumn($tblName, $columnName, $newColumnName)
+    {
+		return $this->_adapter->renameColumn($tblName, $columnName, $newColumnName);
+	}
+
+    /**
      * add index 
      * 
      * @param string       $tableName  The table name
@@ -197,19 +227,6 @@ abstract class Ruckusing_Migration_Base
     public function removeIndex($tableName, $columnName, $options = array())
     {
 		return $this->_adapter->removeIndex($tableName, $columnName, $options);
-	}
-	
-    /**
-     * create table 
-     * 
-     * @param string $tableName The table name
-     * @param array  $options   Options definition table
-     *
-     * @return boolean
-     */
-    public function createTable($tableName, $options = array())
-    {
-		return $this->_adapter->createTable($tableName, $options);
 	}
 	
     /**

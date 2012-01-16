@@ -49,9 +49,26 @@ class Ruckusing_Util_Migrator
      */
     function __construct($adapter)
     {
-        $this->_adapter = $adapter;
+        $this->setAdapter($adapter);
     }
 
+    /**
+     * set adapter 
+     * 
+     * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
+     *
+     * @return Ruckusing_Util_Migrator
+     */
+    public function setAdapter($adapter)
+    {
+        if (! $adapter instanceof Ruckusing_Adapter_Base) {
+            $msg = 'adapter must be implement Ruckusing_Adapter_Base!';
+            throw new Ruckusing_Exception_Argument($msg);
+        }
+        $this->_adapter = $adapter;
+        return $this;
+	}
+	
     /**
      * Return the max version number from the DB, 
      * or "0" in the case of no versions available.
@@ -74,12 +91,12 @@ class Ruckusing_Util_Migrator
             $versions[] = $v['version'];
         }
         $num_versions = count($versions);
+        $version = null;
         if ($num_versions) {
             sort($versions); //sorts lowest-to-highest (ascending)
-            return (string)$versions[$num_versions-1];
-        } else {
-            return null;
+            $version = (string)$versions[$num_versions-1];
         }
+        return $version;
     }
 
     /**
