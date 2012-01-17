@@ -54,9 +54,6 @@ class Ruckusing_Util_MigratorTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Ruckusing_Util_Migrator', $migrator);
     }
 
-    /**
-     * @covers Ruckusing_Util_Migrator::getMaxVersion
-     */
     public function testGetMaxVersion()
     {
         $versions = array();
@@ -64,7 +61,9 @@ class Ruckusing_Util_MigratorTest extends PHPUnit_Framework_TestCase
         $this->assertNull($this->object->getMaxVersion());
         $versions = array(
             array(
-                'version' => '1',
+                'version' => 1,
+                'class' 	=> 'CreateUsers',
+                'file'		=> '001_CreateUsers.php',
             ),
         );
         $this->_adapter->versions = $versions;
@@ -73,13 +72,19 @@ class Ruckusing_Util_MigratorTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('1', $actual);
         $versions = array(
             array(
-                'version' => '1',
+                'version' => 1,
+                'class' 	=> 'CreateUsers',
+                'file'		=> '001_CreateUsers.php',
             ),
             array(
-                'version' => '2',
+                'version' => 2,
+                'class'   => 'AddNewTable',
+                'file'    => '002_AddNewTable.php',
             ),
             array(
-                'version' => '3',
+                'version' => 3,
+                'class' 	=> 'AddIndexToBlogs',
+                'file'		=> '003_AddIndexToBlogs.php',
             ),
         );
         $this->_adapter->versions = $versions;
@@ -88,63 +93,280 @@ class Ruckusing_Util_MigratorTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('3', $actual);
     }
 
-    /**
-     * @covers Ruckusing_Util_Migrator::getRunnableMigrations
-     * @todo   Implement testGetRunnableMigrations().
-     */
-    public function testGetRunnableMigrations()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
-    }
-
-    /**
-     * @covers Ruckusing_Util_Migrator::generateTimestamp
-     * @todo   Implement testGenerateTimestamp().
-     */
     public function testGenerateTimestamp()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        $actual = $this->object->generateTimestamp();
+        $expected = gmdate('YmdHi', time());
+        $this->assertInternalType('string', $actual);
+        $this->assertRegExp('/^'.$expected.'\d{2}$/', $actual);
     }
 
-    /**
-     * @covers Ruckusing_Util_Migrator::resolveCurrentVersion
-     * @todo   Implement testResolveCurrentVersion().
-     */
     public function testResolveCurrentVersion()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        $this->assertNull($this->_adapter->currentVersion);
+        $actual = $this->object->resolveCurrentVersion('2.1', 'up');
+        $this->assertNotNull($this->_adapter->currentVersion);
+        $this->assertEquals($this->_adapter->currentVersion, '2.1');
+        $this->_adapter->currentVersion = null;
+        $this->assertNull($this->_adapter->removeVersion);
+        $actual = $this->object->resolveCurrentVersion('2.1', 'down');
+        $this->assertNotNull($this->_adapter->removeVersion);
+        $this->assertEquals($this->_adapter->removeVersion, '2.1');
+        $this->_adapter->removeVersion = null;
+        $this->assertNull($this->_adapter->currentVersion);
+        $actual = $this->object->resolveCurrentVersion('4.1', 'UP');
+        $this->assertNotNull($this->_adapter->currentVersion);
+        $this->assertEquals($this->_adapter->currentVersion, '4.1');
+        $this->_adapter->currentVersion = null;
+        $this->assertNull($this->_adapter->removeVersion);
+        $actual = $this->object->resolveCurrentVersion('2.3', 'DOWN');
+        $this->assertNotNull($this->_adapter->removeVersion);
+        $this->assertEquals($this->_adapter->removeVersion, '2.3');
+        $this->_adapter->removeVersion = null;
     }
 
-    /**
-     * @covers Ruckusing_Util_Migrator::getExecutedMigrations
-     * @todo   Implement testGetExecutedMigrations().
-     */
+    public function testGetRunnableMigrationsGoingUpNoTargetVersion()
+    {
+        $actualUpFiles = $this->object->getRunnableMigrations(
+            RUCKUSING_MIGRATION_DIR,
+            'up',
+            false
+        );
+        $expectUpFiles = array(
+            array(
+                'version' => 1,
+                'class' 	=> 'CreateUsers',
+                'file'		=> '001_CreateUsers.php',
+            ),
+            array(
+                'version' => 3,
+                'class' 	=> 'AddIndexToBlogs',
+                'file'		=> '003_AddIndexToBlogs.php',
+            ),
+            array(
+                'version' => '20090122193325',
+                'class'   => 'AddNewTable',
+                'file'    => '20090122193325_AddNewTable.php',
+            ),
+        );  
+        $this->assertEquals($expectUpFiles, $actualUpFiles);
+    }
+  
+    public function testGetRunnableMigrationsGoingDownNoTargetVersion()
+    {
+        $actualDownFiles = $this->object->getRunnableMigrations(
+            RUCKUSING_MIGRATION_DIR,
+            'down',
+            false
+        );
+        $this->assertEquals(array(), $actualDownFiles);
+    }
+
+    public function testGetRunnableMigrationsGoingUpWithTargetVersionNoCurrent()
+    {
+        $actualUpFiles = $this->object->getRunnableMigrations(
+            RUCKUSING_MIGRATION_DIR,
+            'up',
+            3,
+            false
+        );
+        $expectUpFiles = array(
+            array(
+                'version' => 1,
+                'class' 	=> 'CreateUsers',
+                'file'		=> '001_CreateUsers.php',
+            ),
+            array(
+                'version' => 3,
+                'class' 	=> 'AddIndexToBlogs',
+                'file'		=> '003_AddIndexToBlogs.php',
+            ),
+        );  
+        $this->assertEquals($expectUpFiles, $actualUpFiles);
+    }
+
+    public function testGetRunnableMigrationsGoingDownWithTargetVersionNoCurrent()
+    {
+        $expectDownFiles = array(
+            array(
+                'version' => '20090122193325',
+                'class'   => 'AddNewTable',
+                'file'    => '20090122193325_AddNewTable.php',
+            ),
+            array(
+                'version' => 3,
+                'class' 	=> 'AddIndexToBlogs',
+                'file'		=> '003_AddIndexToBlogs.php',
+            ),
+        );
+        $this->_adapter->versions = $expectDownFiles;
+        $actualDownFiles    = $this->object->getRunnableMigrations(
+            RUCKUSING_MIGRATION_DIR,
+            'down',
+            1,
+            false
+        );
+        $this->assertEquals($expectDownFiles, $actualDownFiles);
+
+        $this->_adapter->versions = array();
+
+        $expectDownFiles = array(
+            array(
+                'version' => 3,
+                'class'	  => 'AddIndexToBlogs',
+                'file'    => '003_AddIndexToBlogs.php',
+            ),
+        );
+        $this->_adapter->versions = $expectDownFiles;
+        $actualDownFiles = $this->object->getRunnableMigrations(
+            RUCKUSING_MIGRATION_DIR,
+            'down',
+            1,
+            false
+        );
+        $this->assertEquals($expectDownFiles, $actualDownFiles);
+
+        //go all the way down!
+        $this->_adapter->versions = array();
+        $expectDownFiles = array(
+            array(
+                'version' => '20090122193325',
+                'class'   => 'AddNewTable',
+                'file'    => '20090122193325_AddNewTable.php',
+            ),
+            array(
+                'version' => 3,
+                'class' 	=> 'AddIndexToBlogs',
+                'file'		=> '003_AddIndexToBlogs.php',
+            ),
+            array(
+                'version' => 1,
+                'class' 	=> 'CreateUsers',
+                'file'		=> '001_CreateUsers.php',
+            ),
+        );
+        $this->_adapter->versions = $expectDownFiles;
+        $actualDownFiles = $this->object->getRunnableMigrations(
+            RUCKUSING_MIGRATION_DIR,
+            'down',
+            0,
+            false
+        );
+        $this->assertEquals($expectDownFiles, $actualDownFiles);
+        $expectDownFiles = array(
+            array(
+                'version' => 3,
+                'class'   => 'AddIndexToBlogs',
+                'file'    => '003_AddIndexToBlogs.php',
+            ),
+        );
+        $this->_adapter->versions = $expectDownFiles;
+        $actualDownFiles = $this->object->getRunnableMigrations(
+            RUCKUSING_MIGRATION_DIR,
+            'down',
+            1,
+            true
+        );
+        $this->assertEquals($expectDownFiles, $actualDownFiles);
+        $actualDownFiles = $this->object->getRunnableMigrations(
+            RUCKUSING_MIGRATION_DIR,
+            'down',
+            1,
+            true
+        );
+        $this->assertEquals($expectDownFiles, $actualDownFiles);
+        try {
+            $destination = 5;
+            $this->object->getRunnableMigrations(
+                RUCKUSING_MIGRATION_DIR,
+                'down',
+                $destination,
+                false
+            );
+            $this->fail('Target version does not exists in set migration');
+        } catch (Ruckusing_Exception_InvalidTargetMigration $e) {
+            $msg = 'Could not find target version ' . $destination
+                . ' in set of migrations.';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+
+    }
+
+    public function testGetRunnableMigrationsGoingUp()
+    {
+        $versions = array(
+            array(
+                'version' => 1,
+                'class' 	=> 'CreateUsers',
+                'file'		=> '001_CreateUsers.php',
+            ),
+            array(
+                'version' => 3,
+                'class' 	=> 'AddIndexToBlogs',
+                'file'		=> '003_AddIndexToBlogs.php',
+            ),
+        );
+        $this->_adapter->versions = $versions;
+        $actualDownFiles    = $this->object->getRunnableMigrations(
+            RUCKUSING_MIGRATION_DIR,
+            'up',
+            '20090122193325',
+            false
+        );
+        $expectDownFiles = array(
+            array(
+                'version' => '20090122193325',
+                'class'   => 'AddNewTable',
+                'file'    => '20090122193325_AddNewTable.php',
+            ),
+        );
+        $this->assertEquals($expectDownFiles, $actualDownFiles);
+    }
+
     public function testGetExecutedMigrations()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        $this->_adapter->versions = array();
+        $expectDownFiles = array(
+            array(
+                'version' => '20090122193325',
+                'class'   => 'AddNewTable',
+                'file'    => '20090122193325_AddNewTable.php',
+            ),
+            array(
+                'version' => 3,
+                'class' 	=> 'AddIndexToBlogs',
+                'file'		=> '003_AddIndexToBlogs.php',
+            ),
+            array(
+                'version' => 1,
+                'class' 	=> 'CreateUsers',
+                'file'		=> '001_CreateUsers.php',
+            ),
         );
+        $this->_adapter->versions = $expectDownFiles;
+        $expectedVersions = array(1, 3, '20090122193325');
+        $actualMigrateVersions = $this->object->getExecutedMigrations();
+        $this->assertEquals($expectedVersions, $actualMigrateVersions);
+        $this->_adapter->versions = array();
+        $expectDownFiles = array();
+        $this->_adapter->versions = $expectDownFiles;
+        $expectedVersions = array();
+        $actualMigrateVersions = $this->object->getExecutedMigrations();
+        $this->assertEquals($expectedVersions, $actualMigrateVersions);
     }
 
-    /**
-     * @covers Ruckusing_Util_Migrator::getMigrationFiles
-     * @todo   Implement testGetMigrationFiles().
-     */
     public function testGetMigrationFiles()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
+        try {
+            $directory = '/tmp/migrate';
+            $this->object->getMigrationFiles($directory, 'up');
+            $this->fail('The directory of migration files is incorrect!');
+        } catch (Ruckusing_Exception_InvalidMigrationDir $e) {
+            $msg = 'Ruckusing_Util_Migrator - (' . $directory 
+                . ') is not a directory.';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $actualFiles = $this->object->getMigrationFiles('/tmp', 'up');
+        $this->assertEmpty($actualFiles);
     }
 }

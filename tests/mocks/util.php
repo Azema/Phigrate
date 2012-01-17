@@ -15,9 +15,23 @@ class utilAdapterMock extends adapterMock
 {
     public $versions = array();
 
+    public $currentVersion;
+
+    public $removeVersion;
+
     public function selectAll($query)
     {
         return $this->versions;
+    }
+
+    public function setCurrentVersion($version)
+    {
+        $this->currentVersion = $version;
+    }
+
+    public function removeVersion($version)
+    {
+        $this->removeVersion = $version;
     }
 }
 
