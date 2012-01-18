@@ -53,6 +53,12 @@ class Ruckusing_Util_Naming
      */
     public static function taskNameFromNamespaceAndBasename($namespace, $basename)
     {
+        if (empty($namespace) || empty($basename)) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument(
+                'The arguments must not be empty'
+            );
+        }
         return strtolower($namespace . ':' . $basename);
 	}
 
@@ -65,6 +71,12 @@ class Ruckusing_Util_Naming
      */
     public static function taskFromClassName($klass)
     {
+        if (! preg_match('/'.self::CLASS_NS_PREFIX.'/', $klass)) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument(
+                'The class name must start with ' . self::CLASS_NS_PREFIX
+            );
+        }
         //strip namespace
         $klass = str_replace(self::CLASS_NS_PREFIX, '', $klass);
         $klass = strtolower($klass);
@@ -82,11 +94,12 @@ class Ruckusing_Util_Naming
      */
     public static function taskToClassName($task)
     {
-		$parts = explode('::', $task);
-        if (count($parts) < 2) {
+        if (false === strpos($task, ':')) {
             require_once 'Ruckusing/Exception/Argument.php';
-			throw new Ruckusing_Exception_Argument('Task name invalid: ' . $task);
+            throw new Ruckusing_Exception_Argument(
+                'Task name (' . $task . ') must be contains ":"');
 		}
+		$parts = explode(':', $task);
         return self::CLASS_NS_PREFIX . ucfirst($parts[0]) 
             . '_' . ucfirst($parts[1]);
 	}
@@ -102,11 +115,9 @@ class Ruckusing_Util_Naming
     {
 		//we could be given either a string or an absolute path
 		//deal with it appropriately
-        if (is_file($fileName)) {
-            $parts = explode(DIRECTORY_SEPARATOR, $fileName);
-            $namespace = $parts[count($parts)-2];
-			$fileName = substr($parts[count($parts)-1], 0, -4);
-        }
+        $parts = explode(DIRECTORY_SEPARATOR, $fileName);
+        $namespace = $parts[count($parts)-2];
+        $fileName = substr($parts[count($parts)-1], 0, -4);
         return self::CLASS_NS_PREFIX . ucfirst($namespace) 
             . '_' . ucfirst($fileName);
 	}
@@ -120,11 +131,13 @@ class Ruckusing_Util_Naming
      */
     public static function classFromMigrationFile($fileName)
     {
+        $className = false;
 		if (preg_match('/^(\d+)_(.*)\.php$/', $fileName, $matches)) {
 			if (count($matches) == 3) {
-				return $matches[2];
+				$className = $matches[2];
 			}
-		}
+        }
+        return $className;
 	}
 	
     /**
@@ -137,15 +150,15 @@ class Ruckusing_Util_Naming
     public static function camelcase($str)
     {
         $str = preg_replace('/\s+/', '_', $str);
-        $parts = explode("_", $str);
+        $parts = explode('_', $str);
         //if there were no spaces in the input string
         //then assume its already camel-cased
-        if (count($parts) == 0) return $str;
+        if (count($parts) <= 1) return $str;
         $cleaned = '';
         foreach ($parts as $word) {
-            $cleaned .= ucfirst($word);
+            $cleaned .= ucfirst(strtolower($word));
         }
-        return $cleaned;  
+        return $cleaned;
     }
   
     /**
@@ -157,7 +170,8 @@ class Ruckusing_Util_Naming
      */
     public static function underscore($str)
     {
-		return preg_replace('/\W/', '_', $str);
+        $underscored = preg_replace('/\W/', '_', $str);
+		return preg_replace('/\_{2,}/', '_', $underscored);
 	}
 
     /**
@@ -170,13 +184,12 @@ class Ruckusing_Util_Naming
      */
     public static function indexName($tableName, $columnName)
     {
-		$name = sprintf("idx_%s", self::underscore($tableName));
+		$name = sprintf('idx_%s', self::underscore($tableName));
         // if the column parameter is an array then the user wants 
         // to create a multi-column index
+        $columnStr = self::underscore($columnName);
 		if (is_array($columnName)) {
-			$columnStr = join('_and_', $columnName);
-		} else {
-			$columnStr = $columnName;
+			$columnStr = join('_and_', self::underscore($columnName));
 		}
 		$name .= sprintf('_%s', $columnStr);
 		return $name;
