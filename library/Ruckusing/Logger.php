@@ -231,6 +231,7 @@ class Ruckusing_Logger
             $closed = fclose($this->_fp);
             if ($closed) {
                 $this->_fp = null;
+                self::$_instance = null;
             } else {
                 echo 'Error closing the log file';
             }
