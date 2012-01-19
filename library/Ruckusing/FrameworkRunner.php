@@ -138,7 +138,9 @@ class Ruckusing_FrameworkRunner
             $this->initializeDb();
             $this->initTasks();
         } catch (Exception $e) {
-            $this->_logger->err('Exception: ' . $e->getMessage());
+            if (isset($this->_logger)) {
+                $this->_logger->err('Exception: ' . $e->getMessage());
+            }
             throw $e;
         }
         $this->_logger->debug(__METHOD__ . ' End');
@@ -247,7 +249,8 @@ class Ruckusing_FrameworkRunner
         if (! isset($this->_taskDir)) {
             $config = $this->getConfig();
             if (! isset($config->task) || ! isset($config->task->dir)) {
-                throw new Ruckusing_Exception(
+                require_once 'Ruckusing/Exception/MissingTaskDir.php';
+                throw new Ruckusing_Exception_MissingTaskDir(
                     'Please, inform the variable "task.dir" '
                     . 'in the configuration file'
                 );
@@ -281,8 +284,9 @@ class Ruckusing_FrameworkRunner
     private function _initMigrationDir()
     {
         $config = $this->getConfig();
-        if (! isset($config->migration) && ! isset($config->migration->dir)) {
-            throw new Ruckusing_Exception(
+        if (! isset($config->migration) || ! isset($config->migration->dir)) {
+            require_once 'Ruckusing/Exception/MissingMigrationDir.php';
+            throw new Ruckusing_Exception_MissingMigrationDir(
                 'Please, inform the variable "migration.dir" '
                 . 'in the configuration file'
             );
@@ -337,12 +341,6 @@ class Ruckusing_FrameworkRunner
             $options = array();
             for ($i = 1; $i < $num_args; $i++) {
                 switch ($argv[$i]) {
-                    // help for command line
-                    case '-h':
-                    case '--help':
-                    case '-?':
-                        printHelp(true);
-                        break;
                     // configuration file path
                     case '-c':
                     case '--configuration':
@@ -359,7 +357,7 @@ class Ruckusing_FrameworkRunner
                     case '-t':
                     case '--taskdir':
                         $i++;
-                        $this->_taskdir = $argv[$i];
+                        $this->_taskDir = $argv[$i];
                         break;
                     // migration directory
                     case '-m':
@@ -388,8 +386,9 @@ class Ruckusing_FrameworkRunner
             }
             $this->_taskOptions = $options;
         }
-        if ($num_args < 2 || !isset($this->_curTaskName)) {
-            throw new InvalidArgumentException('No task found!');
+        if ($num_args < 2 || ! isset($this->_curTaskName)) {
+            require_once 'Ruckusing/Exception/Argument.php';
+            throw new Ruckusing_Exception_Argument('No task found!');
         }
     }
 
@@ -458,7 +457,14 @@ class Ruckusing_FrameworkRunner
      */
     private function _getConfigFile()
     {
-        if (!isset($this->_configFile)) {
+        if (! isset($this->_configFile)) {
+            if (! is_file(RUCKUSING_BASE . '/config/application.ini')) {
+                require_once 'Ruckusing/Exception/Config.php';
+                throw new Ruckusing_Exception_Config(
+                    'Config file not found! Please, '
+                    . 'create config file for application'
+                );
+            }
             $this->_configFile = RUCKUSING_BASE . '/config/application.ini';
         }
         return $this->_configFile;
@@ -472,8 +478,14 @@ class Ruckusing_FrameworkRunner
     private function _getConfigDbFile()
     {
         $this->getLogger()->debug(__METHOD__ . ' Start');
-        if (!isset($this->_configDbFile)) {
+        if (! isset($this->_configDbFile)) {
             $this->_configDbFile = RUCKUSING_BASE . '/config/database.ini';
+            if (! is_file(RUCKUSING_BASE . '/config/database.ini')) {
+                require_once 'Ruckusing/Exception/Config.php';
+                throw new Ruckusing_Exception_Config(
+                    'Config file for DB not found! Please, create config file'
+                );
+            }
         }
         $this->getLogger()->info('configDbFile: ' . $this->_configDbFile);
         $this->getLogger()->debug(__METHOD__ . ' End');
@@ -535,34 +547,12 @@ class Ruckusing_FrameworkRunner
             $msg = '(' . $env . ') DB is not configured!';
             throw new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
         }
-        $exception = null;
+        // Check only variable type for create Adapter
+        // all other parameters will checked in adapter
         if (! isset($configDb->type)) {
-            $msg = '"type" is not set for "' . $env . '" DB';
+            $msg = '"type" is not set for "' . $env . '" DB in config file';
             $this->_logger->err($msg);
-            $exception = new Ruckusing_Exception_MissingAdapterType('Error: ' . $msg);
-        }
-        if (! isset($configDb->host)) {
-            $msg = '"host" is not set for "' . $env . '" DB';
-            $this->_logger->err($msg);
-            $exception = new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
-        }
-        if (! isset($configDb->database)) {
-            $msg = '"database" is not set for "' . $env . '" DB';
-            $this->_logger->err($msg);
-            $exception = new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
-        }
-        if (! isset($configDb->user)) {
-            $msg = '"user" is not set for "' . $env . '" DB';
-            $this->_logger->err($msg);
-            $exception = new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
-        }
-        if (! isset($configDb->password)) {
-            $msg = '"password" is not set for "' . $env . '" DB';
-            $this->_logger->err($msg);
-            $exception = new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
-        }
-        if (isset($exception)) {
-            throw $exception;
+            throw new Ruckusing_Exception_MissingAdapterType('Error: ' . $msg);
         }
         $this->_logger->debug(__METHOD__ . ' End');
     }
@@ -577,18 +567,25 @@ class Ruckusing_FrameworkRunner
         //initialize logger
         $log_dir = RUCKUSING_BASE . '/logs';
         $config = $this->getConfig();
-        // @TODO : Ajouter une verification de la presence de la variable 'log'
-        if (isset($config->log->dir)) {
+        if (isset($config->log) && isset($config->log->dir)) {
             $log_dir = $config->log->dir;
         }
+        if (! is_dir($log_dir)) {
+            require_once 'Ruckusing/Exception/InvalidLog.php';
+            throw new Ruckusing_Exception_InvalidLog(
+                $log_dir . ' does not exists.'
+            );
+        }
         if (is_dir($log_dir) && ! is_writable($log_dir)) {
-            throw new Exception(
-                "\n\nCannot write to log directory: "
-                . "{$log_dir}\n\nCheck permissions.\n\n"
+            require_once 'Ruckusing/Exception/InvalidLog.php';
+            throw new Ruckusing_Exception_InvalidLog(
+                'Cannot write to log directory: '
+                . $log_dir . '. Check permissions.'
             );
         }
         $logger = Ruckusing_Logger::instance($log_dir . '/' . $this->_env . '.log');
 
+        $priority = 99;
         if (isset($config->log->priority)) {
             $priority = $config->log->priority;
         } elseif ($this->_env == 'development') {

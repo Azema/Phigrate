@@ -125,6 +125,16 @@ class Ruckusing_Logger
     }
 
     /**
+     * getPriority 
+     * 
+     * @return integer
+     */
+    public function getPriority()
+    {
+        return $this->_priority;
+    }
+
+    /**
      * Log a message with debug type
      * 
      * @param string $msg Message to log
