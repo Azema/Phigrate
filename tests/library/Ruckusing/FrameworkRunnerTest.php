@@ -179,7 +179,10 @@ class Ruckusing_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
         );
         try {
             new Ruckusing_FrameworkRunner($parameters);
-            $this->fail('No config DB file in parameters and the default config DB file does not exists');
+            $this->fail(
+                'No config DB file in parameters and the default '
+                . 'config DB file does not exists'
+            );
         } catch (Ruckusing_Exception_Config $e) {
             $msg = 'Config file for DB not found! Please, create config file';
             $this->assertEquals($msg, $e->getMessage());
@@ -459,89 +462,50 @@ USAGE;
     }
 
     /**
-     * @covers Ruckusing_FrameworkRunner::getConfig
-     * @todo   Implement testGetConfig().
+     * @covers Ruckusing_FrameworkRunner::execute
      */
-    public function testGetConfig()
+    public function testExecuteWithUnknownTask()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            RUCKUSING_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            RUCKUSING_BASE . '/tests/fixtures/config/application.ini',
+            'db:unknown',
         );
+        $actual = new Ruckusing_FrameworkRunner($parameters);
+        try {
+            $actual->execute();
+            $this->fail('The task Parameters is unknown');
+        } catch (Ruckusing_Exception_InvalidTask $e) {
+            $msg = 'Task not found: db:unknown';
+            $this->assertEquals($msg, $e->getMessage());
+        }
     }
-
-    /**
-     * @covers Ruckusing_FrameworkRunner::getConfigDb
-     * @todo   Implement testGetConfigDb().
-     */
-    public function testGetConfigDb()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
-    }
-
+    
     /**
      * @covers Ruckusing_FrameworkRunner::execute
-     * @todo   Implement testExecute().
      */
-    public function testExecute()
+    public function testExecuteWithVersionTask()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            RUCKUSING_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            RUCKUSING_BASE . '/tests/fixtures/config/application.ini',
+            'db:version',
         );
+        $actual = new Ruckusing_FrameworkRunner($parameters);
+        $task = $actual->execute();
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
+        . '\[db:version\]:\012+\t+Current version: \d+\012+Finished: '
+        . '\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
+        $this->assertNotEmpty($task);
+        $this->assertRegExp($regexp, $task);
     }
-
-    /**
-     * @covers Ruckusing_FrameworkRunner::initTasks
-     * @todo   Implement testInitTasks().
-     */
-    public function testInitTasks()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
-    }
-
-    /**
-     * @covers Ruckusing_FrameworkRunner::getTaskDir
-     * @todo   Implement testGetTaskDir().
-     */
-    public function testGetTaskDir()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
-    }
-
-    /**
-     * @covers Ruckusing_FrameworkRunner::getMigrationDir
-     * @todo   Implement testGetMigrationDir().
-     */
-    public function testGetMigrationDir()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
-    }
-
-    /**
-     * @covers Ruckusing_FrameworkRunner::initializeDb
-     * @todo   Implement testInitializeDb().
-     */
-    public function testInitializeDb()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
-    }
-
+    
     /**
      * @covers Ruckusing_FrameworkRunner::updateSchemaForTimestamps
      * @todo   Implement testUpdateSchemaForTimestamps().
