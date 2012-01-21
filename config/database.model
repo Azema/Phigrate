@@ -2,7 +2,7 @@
 type     = "mysql"
 host     = "localhost"
 port     = 3306
-database = "ruckusing_migrations"
+database = "rucku_migrations"
 user     = "rucku"
 password = "rucku"
 
@@ -10,6 +10,6 @@ password = "rucku"
 type     = "mysql"
 host     = "localhost"
 port     = 3306
-database = "ruckusing_migrations_test"
+database = "rucku_migrations_test"
 user     = "rucku_test"
 password = "rucku"
