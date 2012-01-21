@@ -55,7 +55,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::setAdapter
      */
     public function testSetAdapter()
     {
@@ -72,7 +71,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::getAdapter
      */
     public function testGetAdapter()
     {
@@ -81,7 +79,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::createDatabase
      */
     public function testCreateDatabase()
     {
@@ -94,7 +91,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::dropDatabase
      */
     public function testDropDatabase()
     {
@@ -105,7 +101,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::createTable
      */
     public function testCreateTable()
     {
@@ -118,7 +113,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::dropTable
      */
     public function testDropTable()
     {
@@ -129,7 +123,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::renameTable
      */
     public function testRenameTable()
     {
@@ -142,7 +135,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::addColumn
      */
     public function testAddColumn()
     {
@@ -159,7 +151,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::removeColumn
      */
     public function testRemoveColumn()
     {
@@ -172,7 +163,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::changeColumn
      */
     public function testChangeColumn()
     {
@@ -189,7 +179,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::renameColumn
      */
     public function testRenameColumn()
     {
@@ -204,7 +193,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::addIndex
      */
     public function testAddIndex()
     {
@@ -219,7 +207,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::removeIndex
      */
     public function testRemoveIndex()
     {
@@ -234,7 +221,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::execute
      */
     public function testExecute()
     {
@@ -245,7 +231,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::selectOne
      */
     public function testSelectOne()
     {
@@ -257,7 +242,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::selectAll
      */
     public function testSelectAll()
     {
@@ -272,7 +256,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::query
      */
     public function testQuery()
     {
@@ -283,7 +266,6 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Migration_Base::quote
      */
     public function testQuote()
     {

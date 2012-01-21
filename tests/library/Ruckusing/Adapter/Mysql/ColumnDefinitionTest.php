@@ -43,8 +43,6 @@ class Ruckusing_Adapter_Mysql_ColumnDefinitionTest extends PHPUnit_Framework_Tes
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_ColumnDefinition::__construct
-     * @covers Ruckusing_Adapter_ColumnDefinition::__construct
      */
     public function testConstructor()
     {

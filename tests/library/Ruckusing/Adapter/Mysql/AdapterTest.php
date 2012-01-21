@@ -183,7 +183,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Base::checkDbConfig
      */
     public function testCheckDbConfig()
     {
@@ -245,7 +244,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::supportsMigrations
      */
     public function testSupportsMigrations()
     {
@@ -303,7 +301,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::nativeDatabaseTypes
      */
     public function testNativeDatabaseTypes()
     {
@@ -353,7 +350,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::createSchemaVersionTable
      */
     public function testCreateSchemaVersionTable()
     {
@@ -363,8 +359,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::startTransaction
-     * @covers Ruckusing_Adapter_Mysql_Adapter::_beginTransaction
      */
     public function testStartTransaction()
     {
@@ -372,8 +366,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::startTransaction
-     * @covers Ruckusing_Adapter_Mysql_Adapter::_beginTransaction
      */
     public function testStartTransactionException()
     {
@@ -386,8 +378,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::commitTransaction
-     * @covers Ruckusing_Adapter_Mysql_Adapter::_commit
      */
     public function testCommitTransaction()
     {
@@ -396,8 +386,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::commitTransaction
-     * @covers Ruckusing_Adapter_Mysql_Adapter::_commit
      */
     public function testCommitTransactionException()
     {
@@ -409,8 +397,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::rollbackTransaction
-     * @covers Ruckusing_Adapter_Mysql_Adapter::_rollback
      */
     public function testRollbackTransaction()
     {
@@ -419,8 +405,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::rollbackTransaction
-     * @covers Ruckusing_Adapter_Mysql_Adapter::_rollback
      */
     public function testRollbackTransactionException()
     {
@@ -432,7 +416,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::quoteTable
      */
     public function testQuoteTable()
     {
@@ -445,7 +428,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::columnDefinition
      */
     public function testColumnDefinition()
     {
@@ -539,7 +521,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::databaseExists
      */
     public function testDatabaseExists()
     {
@@ -548,7 +529,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::createDatabase
      */
     public function testCreateDatabase()
     {
@@ -568,7 +548,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::dropDatabase
      */
     public function testDropDatabase()
     {
@@ -587,7 +566,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::schema
      */
     public function testSchema()
     {
@@ -606,7 +584,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::tableExists
      */
     public function testTableExists()
     {
@@ -623,7 +600,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::showFieldsFrom
      */
     public function testShowFieldsFrom()
     {
@@ -631,7 +607,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::execute
      */
     public function testExecute()
     {
@@ -648,7 +623,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::query
      */
     public function testQuery()
     {
@@ -665,7 +639,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::selectOne
      */
     public function testSelectOne()
     {
@@ -695,7 +668,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::selectAll
      */
     public function testSelectAll()
     {
@@ -732,7 +704,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::executeDdl
      */
     public function testExecuteDdl()
     {
@@ -745,7 +716,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::dropTable
      */
     public function testDropTable()
     {
@@ -756,7 +726,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::createTable
      * @todo   Gestion exception
      */
     public function testCreateTable()
@@ -770,7 +739,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::quote
      */
     public function testQuoteString()
     {
@@ -873,7 +841,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::identifier
      */
     public function testIdentifier()
     {
@@ -884,7 +851,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::renameTable
      */
     public function testRenameTable()
     {
@@ -912,7 +878,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::addColumn
      */
     public function testAddColumn()
     {
@@ -992,7 +957,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::removeColumn
      */
     public function testRemoveColumn()
     {
@@ -1027,7 +991,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::renameColumn
      */
     public function testRenameColumn()
     {
@@ -1068,7 +1031,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::changeColumn
      */
     public function testChangeColumn()
     {
@@ -1133,7 +1095,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::columnInfo
      */
     public function testColumnInfo()
     {
@@ -1162,7 +1123,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::indexes
      */
     public function testIndexes()
     {
@@ -1192,7 +1152,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::hasIndex
      */
     public function testHasIndex()
     {
@@ -1221,7 +1180,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::addIndex
      */
     public function testAddIndex()
     {
@@ -1287,7 +1245,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::removeIndex
      */
     public function testRemoveIndex()
     {
@@ -1338,7 +1295,6 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::typeToSql
      */
     public function testTypeToSql()
     {
@@ -1370,8 +1326,6 @@ Valid types are:
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::addColumnOptions
-     * @covers Ruckusing_Adapter_Mysql_Adapter::_isSqlMethodCall
      * @todo   Implement testAddColumnOptions().
      */
     public function testAddColumnOptions()
@@ -1429,7 +1383,6 @@ Valid types are:
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::__toString
      */
     public function testToString()
     {
@@ -1444,7 +1397,6 @@ Valid types are:
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::setCurrentVersion
      */
     public function testSetCurrentVersion()
     {
@@ -1461,7 +1413,6 @@ Valid types are:
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_Adapter::removeVersion
      */
     public function testRemoveVersion()
     {

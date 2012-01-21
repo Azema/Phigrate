@@ -215,6 +215,7 @@ class Ruckusing_FrameworkRunner
         } else {
             $msg = 'Task not found: ' . $this->_curTaskName;
             $this->_logger->err($msg);
+            require_once 'Ruckusing/Exception/InvalidTask.php';
             throw new Ruckusing_Exception_InvalidTask($msg);
         }
         $this->_logger->debug(__METHOD__ . ' End');
@@ -501,6 +502,7 @@ class Ruckusing_FrameworkRunner
         $configDb = $this->getConfigDb();
         if (! $configDb instanceof Ruckusing_Config) {
             $msg = '(' . $env . ') DB is not configured!';
+            require_once 'Ruckusing/Exception/MissingConfigDb.php';
             throw new Ruckusing_Exception_MissingConfigDb('Error: ' . $msg);
         }
         // Check only variable type for create Adapter
@@ -508,6 +510,7 @@ class Ruckusing_FrameworkRunner
         if (! isset($configDb->type)) {
             $msg = '"type" is not set for "' . $env . '" DB in config file';
             $this->_logger->err($msg);
+            require_once 'Ruckusing/Exception/MissingAdapterType.php';
             throw new Ruckusing_Exception_MissingAdapterType('Error: ' . $msg);
         }
         $this->_logger->debug(__METHOD__ . ' End');

@@ -5,7 +5,6 @@
 class Ruckusing_Util_NamingTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * @covers Ruckusing_Util_Naming::taskNameFromNamespaceAndBasename
      */
     public function testTaskNameFromNamespaceAndBasename()
     {
@@ -28,7 +27,6 @@ class Ruckusing_Util_NamingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Util_Naming::taskFromClassName
      */
     public function testTaskFromClassName()
     {
@@ -50,7 +48,6 @@ class Ruckusing_Util_NamingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Util_Naming::taskToClassName
      */
     public function testTaskToClassName()
     {
@@ -75,7 +72,6 @@ class Ruckusing_Util_NamingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Util_Naming::classFromFileName
      */
     public function testClassFromFileName()
     {
@@ -95,7 +91,6 @@ class Ruckusing_Util_NamingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Util_Naming::classFromMigrationFile
      */
     public function testClassFromMigrationFile()
     {
@@ -123,7 +118,6 @@ class Ruckusing_Util_NamingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Util_Naming::camelcase
      */
     public function testCamelcase()
     {
@@ -149,7 +143,6 @@ class Ruckusing_Util_NamingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Util_Naming::underscore
      */
     public function testUnderscore()
     {
@@ -172,7 +165,6 @@ class Ruckusing_Util_NamingTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Util_Naming::indexName
      */
     public function testIndexName()
     {

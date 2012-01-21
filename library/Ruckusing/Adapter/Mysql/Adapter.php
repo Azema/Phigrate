@@ -395,6 +395,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         // Check error
         if ($this->_isError($pdoStmt)) {
             $error = $this->getConnexion()->errorInfo();
+            require_once 'Ruckusing/Exception/AdapterQuery.php';
             throw new Ruckusing_Exception_AdapterQuery($error[2]);
         }
         if ($queryType == self::SQL_SELECT || $queryType == self::SQL_SHOW) {
@@ -768,6 +769,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
                 . 'parameter to specify a custom name for this index. '
                 . 'Note: you will also need to specify this custom name '
                 . 'in a drop_index() - if you have one.';
+            require_once 'Ruckusing/Exception/InvalidIndexName.php';
 		    throw new Ruckusing_Exception_InvalidIndexName($msg);
 	    }
         $columnNames = $columnName;

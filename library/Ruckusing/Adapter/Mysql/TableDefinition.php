@@ -170,6 +170,7 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
     public function finish($wants_sql = false)
     {
         if ($this->_initialized == false) {
+            require_once 'Ruckusing/Exception/InvalidTableDefinition.php';
             throw new Ruckusing_Exception_InvalidTableDefinition(
                 sprintf(
                     "Table Definition: '%s' has not been initialized", 
@@ -242,11 +243,7 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
 
         //are we forcing table creation? If so, drop it first
         if (array_key_exists('force', $options) && $options['force'] == true) {
-            try {
-                $this->_adapter->dropTable($name);
-            } catch (Ruckusing_Exception_MissingTable $e) {
-                // do nothing
-            }
+            $this->_adapter->dropTable($name);
         }
         $temp = '';
         if (array_key_exists('temporary', $options)) {

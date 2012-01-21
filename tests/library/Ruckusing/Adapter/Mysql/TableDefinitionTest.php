@@ -198,7 +198,6 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
     }
 
     /**
-     * @covers Ruckusing_Adapter_Mysql_TableDefinition::finish
      */
     public function testFinish()
     {

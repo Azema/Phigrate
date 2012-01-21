@@ -462,7 +462,6 @@ USAGE;
     }
 
     /**
-     * @covers Ruckusing_FrameworkRunner::execute
      */
     public function testExecuteWithUnknownTask()
     {
@@ -485,7 +484,6 @@ USAGE;
     }
     
     /**
-     * @covers Ruckusing_FrameworkRunner::execute
      */
     public function testExecuteWithVersionTask()
     {
@@ -507,7 +505,6 @@ USAGE;
     }
     
     /**
-     * @covers Ruckusing_FrameworkRunner::updateSchemaForTimestamps
      * @todo   Implement testUpdateSchemaForTimestamps().
      */
     public function testUpdateSchemaForTimestamps()

@@ -151,7 +151,6 @@ class Ruckusing_Task_ManagerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Task_Manager::registerTask
      */
     public function testRegisterTask()
     {
@@ -185,7 +184,6 @@ class Ruckusing_Task_ManagerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Task_Manager::execute
      */
     public function testExecute()
     {
@@ -212,7 +210,6 @@ class Ruckusing_Task_ManagerTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Ruckusing_Task_Manager::help
      */
     public function testHelp()
     {
