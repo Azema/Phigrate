@@ -342,24 +342,52 @@ class Ruckusing_FrameworkRunner
                     case '-c':
                     case '--configuration':
                         $i++;
+                        if (! array_key_exists($i, $argv)) {
+                            require_once 'Ruckusing/Exception/Argument.php';
+                            throw new Ruckusing_Exception_Argument(
+                                'Please, specify the configuration file if you'
+                                . ' use the argument -c or --configuration'
+                            );
+                        }
                         $this->_configFile = $argv[$i];
                         break;
                     // configuration db file path
                     case '-d':
                     case '--database':
                         $i++;
+                        if (! array_key_exists($i, $argv)) {
+                            require_once 'Ruckusing/Exception/Argument.php';
+                            throw new Ruckusing_Exception_Argument(
+                                'Please, specify the configuration database file'
+                                . ' if you use the argument -d or --database'
+                            );
+                        }
                         $this->_configDbFile = $argv[$i];
                         break;
                     // task directory
                     case '-t':
                     case '--taskdir':
                         $i++;
+                        if (! array_key_exists($i, $argv)) {
+                            require_once 'Ruckusing/Exception/Argument.php';
+                            throw new Ruckusing_Exception_Argument(
+                                'Please, specify the directory of tasks'
+                                . ' if you use the argument -t or --taskdir'
+                            );
+                        }
                         $this->_taskDir = $argv[$i];
                         break;
                     // migration directory
                     case '-m':
                     case '--migrationdir':
                         $i++;
+                        if (! array_key_exists($i, $argv)) {
+                            require_once 'Ruckusing/Exception/Argument.php';
+                            throw new Ruckusing_Exception_Argument(
+                                'Please, specify the directory of migration files'
+                                . ' if you use the argument -m or --migrationdir'
+                            );
+                        }
                         $this->_migrationDir = $argv[$i];
                         break;
                     // other

@@ -483,8 +483,6 @@ USAGE;
         }
     }
     
-    /**
-     */
     public function testExecuteWithVersionTask()
     {
         $parameters = array(
@@ -502,6 +500,86 @@ USAGE;
         . '\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
         $this->assertNotEmpty($task);
         $this->assertRegExp($regexp, $task);
+    }
+
+    public function testParseArgumentConfigurationWithoutConfigFile()
+    {
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            RUCKUSING_BASE . '/tests/fixtures/config/database.ini',
+            'db:version',
+            '-c',
+        );
+        try {
+            new Ruckusing_FrameworkRunner($parameters);
+            $this->fail('The configuration file is not informed');
+        } catch (Ruckusing_Exception_Argument $e) {
+            $msg = 'Please, specify the configuration file if you use the '
+                . 'argument -c or --configuration';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+    }
+    
+    public function testParseArgumentConfigurationDbWithoutConfigDbFile()
+    {
+        $parameters = array(
+            'monScript.php',
+            'db:version',
+            '-c',
+            RUCKUSING_BASE . '/tests/fixtures/config/application.ini',
+            '-d',
+        );
+        try {
+            new Ruckusing_FrameworkRunner($parameters);
+            $this->fail('The configuration database file is not informed');
+        } catch (Ruckusing_Exception_Argument $e) {
+            $msg = 'Please, specify the configuration database file if you '
+                . 'use the argument -d or --database';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+    }
+    
+    public function testParseArgumentMigrationWithoutDirectory()
+    {
+        $parameters = array(
+            'monScript.php',
+            '-c',
+            RUCKUSING_BASE . '/tests/fixtures/config/application.ini',
+            '-d',
+            RUCKUSING_BASE . '/tests/fixtures/config/database.ini',
+            'db:version',
+            '-m',
+        );
+        try {
+            new Ruckusing_FrameworkRunner($parameters);
+            $this->fail('The directory of migration files is not informed');
+        } catch (Ruckusing_Exception_Argument $e) {
+            $msg = 'Please, specify the directory of migration files if you '
+                . 'use the argument -m or --migrationdir';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+    }
+    
+    public function testParseArgumentTasksWithoutDirectory()
+    {
+        $parameters = array(
+            'monScript.php',
+            '-c',
+            RUCKUSING_BASE . '/tests/fixtures/config/application.ini',
+            '-d',
+            RUCKUSING_BASE . '/tests/fixtures/config/database.ini',
+            'db:version',
+            '-t',
+        );
+        try {
+            new Ruckusing_FrameworkRunner($parameters);
+            $this->fail('The directory of tasks files is not informed');
+        } catch (Ruckusing_Exception_Argument $e) {
+            $msg = 'Please, specify the directory of tasks if you '
+                . 'use the argument -t or --taskdir';
+            $this->assertEquals($msg, $e->getMessage());
+        }
     }
     
     /**
