@@ -53,7 +53,6 @@ if (!isset($argv))
     $argv = '';
 $args = parseArgs($argv);
 $env = getEnvironment($args);
-var_dump($args);
 $config = getConfig($args, $env);
 main($args, $config);
 
@@ -228,8 +227,12 @@ function main($args, $config)
     $migrationDir = realpath($migrationDir);
     //generate a complete migration file
     $timestamp   = Ruckusing_Util_Migrator::generateTimestamp();
-    // @TODO Check the class name is not duplicated
     $klass       = Ruckusing_Util_Naming::camelcase($migrationName);
+    if (classNameIsDuplicated($klass, $migrationDir)) {
+        throw new Ruckusing_Exception_Argument(
+            'This class name is already used. Please, choose another name.'
+        );
+    }
     $fileName    = $timestamp . '_' . $klass . '.php';
     $fullPath    = $migrationDir . '/' . $fileName;
     $templateStr = getTemplate($klass);
@@ -237,9 +240,9 @@ function main($args, $config)
     //check to make sure our destination directory is writable
     if (! is_writable($migrationDir . '/')) {
         throw new Ruckusing_Exception_InvalidMigrationDir(
-            "ERROR: migration directory '" . $migrationDir 
-            . "' is not writable by the current user. "
-            . "Check permissions and try again."
+            'ERROR: migration directory (' . $migrationDir 
+            . ') is not writable by the current user. '
+            . 'Check permissions and try again.'
         );
     }
 
@@ -254,6 +257,25 @@ function main($args, $config)
     } else {
         echo "\nCreated migration: {$fileName}\n\n";
     }
+}
+
+/**
+ * Indicate if a class name is already used
+ * 
+ * @param string $classname    The class name to test
+ * @param string $migrationDir The directory of migration files
+ *
+ * @return bool
+ */
+function classNameIsDuplicated($classname, $migrationDir)
+{
+    $migrationFiles = Ruckusing_Util_Migrator::getMigrationFiles($migrationDir);
+    foreach ($migrationFiles as $file) {
+        if ($file['class'] == $classname) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -364,8 +386,8 @@ function scrErrorHandler($errno, $errstr, $errfile, $errline)
  */
 function scrExceptionHandler($exception)
 {
-    echo "\033[40m\033[1;31m" . $exception->getMessage() . "\033[0m\n"
-        . "\nbacktrace: \n" . $exception->getTraceAsString() . "\n";
+    echo "\t\033[40m\033[1;31m " . $exception->getMessage() . " \033[0m\n\n";
+        //. "\nbacktrace: \n" . $exception->getTraceAsString() . "\n";
     exit(1); // exit with error
 }
 

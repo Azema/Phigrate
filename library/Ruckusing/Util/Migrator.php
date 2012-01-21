@@ -237,7 +237,7 @@ class Ruckusing_Util_Migrator
      *
      * @return array
      */
-    public static function getMigrationFiles($directory, $direction)
+    public static function getMigrationFiles($directory, $direction = 'up')
     {
         $validFiles = array();
         if (!is_dir($directory)) {
