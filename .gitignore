@@ -6,4 +6,6 @@ tests/dummy/db/schema.txt
 .DS_Store
 library/.DS_Store
 tests/.DS_Store
-
+cache.properties
+config/application.ini
+config/database.ini
