@@ -15,14 +15,12 @@
     </filter>
 
     <logging>
-        <log type="coverage-html" target="./logs/report" charset="UTF-8"
+        <log type="coverage-html" target="../build/coverage" charset="UTF-8"
             yui="true" highlight="true" lowUpperBound="50" highLowerBound="80" />
-        <!--
-        <log type="coverage-clover" target="./logs/clover.xml"/>
-        <log type="junit" target="./logs/phpunit.xml" logIncompleteSkipped="false"/>
-        -->
-        <log type="testdox-html" target="./logs/testdox.html" />
-        <log type="story-html" target="./logs/story.html" />
+        <log type="coverage-clover" target="../build/logs/clover.xml"/>
+        <log type="junit" target="../build/logs/junit.xml" logIncompleteSkipped="false"/>
+        <log type="testdox-html" target="../build/logs/testdox.html" />
+        <log type="story-html" target="../build/logs/story.html" />
     </logging>
 </phpunit>
 
