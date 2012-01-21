@@ -14,7 +14,12 @@
  */
 
 /**
- * Abstract class exception of Ruckusing
+ * @see Ruckusing_Exception
+ */
+require_once 'Ruckusing/Exception.php';
+
+/**
+ * Class Task exception
  *
  * @category   RuckusingMigrations
  * @package    Ruckusing_Exception
@@ -24,19 +29,6 @@
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
-class Ruckusing_Exception extends Exception
+class Ruckusing_Exception_Task extends Ruckusing_Exception
 {
-    /**
-     * __construct 
-     * 
-     * @param string    $msg      Ruckusing_Exception message
-     * @param int       $code     Ruckusing_Exception code
-     * @param Exception $previous Previous exception
-     *
-     * @return void
-     */
-    public function __construct($msg = '', $code = 0, Exception $previous = null)
-    {
-        parent::__construct($msg, $code, $previous);
-    }
 }

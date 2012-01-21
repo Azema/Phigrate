@@ -15,6 +15,11 @@
  */
 
 /**
+ * @see Task_Base
+ */
+require_once 'Task/Base.php';
+
+/**
  * @see Ruckusing_Task_ITask 
  */
 require_once 'Ruckusing/Task/ITask.php';
@@ -31,61 +36,22 @@ require_once 'Ruckusing/Task/ITask.php';
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
-class Task_Db_Version implements Ruckusing_Task_ITask
+class Task_Db_Version extends Task_Base implements Ruckusing_Task_ITask
 {
-    /**
-     * adapter 
-     * 
-     * @var Ruckusing_Adapter_Base
-     */
-    private $_adapter = null;
-
-    /**
-     * _migrationDir 
-     * 
-     * @var string
-     */
-    private $_migrationDir;
-	
-    /**
-     * __construct 
-     * 
-     * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
-     *
-     * @return Task_Db_Version
-     */
-    function __construct($adapter)
-    {
-		$this->_adapter = $adapter;
-	}
-	
-    /**
-     * setDirectoryMigration : Define directory of migrations
-     * 
-     * @param string $migrationDir Directory of migrations
-     *
-     * @return Task_Db_Schema
-     */
-    public function setDirectoryOfMigrations($migrationDir)
-    {
-        $this->_migrationDir = $migrationDir;
-        return $this;
-    }
-	
     /**
      * Primary task entry point
      * 
      * @param mixed $args Arguments to task
      *
-     * @return void
+     * @return string
      */
     public function execute($args)
     {
-		echo 'Started: ' . date('Y-m-d g:ia T') . "\n\n";		
-		echo "[db:version]: \n";
+		$return = 'Started: ' . date('Y-m-d g:ia T') . "\n\n"
+		    . "[db:version]:\n";
 		if (! $this->_adapter->tableExists(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
 			//it doesnt exist, create it
-            echo "\tSchema version table (" . RUCKUSING_TS_SCHEMA_TBL_NAME 
+            $return .= "\tSchema version table (" . RUCKUSING_TS_SCHEMA_TBL_NAME 
                 . ") does not exist. Do you need to run 'db:setup'?";
 		} else {
 			//it exists, read the version from it
@@ -93,7 +59,10 @@ class Task_Db_Version implements Ruckusing_Task_ITask
             // as it is not part of the SQL standard. Thus we have to select all rows and use PHP to return
             // the record we need
             $versions_nested = $this->_adapter->selectAll(
-                sprintf("SELECT version FROM %s", RUCKUSING_TS_SCHEMA_TBL_NAME)
+                sprintf(
+                    'SELECT version FROM %s',
+                    $this->_adapter->identifier(RUCKUSING_TS_SCHEMA_TBL_NAME)
+                )
             );
             $versions = array();
             foreach ($versions_nested as $v) {
@@ -103,12 +72,13 @@ class Task_Db_Version implements Ruckusing_Task_ITask
             if ($num_versions > 0) {
                 sort($versions); //sorts lowest-to-highest (ascending)
                 $version = (string)$versions[$num_versions-1];
-                printf("\tCurrent version: %s", $version);
+                $return .= sprintf("\tCurrent version: %s", $version);
             } else {
-                printf("\tNo migrations have been executed.");  			
+                $return .= "\tNo migrations have been executed.";
             }
 		}
-		echo "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";		
+        $return .= "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";
+        return $return;
 	}
 
     /**

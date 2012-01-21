@@ -15,6 +15,16 @@
  */
 
 /**
+ * @see Task_Base
+ */
+require_once 'Task/Base.php';
+
+/**
+ * @see Ruckusing_Task_ITask
+ */
+require_once 'Ruckusing/Task/ITask.php';
+
+/**
  * This is a generic task which initializes a table 
  * to hold migration version information. 
  * This task is non-destructive and will only create the table 
@@ -29,47 +39,8 @@
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
-class Task_Db_Setup implements Ruckusing_Task_ITask
+class Task_Db_Setup extends Task_Base implements Ruckusing_Task_ITask
 {
-    /**
-     * adapter 
-     * 
-     * @var Ruckusing_BaseAdapter
-     */
-    private $_adapter = null;
-
-    /**
-     * _migrationDir 
-     * 
-     * @var string
-     */
-    private $_migrationDir;
-	
-    /**
-     * __construct 
-     * 
-     * @param Ruckusing_BaseAdapter $adapter Adapter RDBMS
-     *
-     * @return Ruckusing_DB_Setup
-     */
-    function __construct($adapter)
-    {
-		$this->_adapter = $adapter;
-	}
-	
-    /**
-     * setDirectoryOfMigrations : Define directory of migrations
-     * 
-     * @param string $migrationDir Directory of migrations
-     *
-     * @return Migration_Db_Schema
-     */
-    public function setDirectoryOfMigrations($migrationDir)
-    {
-        $this->_migrationDir = $migrationDir;
-        return $this;
-    }
-	
     /**
      * Primary task entry point
      * 
@@ -79,20 +50,21 @@ class Task_Db_Setup implements Ruckusing_Task_ITask
      */
     public function execute($args)
     {
-		echo 'Started: ' . date('Y-m-d g:ia T') . "\n\n";		
-		echo "[db:setup]: \n";
+        $return = 'Started: ' . date('Y-m-d g:ia T') . "\n\n"
+            . "[db:setup]: \n";
 		//it doesnt exist, create it
-		if (! $this->_adapter->tableExists(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
-			echo sprintf("\tCreating table: %s", RUCKUSING_TS_SCHEMA_TBL_NAME);
+		if (! $this->_adapter->tableExists(RUCKUSING_TS_SCHEMA_TBL_NAME, true)) {
+			$return .= sprintf("\tCreating table: '%s'", RUCKUSING_TS_SCHEMA_TBL_NAME);
             $this->_adapter->createSchemaVersionTable();
-			echo "\n\tDone.\n";
+			$return .= "\n\tDone.";
 		} else {
-            echo sprintf(
+            $return .= sprintf(
                 "\tNOTICE: table '%s' already exists. Nothing to do.", 
                 RUCKUSING_TS_SCHEMA_TBL_NAME
             );
 		}
-		echo "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";		
+        $return .= "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";
+        return $return;
 	}
 
     /**

@@ -84,7 +84,10 @@ class Ruckusing_Util_Migrator
         // the record we need
         // @TODO: Passer le nom de la table schema par un objet config
         $versions_nested = $this->_adapter->selectAll(
-            sprintf('SELECT version FROM %s', RUCKUSING_TS_SCHEMA_TBL_NAME)
+            sprintf(
+                'SELECT version FROM %s',
+                $this->_adapter->Identifier(RUCKUSING_TS_SCHEMA_TBL_NAME)
+            )
         );
         $versions = array();
         foreach ($versions_nested as $v) {
@@ -213,7 +216,7 @@ class Ruckusing_Util_Migrator
     {
         $query_sql = sprintf(
             'SELECT version FROM %s',
-            RUCKUSING_TS_SCHEMA_TBL_NAME
+            $this->_adapter->identifier(RUCKUSING_TS_SCHEMA_TBL_NAME)
         );
         $versions = $this->_adapter->selectAll($query_sql);
         $executed = array();

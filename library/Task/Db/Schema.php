@@ -15,6 +15,16 @@
  */
 
 /**
+ * @see Task_Base
+ */
+require_once 'Task/Base.php';
+
+/**
+ * @see Ruckusing_Task_ITask
+ */
+require_once 'Ruckusing/Task/ITask.php';
+
+/**
  * This is a generic task which dumps the schema of the DB
  * as a text file.	
  *
@@ -27,69 +37,37 @@
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
-class Task_Db_Schema implements Ruckusing_Task_ITask
+class Task_Db_Schema extends Task_Base implements Ruckusing_Task_ITask
 {
-	
-    /**
-     * adapter 
-     * 
-     * @var Ruckusing_BaseAdapter
-     */
-    private $_adapter = null;
-
-    /**
-     * _migrationDir 
-     * 
-     * @var string
-     */
-    private $_migrationDir;
-	
-    /**
-     * __construct 
-     * 
-     * @param Ruckusing_BaseAdapter $adapter Adapter RDBMS
-     *
-     * @return Ruckusing_DB_Schema
-     */
-    public function __construct($adapter)
-    {
-		$this->_adapter = $adapter;
-    }
-
-    /**
-     * setDirectoryMigration : Define directory of migrations
-     * 
-     * @param string $migrationDir Directory of migrations
-     *
-     * @return Task_Db_Schema
-     */
-    public function setDirectoryOfMigrations($migrationDir)
-    {
-        $this->_migrationDir = $migrationDir;
-        return $this;
-    }
-	
     /**
      * Primary task entry point
      *
      * @param mixed $args Arguments to the task
      *
-     * @return void
+     * @return string
      */
     public function execute($args)
     {
+        $return = 'Started: ' . date('Y-m-d g:ia T') . "\n\n"
+            . "[db:schema]: \n";
         try {
-            echo 'Started: ' . date('Y-m-d g:ia T') . "\n\n";		
-            echo "[db:schema]: \n";
             $schema = $this->_adapter->schema();
             //write to disk
             $schema_file = $this->_migrationDir . '/schema.txt';
             file_put_contents($schema_file, $schema, LOCK_EX);
-            echo "\tSchema written to: $schema_file\n\n";
-            echo "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";							
         } catch (Exception $ex) {
+            if (! $ex instanceof Ruckusing_Exception_Task) {
+                $ex = new Ruckusing_Exception_Task(
+                    $ex->getMessage(),
+                    $ex->getCode(),
+                    $ex
+                );
+            }
             throw $ex;
         }
+        $return .= "\tSchema written to: $schema_file\n\n"
+            . "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";
+        return $return;
     }
 
     /**

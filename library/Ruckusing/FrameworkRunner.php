@@ -132,8 +132,6 @@ class Ruckusing_FrameworkRunner
             //parse arguments
             $this->_parseArgs($argv);
             $this->getLogger()->debug(__METHOD__ . ' Start');
-            //include all adapters
-            $this->_loadAllAdapters(RUCKUSING_BASE . '/library/Ruckusing/Adapter');
             // initialize DB
             $this->initializeDb();
             $this->initTasks();
@@ -209,12 +207,10 @@ class Ruckusing_FrameworkRunner
             if ($this->_helpTask) {
                 $output = $this->_taskMgr->help($this->_curTaskName);
             } else {
-                ob_start();
-                $this->_taskMgr->execute(
+                $output = $this->_taskMgr->execute(
                     $this->_curTaskName, 
                     $this->_taskOptions
                 );
-                $output = ob_get_clean();
             }
         } else {
             $msg = 'Task not found: ' . $this->_curTaskName;
@@ -335,11 +331,11 @@ class Ruckusing_FrameworkRunner
      */
     private function _parseArgs($argv)
     {
-        $num_args = count($argv);
+        $numArgs = count($argv);
 
-        if ($num_args >= 2) {
+        if ($numArgs >= 2) {
             $options = array();
-            for ($i = 1; $i < $num_args; $i++) {
+            for ($i = 1; $i < $numArgs; $i++) {
                 switch ($argv[$i]) {
                     // configuration file path
                     case '-c':
@@ -386,7 +382,7 @@ class Ruckusing_FrameworkRunner
             }
             $this->_taskOptions = $options;
         }
-        if ($num_args < 2 || ! isset($this->_curTaskName)) {
+        if ($numArgs < 2 || ! isset($this->_curTaskName)) {
             require_once 'Ruckusing/Exception/Argument.php';
             throw new Ruckusing_Exception_Argument('No task found!');
         }
@@ -404,8 +400,8 @@ class Ruckusing_FrameworkRunner
         //only create the table if it doesnt already exist
         $this->_adapter->createSchemaVersionTable();
         //insert all existing records into our new table
-        $migrator_util = new Ruckusing_Util_Migrator($this->_adapter);
-        $files = $migrator_util->getMigrationFiles(
+        $migratorUtil = new Ruckusing_Util_Migrator($this->_adapter);
+        $files = $migratorUtil->getMigrationFiles(
             $this->getMigrationDir(), 'up'
         );
         foreach ($files as $file) {
@@ -493,46 +489,6 @@ class Ruckusing_FrameworkRunner
     }
 
     /**
-     * getConfigFromFile : Return sectionName from filename 
-     * 
-     * @param string $filename    The config file name
-     * @param string $sectionName The section name
-     *
-     * @return array
-     */
-    private function _getConfigFromFile($filename, $sectionName)
-    {
-        if (! is_file($filename)) {
-            throw new Exception('Config file not found (' . $filename . ')');
-        }
-        $ini_array = parse_ini_file($filename, true);
-        if (! array_key_exists($sectionName, $ini_array)) {
-            $found = false;
-            $regExp = '/^'.$sectionName.'\s?:\s?(\w+)$/';
-            foreach ($ini_array as $name => $section) {
-                if (preg_match($regExp, $name, $matches)) {
-                    $sectionExtended = $this->_getConfigFromFile(
-                        $filename, 
-                        $matches[1]
-                    );
-                    $config = array_merge($sectionExtended, $section);
-                    $found = true;
-                    break;
-                }
-            }
-            if (! $found) {
-                throw new Exception(
-                    'Section "' . $sectionName 
-                    . '" not found in config file : ' . $filename
-                );
-            }
-        } else {
-            $config = $ini_array[$sectionName];
-        }
-        return $config;
-    }
-
-    /**
      * verify db config 
      * 
      * @return void
@@ -565,25 +521,25 @@ class Ruckusing_FrameworkRunner
     private function _initLogger()
     {
         //initialize logger
-        $log_dir = RUCKUSING_BASE . '/logs';
+        $logDir = RUCKUSING_BASE . '/logs';
         $config = $this->getConfig();
         if (isset($config->log) && isset($config->log->dir)) {
-            $log_dir = $config->log->dir;
+            $logDir = $config->log->dir;
         }
-        if (! is_dir($log_dir)) {
+        if (! is_dir($logDir)) {
             require_once 'Ruckusing/Exception/InvalidLog.php';
             throw new Ruckusing_Exception_InvalidLog(
-                $log_dir . ' does not exists.'
+                $logDir . ' does not exists.'
             );
         }
-        if (is_dir($log_dir) && ! is_writable($log_dir)) {
+        if (is_dir($logDir) && ! is_writable($logDir)) {
             require_once 'Ruckusing/Exception/InvalidLog.php';
             throw new Ruckusing_Exception_InvalidLog(
                 'Cannot write to log directory: '
-                . $log_dir . '. Check permissions.'
+                . $logDir . '. Check permissions.'
             );
         }
-        $logger = Ruckusing_Logger::instance($log_dir . '/' . $this->_env . '.log');
+        $logger = Ruckusing_Logger::instance($logDir . '/' . $this->_env . '.log');
 
         $priority = 99;
         if (isset($config->log->priority)) {
@@ -609,42 +565,16 @@ class Ruckusing_FrameworkRunner
     {
         $adapterClass = null;
         switch (strtolower($dbType)) {
-        case 'mysql':
-            $adapterClass = 'Ruckusing_Adapter_Mysql_Adapter';
-            break;
-        case 'mssql':
-        case 'pgsql':
-        default:
-            throw new Ruckusing_Exception_InvalidAdapterType(
-                'Adapter "' . $dbType . '" not implemented!'
-            );
+            case 'mysql':
+                $adapterClass = 'Ruckusing_Adapter_Mysql_Adapter';
+                break;
+            case 'mssql':
+            case 'pgsql':
+            default:
+                throw new Ruckusing_Exception_InvalidAdapterType(
+                    'Adapter "' . $dbType . '" not implemented!'
+                );
         }
         return $adapterClass;
-    }
-    
-    /**
-     * DB adapters are classes in lib/classes/adapters
-     * and they follow the file name syntax of "class.<DB Name>Adapter.php".
-     * 
-     * See the function "_getAdapterClass" in this class for examples.
-     * 
-     * @param string $adapter_dir Directory path of adapters
-     *
-     * @return void
-     */
-    private function _loadAllAdapters($adapter_dir)
-    {
-        if (! is_dir($adapter_dir)) {
-            trigger_error(
-                sprintf("Adapter dir: %s does not exist", $adapter_dir)
-            );
-            return false;
-        }
-        $files = scandir($adapter_dir);
-        $regex = '/^class\.(\w+)Adapter\.php$/';
-        foreach ($files as $f) {
-            if ($f == '.' || $f == ".." || ! is_dir($f)) continue;
-            include_once $adapter_dir . $f . '/Adapter.php';
-        }
     }
 }

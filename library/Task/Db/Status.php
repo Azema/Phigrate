@@ -15,6 +15,16 @@
  */
 
 /**
+ * @see Task_Base
+ */
+require_once 'Task/Base.php';
+
+/**
+ * @see Ruckusing_Task_ITask
+ */
+require_once 'Ruckusing/Task/ITask.php';
+
+/**
  * Prints out a list of migrations that have and haven't been applied
  *
  * @category   RuckusingMigrations
@@ -26,61 +36,23 @@
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
-class Task_Db_Status implements Ruckusing_Task_ITask
+class Task_Db_Status extends Task_Base implements Ruckusing_Task_ITask
 {
-    /**
-     * adapter 
-     * 
-     * @var Ruckusing_BaseAdapter
-     */
-    private $_adapter = null;
-
-    /**
-     * _migrationDir 
-     * 
-     * @var string
-     */
-    private $_migrationDir;
-
-    /**
-     * __construct 
-     * 
-     * @param Ruckusing_BaseAdapter $adapter Adapter RDBMS
-     *
-     * @return Ruckusing_DB_Status
-     */
-    function __construct($adapter)
-    {
-		$this->_adapter = $adapter;
-	}
-	
-    /**
-     * setDirectoryOfMigrations : Define directory of migrations
-     * 
-     * @param string $migrationDir Directory of migrations
-     *
-     * @return Migration_Db_Schema
-     */
-    public function setDirectoryOfMigrations($migrationDir)
-    {
-        $this->_migrationDir = $migrationDir;
-        return $this;
-    }
-	
     /**
      * Primary task entry point
      * 
      * @param array $args Arguments to task
      *
-     * @return void
+     * @return string
      */
     public function execute($args)
     {
-		echo 'Started: ' . date('Y-m-d g:ia T') . "\n\n";		
-		echo "[db:status]: \n";
-		$util = new Ruckusing_MigratorUtil($this->_adapter);
+		$return = 'Started: ' . date('Y-m-d g:ia T') . "\n\n"
+            . "[db:status]:\n";
+        require_once 'Ruckusing/Util/Migrator.php';
+		$util = new Ruckusing_Util_Migrator($this->_adapter);
 		$migrations = $util->getExecutedMigrations();
-		$files = $util->getMigrationFiles(RUCKUSING_MIGRATION_DIR, 'up');
+        $files = $util->getMigrationFiles($this->_migrationDir, 'up');
 		$applied = array();
 		$notApplied = array();
 		foreach ($files as $file) {
@@ -90,16 +62,32 @@ class Task_Db_Status implements Ruckusing_Task_ITask
                 $notApplied[] = $file['class'] . ' [ ' . $file['version'] . ' ]';
             }
         }
-        echo "\n\n===================== APPLIED ======================= \n";
-        foreach ($applied as $a) {
-            echo "\t" . $a . "\n";
+        if (count($applied) > 0) {
+            $return .= $this->_displayMigrations($applied, 'APPLIED');
         }
-        echo "\n\n===================== NOT APPLIED ======================= \n";
-        foreach ($notApplied as $na) {
-            echo "\t" . $na . "\n";
+        if (count($notApplied) > 0) {
+            $return .= $this->_displayMigrations($notApplied, 'NOT APPLIED');
         }
-		echo "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";		
-	}
+        $return .= "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";		
+        return $return;
+    }
+
+    /**
+     * _displayMigrations 
+     * 
+     * @param array  $migrations The migrations
+     * @param string $title      The title of section
+     *
+     * @return string
+     */
+    protected function _displayMigrations($migrations, $title)
+    {
+        $return = "\n\n===================== {$title} =======================\n";
+        foreach ($migrations as $a) {
+            $return .= "\t" . $a . "\n";
+        }
+        return $return;
+    }
 
     /**
      * Return the usage of the task

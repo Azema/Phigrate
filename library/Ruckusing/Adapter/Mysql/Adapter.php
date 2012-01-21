@@ -321,15 +321,13 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         $views = '';
 		$this->_loadTables(true);
         foreach ($this->_tables as $tbl => $idx) {
-			if ($tbl == 'schema_info') continue;
+			if ($tbl == RUCKUSING_SCHEMA_TBL_NAME) continue;
 
 			$stmt = sprintf('SHOW CREATE TABLE %s', $this->identifier($tbl));
             $result = $this->query($stmt);
 
             if (is_array($result) && count($result) == 1) {
                 $row = $result[0];
-                $createTable = 'Create Table';
-                $createView = 'Create View';
                 if (isset($row['Create Table'])) {
                     $final .= $row['Create Table'] . ";\n\n";
                 } else if (isset($row['Create View'])) {
@@ -350,7 +348,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     public function tableExists($tbl, $reload_tables = false)
     {
-		$this->_loadTables($reload_tables);
+        $this->_loadTables($reload_tables);
 		return array_key_exists($tbl, $this->_tables);
 	}
 		
@@ -1124,8 +1122,8 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
 		if ($this->_tablesLoaded == false || $reload) {
 			$this->_tables = array(); //clear existing structure
 			$qry = 'SHOW TABLES';
-			$res = $this->getConnexion()->query($qry);
-			foreach ($res as $row) {
+            $results = $this->getConnexion()->query($qry);
+			foreach ($results as $row) {
                 $table = $row[0];
                 $this->_tables[$table] = true;
             }
