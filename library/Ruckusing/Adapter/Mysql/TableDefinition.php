@@ -35,38 +35,38 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
 {
     /**
      * adapter MySQL
-     * 
+     *
      * @var Ruckusing_Adapter_Mysql_Adapter
      */
     protected $_adapter;
     /**
-     * sql 
-     * 
+     * sql
+     *
      * @var string
      */
     protected $_sql = '';
     /**
-     * initialized 
-     * 
+     * initialized
+     *
      * @var boolean
      */
     protected $_initialized = false;
     /**
-     * primary keys 
-     * 
+     * primary keys
+     *
      * @var array
      */
     protected $_primaryKeys = array();
     /**
-     * auto generate id 
-     * 
+     * auto generate id
+     *
      * @var boolean
      */
     protected $_autoGenerateId = true;
-    
+
     /**
-     * __construct 
-     * 
+     * __construct
+     *
      * @param Ruckusing_Adapter_Base $adapter Adapter MySQL
      * @param string                 $name    The table name
      * @param array                  $options The options definition
@@ -89,8 +89,8 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
                 $this->_autoGenerateId = false;
                 $primaryName = $options['id'];
                 $options = array(
-                    'unsigned' => true, 
-                    'null' => false, 
+                    'unsigned' => true,
+                    'null' => false,
                     'auto_increment' => true,
                     'primary_key' => true,
                 );
@@ -98,10 +98,10 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
             }
         }
     }
-    
+
     /**
      * column
-     * 
+     *
      * @param string $column_name The column name
      * @param string $type        The type generic of the column
      * @param array  $options     The options defintion of the column
@@ -110,20 +110,20 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
      */
     public function column($column_name, $type, $options = array())
     {
-        //if there is already a column by the same name then silently fail 
+        //if there is already a column by the same name then silently fail
         //and continue
         if ($this->included($column_name) == true) {
             return;
         }
-        
+
         $column_options = array();
-        
+
         if (array_key_exists('primary_key', $options)) {
             if ($options['primary_key'] === true) {
                 $this->_primaryKeys[] = $column_name;
             }
         }
-      
+
         if (array_key_exists('auto_increment', $options)) {
             if ($options['auto_increment'] === true) {
                 $column_options['auto_increment'] = true;
@@ -136,13 +136,13 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
             $type,
             $column_options
         );
-        
+
         $this->_columns[] = $column;
     }
-    
+
     /**
-     * keys 
-     * 
+     * keys
+     *
      * @return void
      */
     protected function _keys()
@@ -158,10 +158,10 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
         }
         return $keys;
     }
-    
+
     /**
-     * finish 
-     * 
+     * finish
+     *
      * @param boolean $wants_sql Flag to get SQL generated
      *
      * @return mixed
@@ -173,48 +173,48 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
             require_once 'Ruckusing/Exception/InvalidTableDefinition.php';
             throw new Ruckusing_Exception_InvalidTableDefinition(
                 sprintf(
-                    "Table Definition: '%s' has not been initialized", 
+                    "Table Definition: '%s' has not been initialized",
                     $this->_name
                 )
             );
         }
-        $opt_str = null;            
-        if (is_array($this->_options) 
+        $opt_str = null;
+        if (is_array($this->_options)
             && array_key_exists('options', $this->_options)
         ) {
             $opt_str = $this->_options['options'];
         }
-        
+
         $close_sql = sprintf(') %s;', $opt_str);
         $createTableSql = $this->_sql;
-        
+
         if ($this->_autoGenerateId === true) {
             $this->_primaryKeys[] = 'id';
             $primary_id = new Ruckusing_Adapter_Mysql_ColumnDefinition(
-                $this->_adapter, 
-                'id', 
-                'integer', 
+                $this->_adapter,
+                'id',
+                'integer',
                 array(
-                    'unsigned' => true, 
-                    'null' => false, 
+                    'unsigned' => true,
+                    'null' => false,
                     'auto_increment' => true,
                 )
             );
             $createTableSql .= $primary_id->toSql() . ",\n";
         }
-        
+
         $createTableSql .= $this->_columnsToStr();
         $createTableSql .= $this->_keys() . $close_sql;
-        
+
         if ($wants_sql) {
             return $createTableSql;
         }
-        return $this->_adapter->executeDdl($createTableSql);            
+        return $this->_adapter->executeDdl($createTableSql);
     }
-    
+
     /**
-     * columns to str 
-     * 
+     * columns to str
+     *
      * @return string
      */
     protected function _columnsToStr()
@@ -228,10 +228,10 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
         }
         return join(",\n", $fields);
     }
-    
+
     /**
-     * init sql 
-     * 
+     * init sql
+     *
      * @param string $name    The table name
      * @param array  $options The options definition of the table
      *
@@ -239,7 +239,9 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
      */
     protected function _initSql($name, $options = array())
     {
-        if (! is_array($options)) $options = array();
+        if (! is_array($options)) {
+            $options = array();
+        }
 
         //are we forcing table creation? If so, drop it first
         if (array_key_exists('force', $options) && $options['force'] == true) {

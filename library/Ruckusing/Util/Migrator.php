@@ -27,22 +27,22 @@
 class Ruckusing_Util_Migrator
 {
     /**
-     * adapter 
-     * 
+     * adapter
+     *
      * @var Ruckusing_Adapter_Base
      */
     private $_adapter = null;
 
     /**
-     * migrations 
-     * 
+     * migrations
+     *
      * @var array
      */
     private $_migrations = array();
-    
+
     /**
-     * __construct 
-     * 
+     * __construct
+     *
      * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
      *
      * @return Ruckusing_Util_Migrator
@@ -53,8 +53,8 @@ class Ruckusing_Util_Migrator
     }
 
     /**
-     * set adapter 
-     * 
+     * set adapter
+     *
      * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
      *
      * @return Ruckusing_Util_Migrator
@@ -68,11 +68,11 @@ class Ruckusing_Util_Migrator
         $this->_adapter = $adapter;
         return $this;
     }
-    
+
     /**
-     * Return the max version number from the DB, 
+     * Return the max version number from the DB,
      * or "0" in the case of no versions available.
-     * We must use strings because our date/timestamp 
+     * We must use strings because our date/timestamp
      * when treated as an integer would cause overflow.
      *
      * @return string
@@ -103,13 +103,13 @@ class Ruckusing_Util_Migrator
     }
 
     /**
-     * This methods calculates the actual set of migrations 
+     * This methods calculates the actual set of migrations
      * that should be performed, taking into account
-     * the current version, the target version and the direction (up/down). 
-     * When going up this method will skip migrations that have not been 
-     * executed, when going down this method will only include migrations 
+     * the current version, the target version and the direction (up/down).
+     * When going up this method will skip migrations that have not been
+     * executed, when going down this method will only include migrations
      * that have been executed.
-     * 
+     *
      * @param string  $directory   The directory of migrations files
      * @param string  $direction   Up or Down
      * @param int     $destination The version desired
@@ -117,10 +117,10 @@ class Ruckusing_Util_Migrator
      *
      * @return array
      */
-    public function getRunnableMigrations($directory, $direction, 
-        $destination = null, $useCache = true
-    ) {
-        // cache migration lookups and early return if we've seen 
+    public function getRunnableMigrations($directory, $direction,
+        $destination = null, $useCache = true)
+    {
+        // cache migration lookups and early return if we've seen
         // this requested set
         if ($useCache == true) {
             $key = $direction . '-' . $destination;
@@ -128,7 +128,7 @@ class Ruckusing_Util_Migrator
                 return($this->_migrations[$key]);
             }
         }
-      
+
         $runnable = array();
         $migrations = array();
         $migrations = $this->getMigrationFiles($directory, $direction);
@@ -145,14 +145,14 @@ class Ruckusing_Util_Migrator
         $finish = array_search($target, $migrations);
         $finish = $finish !== false ? $finish : (count($migrations) - 1);
         $item_length = ($finish - $start) + 1;
-        
+
         $runnable = array_slice($migrations, $start, $item_length);
-        
+
         //dont include first item if going down but not if going all the way to the bottom
         if ($direction == 'down' && count($runnable) > 0 && $target != null) {
             array_pop($runnable);
         }
-    
+
         $executed = $this->getExecutedMigrations();
         $to_execute = array();
 
@@ -165,7 +165,7 @@ class Ruckusing_Util_Migrator
             //Skip ones that we never executed
             if ($direction == 'down' && ! in_array($version, $executed)) {
                 continue;
-            } 
+            }
             $to_execute[] = $migration;
         }
         if ($useCache == true) {
@@ -173,7 +173,7 @@ class Ruckusing_Util_Migrator
         }
         return $to_execute;
     }
-        
+
     /**
      * Generate a timestamp for the current time in UTC format
      * Returns a string like '20090122193325'
@@ -182,13 +182,13 @@ class Ruckusing_Util_Migrator
      */
     public static function generateTimestamp()
     {
-        return gmdate('YmdHis', time()); 
+        return gmdate('YmdHis', time());
     }
-  
+
     /**
-     * If we are going UP then log this version as executed, 
+     * If we are going UP then log this version as executed,
      * if going DOWN then delete this version from our set of executed migrations.
-     * 
+     *
      * @param string $version   The version desired
      * @param string $direction Up or Down
      *
@@ -207,7 +207,7 @@ class Ruckusing_Util_Migrator
     }
 
     /**
-     * Returns an array of strings which represent version numbers 
+     * Returns an array of strings which represent version numbers
      * that we *have* migrated
      *
      * @return array
@@ -225,11 +225,11 @@ class Ruckusing_Util_Migrator
         }
         sort($executed);
         return $executed;
-    }   
-    
+    }
+
     /**
      * Return a set of migration files, according to the given direction.
-     * If nested, then return a complex array with the migration parts 
+     * If nested, then return a complex array with the migration parts
      * broken up into parts which make analysis much easier.
      *
      * @param string $directory The directory of migration files
@@ -265,14 +265,14 @@ class Ruckusing_Util_Migrator
         }
         return $validFiles;
     }
-  
-    //== Private methods  
-  
-  
+
+    //== Private methods
+
+
     /**
-     * Find the specified structure (representing a migration) 
+     * Find the specified structure (representing a migration)
      * that matches the given version
-     * 
+     *
      * @param array  $migrations The table of migrations
      * @param string $version    The version desired
      *

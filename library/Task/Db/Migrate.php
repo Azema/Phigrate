@@ -45,22 +45,22 @@ class Task_Db_Migrate extends Task_Base implements Ruckusing_Task_ITask
     const STYLE_OFFSET = 2;
 
     /**
-     * migrator util 
-     * 
+     * migrator util
+     *
      * @var Ruckusing_Util_Migrator
      */
     private $_migratorUtil = null;
 
     /**
      * Return executed string
-     * 
+     *
      * @var string
      */
     protected $_return = '';
 
     /**
      * Primary task entry point
-     * 
+     *
      * @param array $args Arguments of task
      *
      * @return void
@@ -80,7 +80,7 @@ class Task_Db_Migrate extends Task_Base implements Ruckusing_Task_ITask
         $this->_return = 'Started: ' . date('Y-m-d g:ia T') . PHP_EOL . PHP_EOL
             . '[db:migrate]:' . PHP_EOL;
         try {
-            // Check that the schema_version table exists, 
+            // Check that the schema_version table exists,
             // and if not, automatically create it
             $this->_verifyEnvironment();
 
@@ -88,7 +88,7 @@ class Task_Db_Migrate extends Task_Base implements Ruckusing_Task_ITask
 
             $targetVersion = null;
             $style = self::STYLE_REGULAR;
-            
+
             //did the user specify an explicit version?
             if (array_key_exists('VERSION', $this->_taskArgs)) {
                 $targetVersion = trim($this->_taskArgs['VERSION']);
@@ -96,7 +96,7 @@ class Task_Db_Migrate extends Task_Base implements Ruckusing_Task_ITask
             }
 
             // did the user specify a relative offset, e.g. "-2" or "+3" ?
-            if ($targetVersion !== null 
+            if ($targetVersion !== null
                 && preg_match('/^([\+-])(\d+)$/', $targetVersion, $matches)
             ) {
                 if (count($matches) == 3) {
@@ -139,7 +139,7 @@ class Task_Db_Migrate extends Task_Base implements Ruckusing_Task_ITask
 
     /**
      * Return the usage of the task
-     * 
+     *
      * @return string
      */
     public function help()
@@ -148,25 +148,25 @@ class Task_Db_Migrate extends Task_Base implements Ruckusing_Task_ITask
         $output =<<<USAGE
 Task: \033[36mdb:migrate\033[0m [\033[33mVERSION\033[0m]
 
-The primary purpose of the framework is to run migrations, and the 
+The primary purpose of the framework is to run migrations, and the
 execution of migrations is all handled by just a regular ol' task.
 
-\t\033[33mVERSION\033[0m can be specified to go up (or down) to a specific 
-\tversion, based on the current version. If not specified, 
-\tall migrations greater than the current database version 
+\t\033[33mVERSION\033[0m can be specified to go up (or down) to a specific
+\tversion, based on the current version. If not specified,
+\tall migrations greater than the current database version
 \twill be executed.
 
-\t\033[37mExample A:\033[0m The database is fresh and empty, assuming there 
+\t\033[37mExample A:\033[0m The database is fresh and empty, assuming there
 \tare 5 actual migrations, but only the first two should be run.
 
 \t\t\033[35mphp main.php db:migrate VERSION=20101006114707\033[0m
 
-\t\033[37mExample B:\033[0m The current version of the DB is 20101006114707 
+\t\033[37mExample B:\033[0m The current version of the DB is 20101006114707
 \tand we want to go down to 20100921114643
 
 \t\t\033[35mphp main.php db:migrate VERSION=20100921114643\033[0m
 
-\t\033[37mExample C:\033[0m You can also use relative number of revisions 
+\t\033[37mExample C:\033[0m You can also use relative number of revisions
 \t(positive migrate up, negative migrate down).
 
 \t\t\033[35mphp main.php db:migrate VERSION=-2\033[0m
@@ -175,10 +175,10 @@ USAGE;
         $this->_logger->debug(__METHOD__ . ' End');
         return $output;
     }
-    
+
     /**
-     * migrate from offset 
-     * 
+     * migrate from offset
+     *
      * @param int    $offset         The offset
      * @param int    $currentVersion The current version
      * @param string $direction      Up or Down
@@ -206,14 +206,14 @@ USAGE;
             }
         }
         $this->_logger->debug('current index: ' . $currentIndex);
-        
+
         // If we are not at the bottom then adjust our index (to satisfy array_slice)
         if ($currentIndex == -1) {
             $currentIndex = 0;
         } else {
             $currentIndex += 1;
         }
-        
+
         // check to see if we have enough migrations to run - the user
         // might have asked to run more than we have available
         $available = array_slice($migrations, $currentIndex, $offset);
@@ -226,10 +226,10 @@ USAGE;
             $numAvailable = count($names);
             $prefix = $direction == 'down' ? '-' : '+';
             $this->_logger->warn(
-                'Cannot migration ' . $direction . ' via offset ' 
+                'Cannot migration ' . $direction . ' via offset '
                 . $prefix . $offset
             );
-            $this->_return .= "\tCannot migrate " . strtoupper($direction) 
+            $this->_return .= "\tCannot migrate " . strtoupper($direction)
                 . " via offset \"{$prefix}{$offset}\": "
                 . "not enough migrations exist to execute.\n"
                 . "\tYou asked for ({$offset}) but only available are "
@@ -243,8 +243,8 @@ USAGE;
     }
 
     /**
-     * prepare to migrate 
-     * 
+     * prepare to migrate
+     *
      * @param string $destination The version desired
      * @param string $direction   Up or Down
      *
@@ -254,22 +254,22 @@ USAGE;
     {
         $this->_logger->debug(__METHOD__ . ' Start');
         $this->_logger->debug(
-            'Destination: ' . $destination 
+            'Destination: ' . $destination
             . ' - direction: ' . $direction
         );
         try {
             $this->_return .= "\tMigrating " . strtoupper($direction);
             if (! is_null($destination)) {
-                $this->_return .= " to: {$destination}\n";              
+                $this->_return .= " to: {$destination}\n";
             } else {
                 $this->_return .= ":\n";
             }
             $migrations = $this->_migratorUtil
                 ->getRunnableMigrations(
-                    $this->_migrationDir, 
-                    $direction, 
+                    $this->_migrationDir,
+                    $direction,
                     $destination
-                );          
+                );
             if (count($migrations) == 0) {
                 $msg = 'No relevant migrations to run. Exiting...';
                 $this->_logger->info($msg);
@@ -285,8 +285,8 @@ USAGE;
     }
 
     /**
-     * run migrations 
-     * 
+     * run migrations
+     *
      * @param array                   $migrations   The table of migration files
      * @param Ruckusing_BaseMigration $targetMethod The migration class
      *
@@ -309,7 +309,7 @@ USAGE;
             $obj = new $klass($this->_adapter);
             $refl = new ReflectionObject($obj);
             if (! $refl->hasMethod($targetMethod)) {
-                $msg = $klass . ' does not have (' . $targetMethod 
+                $msg = $klass . ' does not have (' . $targetMethod
                     . ') method defined!';
                 $this->_logger->warn($msg);
                 require_once 'Ruckusing/Exception/MissingMigrationMethod.php';
@@ -345,10 +345,10 @@ USAGE;
         $this->_logger->debug(__METHOD__ . ' End');
         return array('last_version' => $lastVersion);
     }
-    
+
     /**
-     * diff timer 
-     * 
+     * diff timer
+     *
      * @param integer $s Start time
      * @param integer $e End time
      *
@@ -363,10 +363,10 @@ USAGE;
         $this->_logger->debug(__METHOD__ . ' End');
         return $result;
     }
-    
+
     /**
-     * verify environment 
-     * 
+     * verify environment
+     *
      * @return void
      */
     private function _verifyEnvironment()

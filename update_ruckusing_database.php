@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
   The table for keeping track of Ruckusing Migrations has changed so we need to alter the schema and migrate
   over existing migrations.
 */

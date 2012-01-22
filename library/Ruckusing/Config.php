@@ -70,7 +70,7 @@ class Ruckusing_Config implements Countable, Iterator
 
     /**
      * Load file error string.
-     * 
+     *
      * Is null if there was no error while file loading
      *
      * @var string
@@ -146,24 +146,24 @@ class Ruckusing_Config implements Countable, Iterator
         require_once 'Ruckusing/Exception/Config.php';
         throw new Ruckusing_Exception_Config('Ruckusing_Config is read only');
     }
-    
+
     /**
      * Deep clone of this instance to ensure that nested Ruckusing_Configs
      * are also cloned.
-     * 
+     *
      * @return void
      */
     public function __clone()
     {
-      $array = array();
-      foreach ($this->_data as $key => $value) {
-          if ($value instanceof Ruckusing_Config) {
-              $array[$key] = clone $value;
-          } else {
-              $array[$key] = $value;
-          }
-      }
-      $this->_data = $array;
+        $array = array();
+        foreach ($this->_data as $key => $value) {
+            if ($value instanceof Ruckusing_Config) {
+                $array[$key] = clone $value;
+            } else {
+                $array[$key] = $value;
+            }
+        }
+        $this->_data = $array;
     }
 
     /**
@@ -329,7 +329,7 @@ class Ruckusing_Config implements Countable, Iterator
      * @param integer $errline
      */
     protected function _loadFileErrorHandler($errno, $errstr, $errfile, $errline)
-    { 
+    {
         if ($this->_loadFileErrorStr === null) {
             $this->_loadFileErrorStr = $errstr;
         } else {

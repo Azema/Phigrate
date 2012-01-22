@@ -27,53 +27,53 @@
 class Ruckusing_Logger
 {
     /**
-     * @var string Log type Error 
+     * @var string Log type Error
      */
     const ERROR = 1;
     /**
-     * @var string Log type Warning 
+     * @var string Log type Warning
      */
     const WARNING = 2;
     /**
-     * @var string Log type Info 
+     * @var string Log type Info
      */
     const INFO = 3;
     /**
-     * @var string Log type Debug 
+     * @var string Log type Debug
      */
     const DEBUG = 4;
 
     /**
      * Instance of logger
      *
-     * @var Ruckusing_Logger 
+     * @var Ruckusing_Logger
      */
     private static $_instance;
 
     /**
-     * file 
-     * 
+     * file
+     *
      * @var string
      */
     private $_file = '';
 
     /**
      * File descriptor
-     * 
+     *
      * @var resource
      */
     private $_fp;
 
     /**
-     * _priority 
-     * 
+     * _priority
+     *
      * @var integer
      */
     private $_priority = 99;
 
     /**
-     * __construct 
-     * 
+     * __construct
+     *
      * @param string $file Path of file to write logs
      *
      * @return Ruckusing_Logger
@@ -86,7 +86,7 @@ class Ruckusing_Logger
 
     /**
      * Close the file descriptor
-     * 
+     *
      * @return void
      */
     public function __destruct()
@@ -94,10 +94,10 @@ class Ruckusing_Logger
         $this->debug(__METHOD__);
         $this->close();
     }
-  
+
     /**
      * Return an instance of logger
-     * 
+     *
      * @param string $logfile Path of file to write logs
      *
      * @return Ruckusing_Logger
@@ -108,12 +108,12 @@ class Ruckusing_Logger
             return self::$_instance;
         }
         self::$_instance = new Ruckusing_Logger($logfile);
-        return self::$_instance; 
+        return self::$_instance;
     }
 
     /**
      * set priority of log
-     * 
+     *
      * @param mixed $priority The priority of log
      *
      * @return Ruckusing_Logger
@@ -125,8 +125,8 @@ class Ruckusing_Logger
     }
 
     /**
-     * getPriority 
-     * 
+     * getPriority
+     *
      * @return integer
      */
     public function getPriority()
@@ -136,7 +136,7 @@ class Ruckusing_Logger
 
     /**
      * Log a message with debug type
-     * 
+     *
      * @param string $msg Message to log
      *
      * @return void
@@ -148,7 +148,7 @@ class Ruckusing_Logger
 
     /**
      * Log a message with info type
-     * 
+     *
      * @param string $msg Message to log
      *
      * @return void
@@ -157,10 +157,10 @@ class Ruckusing_Logger
     {
         $this->log($msg, 'info');
     }
-  
+
     /**
      * Log a message with warn type
-     * 
+     *
      * @param string $msg Message to log
      *
      * @return void
@@ -169,10 +169,10 @@ class Ruckusing_Logger
     {
         $this->log($msg, 'warn');
     }
-  
+
     /**
      * Log a message with err type
-     * 
+     *
      * @param string $msg Message to log
      *
      * @return void
@@ -181,10 +181,10 @@ class Ruckusing_Logger
     {
         $this->log($msg, 'err');
     }
-  
+
     /**
      * log a message in file
-     * 
+     *
      * @param string $msg  Message to log
      * @param string $type Type of log (default: info)
      *
@@ -196,14 +196,14 @@ class Ruckusing_Logger
         $prioOfType = $this->_getPriorityFromType($type);
         if ($this->_fp && $prioOfType <= $this->_priority) {
             $ts = date('M d H:i:s');
-            $line = sprintf("%s [%s] %s\n", $ts, strtoupper($type), $msg); 
+            $line = sprintf("%s [%s] %s\n", $ts, strtoupper($type), $msg);
             fwrite($this->_fp, $line);
         }
     }
 
     /**
-     * get priority from type 
-     * 
+     * get priority from type
+     *
      * @param string $type The type of log
      *
      * @return integer
@@ -228,10 +228,10 @@ class Ruckusing_Logger
         }
         return $priority;
     }
-  
+
     /**
      * close a file logs
-     * 
+     *
      * @return void
      */
     public function close()

@@ -26,17 +26,4 @@
  */
 class Ruckusing_Exception extends Exception
 {
-    /**
-     * __construct 
-     * 
-     * @param string    $msg      Ruckusing_Exception message
-     * @param int       $code     Ruckusing_Exception code
-     * @param Exception $previous Previous exception
-     *
-     * @return void
-     */
-    public function __construct($msg = '', $code = 0, Exception $previous = null)
-    {
-        parent::__construct($msg, $code, $previous);
-    }
 }

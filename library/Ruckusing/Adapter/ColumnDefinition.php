@@ -31,32 +31,32 @@ abstract class Ruckusing_Adapter_ColumnDefinition
      * 
      * @var string
      */
-	public $name;
+    public $name;
     /**
      * type 
      * 
      * @var mixed
      */
-	public $type;
+    public $type;
     /**
      * properties 
      * 
      * @var mixed
      */
-	public $properties;
+    public $properties;
     /**
      * options 
      * 
      * @var array
      */
-	protected $_options = array();
+    protected $_options = array();
     /**
      * adapter 
      * 
      * @var Ruckusing_Adapter_Base
      */
-	protected $_adapter;
-	
+    protected $_adapter;
+
     /**
      * __construct 
      * 
@@ -84,11 +84,11 @@ abstract class Ruckusing_Adapter_ColumnDefinition
             require_once 'Ruckusing/Exception/Argument.php';
             throw new Ruckusing_Exception_Argument("Invalid 'type' parameter");
         }
-		$this->_adapter = $adapter;
-		$this->name = $name;
-		$this->type = $type;
-	    $this->_options = $options;
-	}
+        $this->_adapter = $adapter;
+        $this->name     = $name;
+        $this->type     = $type;
+        $this->_options = $options;
+    }
 
     /**
      * toSql 
@@ -98,16 +98,16 @@ abstract class Ruckusing_Adapter_ColumnDefinition
     public function toSql()
     {
         $column_sql = sprintf(
-            '%s %s', 
-            $this->_adapter->identifier($this->name), 
+            '%s %s',
+            $this->_adapter->identifier($this->name),
             $this->_sqlType()
         );
         $column_sql .= $this->_adapter->addColumnOptions(
             $this->type,
             $this->_options
         );
-		return $column_sql;
-	}
+        return $column_sql;
+    }
 
     /**
      * __toString 
@@ -118,7 +118,7 @@ abstract class Ruckusing_Adapter_ColumnDefinition
     {
         //Dont catch any exceptions here, let them bubble up
         return $this->toSql();
-	}
+    }
 
     /**
      * sql type 
@@ -128,5 +128,5 @@ abstract class Ruckusing_Adapter_ColumnDefinition
     private function _sqlType()
     {
         return $this->_adapter->typeToSql($this->type, $this->_options);
-	}
+    }
 }

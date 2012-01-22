@@ -40,22 +40,22 @@ class Task_Db_Status extends Task_Base implements Ruckusing_Task_ITask
 {
     /**
      * Primary task entry point
-     * 
+     *
      * @param array $args Arguments to task
      *
      * @return string
      */
     public function execute($args)
     {
-		$return = 'Started: ' . date('Y-m-d g:ia T') . "\n\n"
+        $return = 'Started: ' . date('Y-m-d g:ia T') . "\n\n"
             . "[db:status]:\n";
         require_once 'Ruckusing/Util/Migrator.php';
-		$util = new Ruckusing_Util_Migrator($this->_adapter);
-		$migrations = $util->getExecutedMigrations();
+        $util = new Ruckusing_Util_Migrator($this->_adapter);
+        $migrations = $util->getExecutedMigrations();
         $files = $util->getMigrationFiles($this->_migrationDir, 'up');
-		$applied = array();
-		$notApplied = array();
-		foreach ($files as $file) {
+        $applied = array();
+        $notApplied = array();
+        foreach ($files as $file) {
             if (in_array($file['version'], $migrations)) {
                 $applied[] = $file['class'] . ' [ ' . $file['version'] . ' ]';
             } else {
@@ -68,13 +68,13 @@ class Task_Db_Status extends Task_Base implements Ruckusing_Task_ITask
         if (count($notApplied) > 0) {
             $return .= $this->_displayMigrations($notApplied, 'NOT APPLIED');
         }
-        $return .= "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";		
+        $return .= "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";
         return $return;
     }
 
     /**
-     * _displayMigrations 
-     * 
+     * _displayMigrations
+     *
      * @param array  $migrations The migrations
      * @param string $title      The title of section
      *
@@ -91,7 +91,7 @@ class Task_Db_Status extends Task_Base implements Ruckusing_Task_ITask
 
     /**
      * Return the usage of the task
-     * 
+     *
      * @return string
      */
     public function help()
@@ -99,7 +99,7 @@ class Task_Db_Status extends Task_Base implements Ruckusing_Task_ITask
         $output =<<<USAGE
 Task: \033[36mdb:status\033[0m
 
-With this taks you'll get an overview of the already executed migrations and 
+With this taks you'll get an overview of the already executed migrations and
 which will be executed when running db:migrate.
 
 This task not take arguments.

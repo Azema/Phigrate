@@ -26,7 +26,7 @@ require_once 'Ruckusing/Task/ITask.php';
 
 /**
  * This is a generic task which dumps the schema of the DB
- * as a text file.	
+ * as a text file.
  *
  * @category   RuckusingMigrations
  * @package    Task
@@ -72,7 +72,7 @@ class Task_Db_Schema extends Task_Base implements Ruckusing_Task_ITask
 
     /**
      * Return the usage of the task
-     * 
+     *
      * @return string
      */
     public function help()
@@ -80,13 +80,13 @@ class Task_Db_Schema extends Task_Base implements Ruckusing_Task_ITask
         $output =<<<USAGE
 Task: \033[36mdb:schema\033[0m
 
-It can be beneficial to get a dump of the DB in raw SQL format which represents 
+It can be beneficial to get a dump of the DB in raw SQL format which represents
 the current version.
 
-\033[31mNote\033[0m: This dump only contains the actual schema (e.g. the DML needed to 
-reconstruct the DB), but not any actual data. 
+\033[31mNote\033[0m: This dump only contains the actual schema (e.g. the DML needed to
+reconstruct the DB), but not any actual data.
 
-In MySQL terms, this task would not be the same as running the mysqldump command 
+In MySQL terms, this task would not be the same as running the mysqldump command
 (which by defaults does include any data in the tables).
 
 USAGE;

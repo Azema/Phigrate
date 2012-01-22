@@ -46,7 +46,7 @@ abstract class Ruckusing_Adapter_Base
      * @var Ruckusing_Logger
      */
     protected $_logger;
-	
+
     /**
      * __construct 
      * 
@@ -59,8 +59,8 @@ abstract class Ruckusing_Adapter_Base
     {
         $this->setDbConfig($dbConfig);
         $this->setLogger($logger);
-	}
-	
+    }
+
     /**
      * set dbConfig 
      * 
@@ -68,7 +68,7 @@ abstract class Ruckusing_Adapter_Base
      *
      * @return Ruckusing_Adapter_Base
      */
-    public function setDbConfig($dbConfig) 
+    public function setDbConfig($dbConfig)
     {
         if (! is_array($dbConfig) || empty($dbConfig)) {
             require_once 'Ruckusing/Exception/Argument.php';
@@ -104,7 +104,7 @@ abstract class Ruckusing_Adapter_Base
                     'The argument dbConfig must be contains index "database"'
                 );
             }
-            if (! array_key_exists('socket', $dbConfig) 
+            if (! array_key_exists('socket', $dbConfig)
                 && ! array_key_exists('host', $dbConfig)
             ) {
                 require_once 'Ruckusing/Exception/Argument.php';
@@ -128,7 +128,7 @@ abstract class Ruckusing_Adapter_Base
         }
         return true;
     }
-	
+
     /**
      * get dsn 
      * 
@@ -139,7 +139,7 @@ abstract class Ruckusing_Adapter_Base
         if (! isset($this->_dsn)) {
             $this->_dsn = $this->_initDsn();
         }
-		return $this->_dsn;
+        return $this->_dsn;
     }
 
     /**
@@ -159,7 +159,7 @@ abstract class Ruckusing_Adapter_Base
         }
         $this->_logger = $logger;
         return $this;
-	}
+    }
 
     /**
      * get logger 
@@ -168,10 +168,10 @@ abstract class Ruckusing_Adapter_Base
      */
     public function getLogger()
     {
-		return $this->_logger;
-	}
-	
-	//alias
+        return $this->_logger;
+    }
+
+    //alias
     /**
      * has table 
      * 
@@ -181,7 +181,7 @@ abstract class Ruckusing_Adapter_Base
      */
     public function hasTable($tbl)
     {
-		return $this->tableExists($tbl, true);
+        return $this->tableExists($tbl, true);
     }
 
     /**
@@ -218,7 +218,7 @@ abstract class Ruckusing_Adapter_Base
         }
         return "'" . addcslashes($value, "\000\n\r\\'\"\032") . "'";
     }
-  
+
     /**
      * Creates a PDO instance to represent a connection
      * to the requested database.
@@ -237,7 +237,7 @@ abstract class Ruckusing_Adapter_Base
             $password = $this->_dbConfig['password'];
         }
         $options = array();
-        if (array_key_exists('options', $this->_dbConfig) 
+        if (array_key_exists('options', $this->_dbConfig)
             && is_array($this->_dbConfig['options'])
         ) {
             $options = $this->_dbConfig['options'];

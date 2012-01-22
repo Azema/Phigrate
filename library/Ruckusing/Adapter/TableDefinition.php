@@ -32,33 +32,33 @@ require_once 'Ruckusing/Adapter/ColumnDefinition.php';
 abstract class Ruckusing_Adapter_TableDefinition
 {
     /**
-     * columns 
-     * 
+     * columns
+     *
      * @var array
      */
     protected $_columns = array();
     /**
-     * adapter 
-     * 
+     * adapter
+     *
      * @var Ruckusing_Adapter_Base
      */
     protected $_adapter;
     /**
-     * name 
-     * 
+     * name
+     *
      * @var string
      */
     protected $_name;
     /**
-     * options 
-     * 
+     * options
+     *
      * @var mixed
      */
     protected $_options;
-    
+
     /**
-     * __construct 
-     * 
+     * __construct
+     *
      * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
      * @param string                 $name    The table name
      * @param array                  $options The table options
@@ -81,16 +81,16 @@ abstract class Ruckusing_Adapter_TableDefinition
 
         $this->_adapter = $adapter;
         $this->_name = $name;
-        $this->_options = $options;     
+        $this->_options = $options;
     }
-    
+
     /**
-     * Determine whether or not the given column already exists in our 
+     * Determine whether or not the given column already exists in our
      * table definition.
-     * 
+     *
      * This method is lax enough that it can take either a string column name
      * or a Ruckusing_Adpater_ColumnDefinition object.
-     * 
+     *
      * @param Ruckusing_Adpater_ColumnDefinition|string $column The column to included
      *
      * @return boolean
@@ -110,11 +110,11 @@ abstract class Ruckusing_Adapter_TableDefinition
             }
         }
         return false;
-    }   
-    
+    }
+
     /**
-     * toSql 
-     * 
+     * toSql
+     *
      * @return string
      */
     public function toSql()
@@ -124,7 +124,7 @@ abstract class Ruckusing_Adapter_TableDefinition
 
     /**
      * column
-     * 
+     *
      * @param string $column_name The column name
      * @param string $type        The type generic of the column
      * @param array  $options     The options defintion of the column
@@ -134,8 +134,8 @@ abstract class Ruckusing_Adapter_TableDefinition
     abstract public function column($column_name, $type, $options = array());
 
     /**
-     * finish 
-     * 
+     * finish
+     *
      * @param boolean $wants_sql Flag to get SQL generated
      *
      * @return mixed

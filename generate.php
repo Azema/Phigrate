@@ -15,28 +15,30 @@
  *
  * Generator for migrations.
  * Ruckusing Migrations v{$version} at {$dateVersion}
- * 
+ *
  * Usage: php generate.php [options] [help] [ENV=environment] <migration name>
- * 
+ *
  * Options:
  *     -c, --configuration  Path to the configuration file (INI) of application.
- * 
+ *
  *     -m, --migrationdir   Path of the directory of the migrations.
- * 
+ *
  * ###########
- * 
+ *
  *     help: Display this message
- * 
- *     ENV: The ENV command line parameter can be used to specify a different 
+ *
+ *     ENV: The ENV command line parameter can be used to specify a different
  * database to run against, as specific in the configuration file (config/database.inc.php).
  * By default, ENV is "development"
- * 
+ *
  *     <migration_name> is a descriptive name of the migration, joined with undescores.
  *         Examples: add_index_to_users | create_users_table | remove_pending_users
- * 
+ *
  */
 
-if (!defined('RUCKUSING_BASE')) define('RUCKUSING_BASE', dirname(__FILE__));
+if (!defined('RUCKUSING_BASE')) {
+    define('RUCKUSING_BASE', dirname(__FILE__));
+}
 
 set_error_handler('scrErrorHandler', E_ALL);
 set_exception_handler('scrExceptionHandler');
@@ -49,8 +51,9 @@ set_include_path(
     ))
 );
 
-if (!isset($argv))
+if (!isset($argv)) {
     $argv = '';
+}
 $args = parseArgs($argv);
 $env = getEnvironment($args);
 $config = getConfig($args, $env);
@@ -61,7 +64,7 @@ main($args, $config);
 
 /**
  * Parse command line arguments
- * 
+ *
  * @param array $argv Arguments of command line
  *
  * @return array
@@ -129,9 +132,9 @@ function parseArgs($argv)
 }
 
 /**
- * getEnvironment 
- * 
- * @param array $options 
+ * getEnvironment
+ *
+ * @param array $options
  *
  * @return string
  */
@@ -145,10 +148,10 @@ function getEnvironment($options)
 }
 
 /**
- * getConfig 
- * 
- * @param array  $options 
- * @param string $env 
+ * getConfig
+ *
+ * @param array  $options
+ * @param string $env
  *
  * @return Ruckusing_Config
  */
@@ -169,7 +172,7 @@ function getConfig($options, $env)
 /**
  * Print a usage scenario for this script.
  * Optionally take a boolean on whether to immediately die or not.
- * 
+ *
  * @param boolean $exit Flag to exit script generate
  *
  * @return void
@@ -192,7 +195,7 @@ Options:
 
     help: Display this message
 
-    ENV: The ENV command line parameter can be used to specify a different 
+    ENV: The ENV command line parameter can be used to specify a different
 database to run against, as specific in the configuration file (config/database.inc.php).
 By default, ENV is "development"
 
@@ -203,12 +206,14 @@ By default, ENV is "development"
 USAGE;
 
     echo $usage;
-    if ($exit) exit(0);
+    if ($exit) {
+        exit(0);
+    }
 }
 
 /**
  * The main function of this script
- * 
+ *
  * @param array $args Arguments of command line
  *
  * @return void
@@ -225,14 +230,14 @@ function main($args, $config)
             'Error: Migration directory must be specified!'
         );
     }
-    
+
     //clear any filesystem stats cache
     clearstatcache();
-    
+
     //check to make sure our migration directory exists
     if (! is_dir($migrationDir)) {
         throw new Ruckusing_Exception_InvalidMigrationDir(
-            "ERROR: migration directory '" . $migrationDir 
+            "ERROR: migration directory '" . $migrationDir
             . "' does not exist. Specify 'migration.dir' in "
             . "config/application.ini and try again."
         );
@@ -250,11 +255,11 @@ function main($args, $config)
     $fileName    = $timestamp . '_' . $klass . '.php';
     $fullPath    = $migrationDir . '/' . $fileName;
     $templateStr = getTemplate($klass);
-    
+
     //check to make sure our destination directory is writable
     if (! is_writable($migrationDir . '/')) {
         throw new Ruckusing_Exception_InvalidMigrationDir(
-            'ERROR: migration directory (' . $migrationDir 
+            'ERROR: migration directory (' . $migrationDir
             . ') is not writable by the current user. '
             . 'Check permissions and try again.'
         );
@@ -275,7 +280,7 @@ function main($args, $config)
 
 /**
  * Indicate if a class name is already used
- * 
+ *
  * @param string $classname    The class name to test
  * @param string $migrationDir The directory of migration files
  *
@@ -293,8 +298,8 @@ function classNameIsDuplicated($classname, $migrationDir)
 }
 
 /**
- * die with error 
- * 
+ * die with error
+ *
  * @param string $str Message to display
  *
  * @return void
@@ -305,8 +310,8 @@ function dieWithError($str)
 }
 
 /**
- * get template 
- * 
+ * get template
+ *
  * @param string $klass The class name
  *
  * @return string
@@ -322,31 +327,31 @@ function getTemplate($klass)
  *
  * @category   RuckusingMigrations
  * @package    Migrations
- * @author     
- * @copyright  
- * @license    
- * @link       
+ * @author
+ * @copyright
+ * @license
+ * @link
  */
 
 /**
  * Class migration DB $klass
- * 
+ *
  * For documentation on the methods of migration
  *
  * @see https://github.com/Azema/ruckusing-migrations/wiki/Migration-Methods
  *
  * @category   RuckusingMigrations
  * @package    Migrations
- * @author     
- * @copyright  
- * @license    
- * @link       
+ * @author
+ * @copyright
+ * @license
+ * @link
  */
 class $klass extends Ruckusing_Migration_Base
 {
     /**
-     * up 
-     * 
+     * up
+     *
      * @return void
      */
     public function up()
@@ -355,8 +360,8 @@ class $klass extends Ruckusing_Migration_Base
     }
 
     /**
-     * down 
-     * 
+     * down
+     *
      * @return void
      */
     public function down()
@@ -369,9 +374,9 @@ TPL;
 }
 
 /**
- * error_handler 
+ * error_handler
  * Global error handler to process all errors during script execution
- * 
+ *
  * @param integer $errno   Error number
  * @param string  $errstr  Error message
  * @param string  $errfile Error file
@@ -382,18 +387,18 @@ TPL;
 function scrErrorHandler($errno, $errstr, $errfile, $errline)
 {
     echo sprintf(
-        "\n\n(%s:%d) %s\n\n", 
-        basename($errfile), 
-        $errline, 
+        "\n\n(%s:%d) %s\n\n",
+        basename($errfile),
+        $errline,
         $errstr
     );
     exit(1); // exit with error
 }
 
 /**
- * exception handler 
+ * exception handler
  * Global exception handler to process all exception during script execution
- * 
+ *
  * @param Exception $exception Exception
  *
  * @return void

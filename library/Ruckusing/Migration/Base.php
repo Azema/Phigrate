@@ -14,7 +14,7 @@
  */
 
 /**
- * @see Ruckusing_Adapter_IAdapter 
+ * @see Ruckusing_Adapter_IAdapter
  */
 require_once 'Ruckusing/Adapter/IAdapter.php';
 
@@ -32,15 +32,15 @@ require_once 'Ruckusing/Adapter/IAdapter.php';
 abstract class Ruckusing_Migration_Base
 {
     /**
-     * adapter 
-     * 
+     * adapter
+     *
      * @var Ruckusing_Adapter_Base
      */
-	protected $_adapter;
-	
+    protected $_adapter;
+
     /**
-     * __construct 
-     * 
+     * __construct
+     *
      * @param Ruckusing_Adapter_Base $adapter Adapter of RDBMS
      *
      * @return void
@@ -51,8 +51,8 @@ abstract class Ruckusing_Migration_Base
     }
 
     /**
-     * set adapter 
-     * 
+     * set adapter
+     *
      * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
      *
      * @return Ruckusing_Migration_Base
@@ -65,21 +65,21 @@ abstract class Ruckusing_Migration_Base
         }
         $this->_adapter = $adapter;
         return $this;
-	}
-	
+    }
+
     /**
-     * get adapter 
-     * 
+     * get adapter
+     *
      * @return Ruckusing_Adapter_Base
      */
     public function getAdapter()
     {
-		return $this->_adapter;
-	}
-	
+        return $this->_adapter;
+    }
+
     /**
-     * create database 
-     * 
+     * create database
+     *
      * @param string $name    The database name
      * @param array  $options The options definition of the database
      *
@@ -87,24 +87,24 @@ abstract class Ruckusing_Migration_Base
      */
     public function createDatabase($name, $options = null)
     {
-		return $this->_adapter->createDatabase($name, $options);
-	}
-	
+        return $this->_adapter->createDatabase($name, $options);
+    }
+
     /**
-     * drop database 
-     * 
+     * drop database
+     *
      * @param string $name The database name
      *
      * @return boolean
      */
     public function dropDatabase($name)
     {
-		return $this->_adapter->dropDatabase($name);		
-	}
-	
+        return $this->_adapter->dropDatabase($name);
+    }
+
     /**
-     * create table 
-     * 
+     * create table
+     *
      * @param string $tableName The table name
      * @param array  $options   Options definition table
      *
@@ -112,24 +112,24 @@ abstract class Ruckusing_Migration_Base
      */
     public function createTable($tableName, $options = array())
     {
-		return $this->_adapter->createTable($tableName, $options);
-	}
-	
+        return $this->_adapter->createTable($tableName, $options);
+    }
+
     /**
-     * drop table 
-     * 
+     * drop table
+     *
      * @param string $tbl The table name
      *
      * @return boolean
      */
     public function dropTable($tbl)
     {
-		return $this->_adapter->dropTable($tbl);				
-	}
-	
+        return $this->_adapter->dropTable($tbl);
+    }
+
     /**
-     * rename table 
-     * 
+     * rename table
+     *
      * @param string $name    The old name of table
      * @param string $newName The new name of table
      *
@@ -137,12 +137,12 @@ abstract class Ruckusing_Migration_Base
      */
     public function renameTable($name, $newName)
     {
-		return $this->_adapter->renameTable($name, $newName);						
-	}
+        return $this->_adapter->renameTable($name, $newName);
+    }
 
     /**
-     * add column 
-     * 
+     * add column
+     *
      * @param string $tableName  The table name
      * @param string $columnName The column name
      * @param string $type       The type generic of the column
@@ -151,15 +151,15 @@ abstract class Ruckusing_Migration_Base
      * @return boolean
      */
     public function addColumn($tableName, $columnName, $type,
-        $options = array()
-    ) {
+        $options = array())
+    {
         return $this->_adapter
             ->addColumn($tableName, $columnName, $type, $options);
-	}
-	
+    }
+
     /**
-     * remove column 
-     * 
+     * remove column
+     *
      * @param string $tableName  The table name
      * @param string $columnName The column name
      *
@@ -167,12 +167,12 @@ abstract class Ruckusing_Migration_Base
      */
     public function removeColumn($tableName, $columnName)
     {
-		return $this->_adapter->removeColumn($tableName, $columnName);
-	}
+        return $this->_adapter->removeColumn($tableName, $columnName);
+    }
 
     /**
-     * change column 
-     * 
+     * change column
+     *
      * @param string $tableName  The table name
      * @param string $columnName The column name
      * @param string $type       The type generic of the column
@@ -180,16 +180,16 @@ abstract class Ruckusing_Migration_Base
      *
      * @return boolean
      */
-    public function changeColumn($tableName, $columnName, $type, 
-        $options = array()
-    ) {
+    public function changeColumn($tableName, $columnName, $type,
+        $options = array())
+    {
         return $this->_adapter
-            ->changeColumn($tableName, $columnName, $type, $options);	
-	}
-	
+            ->changeColumn($tableName, $columnName, $type, $options);
+    }
+
     /**
-     * rename column 
-     * 
+     * rename column
+     *
      * @param string $tblName       The table name where is the column
      * @param string $columnName    The old column name
      * @param string $newColumnName The new column name
@@ -198,12 +198,12 @@ abstract class Ruckusing_Migration_Base
      */
     public function renameColumn($tblName, $columnName, $newColumnName)
     {
-		return $this->_adapter->renameColumn($tblName, $columnName, $newColumnName);
-	}
+        return $this->_adapter->renameColumn($tblName, $columnName, $newColumnName);
+    }
 
     /**
-     * add index 
-     * 
+     * add index
+     *
      * @param string       $tableName  The table name
      * @param string|array $columnName The column name
      * @param array        $options    The options defintion of the index
@@ -212,12 +212,12 @@ abstract class Ruckusing_Migration_Base
      */
     public function addIndex($tableName, $columnName, $options = array())
     {
-		return $this->_adapter->addIndex($tableName, $columnName, $options);			
-	}
-	
+        return $this->_adapter->addIndex($tableName, $columnName, $options);
+    }
+
     /**
-     * remove index 
-     * 
+     * remove index
+     *
      * @param string       $tableName  The table name
      * @param string|array $columnName The column name
      * @param array        $options    The options definition of the index
@@ -226,66 +226,66 @@ abstract class Ruckusing_Migration_Base
      */
     public function removeIndex($tableName, $columnName, $options = array())
     {
-		return $this->_adapter->removeIndex($tableName, $columnName, $options);
-	}
-	
+        return $this->_adapter->removeIndex($tableName, $columnName, $options);
+    }
+
     /**
-     * execute 
-     * 
+     * execute
+     *
      * @param string $query Query SQL
      *
      * @return boolean
      */
     public function execute($query)
     {
-		return $this->_adapter->query($query);
-	}
-	
+        return $this->_adapter->query($query);
+    }
+
     /**
-     * select one 
-     * 
+     * select one
+     *
      * @param string $sql Query SQL
      *
      * @return mixed
      */
     public function selectOne($sql)
     {
-		return $this->_adapter->selectOne($sql);
-	}
+        return $this->_adapter->selectOne($sql);
+    }
 
     /**
-     * select all 
-     * 
+     * select all
+     *
      * @param string $sql Query SQL
      *
      * @return mixed
      */
     public function selectAll($sql)
     {
-		return $this->_adapter->selectAll($sql);
+        return $this->_adapter->selectAll($sql);
     }
 
     /**
-     * query 
-     * 
+     * query
+     *
      * @param string $sql Query SQL
      *
      * @return boolean
      */
     public function query($sql)
     {
-		return $this->_adapter->query($sql);		
-	}
-	
+        return $this->_adapter->query($sql);
+    }
+
     /**
      * Quote a raw string.
-     * 
+     *
      * @param string|int|float|string[] $value Raw string
      *
      * @return string
      */
     public function quote($value)
     {
-        return $this->_adapter->quote($value); 
+        return $this->_adapter->quote($value);
     }
 }

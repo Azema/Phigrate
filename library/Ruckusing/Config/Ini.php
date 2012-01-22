@@ -111,7 +111,7 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
 
         if (is_array($options)) {
             if (isset($options['nestSeparator'])) {
-                $this->_nestSeparator = (string) $options['nestSeparator'];
+                $this->_nestSeparator = (string)$options['nestSeparator'];
             }
         }
 
@@ -228,7 +228,7 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
 
         return $iniArray;
     }
-    
+
     /**
      * Process each element in the section and handle the ";extends" inheritance
      * key. Passes control to _processKey() to handle the nest separator

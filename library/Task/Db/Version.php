@@ -20,7 +20,7 @@
 require_once 'Task/Base.php';
 
 /**
- * @see Ruckusing_Task_ITask 
+ * @see Ruckusing_Task_ITask
  */
 require_once 'Ruckusing/Task/ITask.php';
 
@@ -40,21 +40,21 @@ class Task_Db_Version extends Task_Base implements Ruckusing_Task_ITask
 {
     /**
      * Primary task entry point
-     * 
+     *
      * @param mixed $args Arguments to task
      *
      * @return string
      */
     public function execute($args)
     {
-		$return = 'Started: ' . date('Y-m-d g:ia T') . "\n\n"
-		    . "[db:version]:\n";
-		if (! $this->_adapter->tableExists(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
-			//it doesnt exist, create it
-            $return .= "\tSchema version table (" . RUCKUSING_TS_SCHEMA_TBL_NAME 
+        $return = 'Started: ' . date('Y-m-d g:ia T') . "\n\n"
+            . "[db:version]:\n";
+        if (! $this->_adapter->tableExists(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
+            //it doesnt exist, create it
+            $return .= "\tSchema version table (" . RUCKUSING_TS_SCHEMA_TBL_NAME
                 . ") does not exist. Do you need to run 'db:setup'?";
-		} else {
-			//it exists, read the version from it
+        } else {
+            //it exists, read the version from it
             // We only want one row but we cannot assume that we are using MySQL and use a LIMIT statement
             // as it is not part of the SQL standard. Thus we have to select all rows and use PHP to return
             // the record we need
@@ -76,14 +76,14 @@ class Task_Db_Version extends Task_Base implements Ruckusing_Task_ITask
             } else {
                 $return .= "\tNo migrations have been executed.";
             }
-		}
+        }
         $return .= "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";
         return $return;
-	}
+    }
 
     /**
      * Return the usage of the task
-     * 
+     *
      * @return string
      */
     public function help()
@@ -91,7 +91,7 @@ class Task_Db_Version extends Task_Base implements Ruckusing_Task_ITask
         $output =<<<USAGE
 Task: \033[36mdb:version\033[0m
 
-It is always possible to ask the framework (really the DB) what version it is 
+It is always possible to ask the framework (really the DB) what version it is
 currently at.
 
 This task not take arguments.
