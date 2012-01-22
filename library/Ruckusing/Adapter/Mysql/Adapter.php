@@ -332,14 +332,14 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
                 continue;
             }
 
-            $stmt = sprintf('SHOW CREATE TABLE %s', $this->identifier($tbl));
+            $stmt = sprintf('SHOW CREATE TABLE %s;', $this->identifier($tbl));
             $result = $this->query($stmt);
 
             if (is_array($result) && count($result) == 1) {
                 $row = $result[0];
-                if (isset($row['Create Table'])) {
+                if (array_key_exists('Create Table', $row)) {
                     $final .= $row['Create Table'] . ";\n\n";
-                } else if (isset($row['Create View'])) {
+                } else if (array_key_exists('Create View', $row)) {
                     $views .= $row['Create View'] . ";\n\n";
                 }
             }
@@ -1081,6 +1081,12 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     public function __toString()
     {
         return 'Ruckusing_Adapter_Mysql_Adapter, version: ' . $this->_version;
+    }
+
+    public function getVersionServer()
+    {
+        $version = $this->_conn->getAttribute(PDO::ATTR_SERVER_VERSION);
+        return $version;
     }
 
 

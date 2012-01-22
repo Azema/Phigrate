@@ -569,17 +569,29 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
      */
     public function testSchema()
     {
-        $this->object->executeDdl("CREATE TABLE `users` ( name varchar(20) );");
+        $this->object->executeDdl("CREATE TABLE `users` ( name varchar(20) DEFAULT NULL ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
         $this->object->executeDdl("CREATE VIEW `v_users` AS SELECT `name` FROM `users`;");
         $schema = $this->object->schema();
         $this->assertNotEmpty($schema);
-        $expected = "CREATE TABLE `users` (
+        $versionMysqld = $this->object->getVersionServer();
+        $versionMysqld = (float)substr($versionMysqld, 0, 3);
+        if ($versionMysqld >= 5.5) {
+            $expected = "CREATE TABLE `users` (
   `name` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW `v_users` AS select `users`.`name` AS `name` from `users`;
 
 ";
+        } else {
+            $expected = "CREATE TABLE `users` (
+  `name` varchar(20) default NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW `v_users` AS select `users`.`name` AS `name` from `users`;
+
+";
+        }
         $this->assertEquals($expected, $schema);
     }
 
