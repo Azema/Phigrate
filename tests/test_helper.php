@@ -57,3 +57,8 @@ foreach ($files as $file) {
     if ($file == '.' || $file == '..' || is_dir($file) || substr($file, -4) != '.php') continue;
     require_once MOCKS_PATH . '/' . $file;
 }
+
+// Clean file logs
+if (is_file(RUCKUSING_BASE . '/tests/logs/tests.log')) {
+    unlink(RUCKUSING_BASE . '/tests/logs/tests.log');
+}
