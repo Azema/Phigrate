@@ -219,7 +219,6 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
      */
     protected function _columnsToStr()
     {
-        $str = '';
         $fields = array();
         $len = count($this->_columns);
         for ($i = 0; $i < $len; $i++) {

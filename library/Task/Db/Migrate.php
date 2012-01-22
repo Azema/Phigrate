@@ -68,7 +68,6 @@ class Task_Db_Migrate extends Task_Base implements Ruckusing_Task_ITask
     public function execute($args)
     {
         $this->_logger->debug(__METHOD__ . ' Start');
-        $output = '';
         if (! $this->_adapter->supportsMigrations()) {
             $msg = 'This database does not support migrations.';
             $this->_logger->warn($msg);
@@ -295,7 +294,7 @@ USAGE;
     private function _runMigrations($migrations, $targetMethod)
     {
         $this->_logger->debug(__METHOD__ . ' Start');
-        $last_version = -1;
+        $lastVersion = -1;
         foreach ($migrations as $file) {
             $fullPath = $this->_migrationDir . '/' . $file['file'];
             $this->_logger->debug('file: ' . var_export($file, true));
@@ -319,7 +318,7 @@ USAGE;
             try {
                 //start transaction
                 $this->_adapter->startTransaction();
-                $result =  $obj->$targetMethod();
+                $obj->$targetMethod();
                 //successfully ran migration, update our version and commit
                 $this->_migratorUtil
                     ->resolveCurrentVersion($file['version'], $targetMethod);

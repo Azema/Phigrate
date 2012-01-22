@@ -71,7 +71,7 @@ class Task_Db_SchemaTest extends PHPUnit_Framework_TestCase
     {
         $this->_adapter->setTableSchemaExist(true);
         $this->object->setDirectoryOfMigrations('/tmp');
-        $expected =FIXTURES_PATH . '/tasks/Db/schema.txt';
+        $expected = FIXTURES_PATH . '/tasks/Db/schema.txt';
         $actual = $this->object->execute(array());
         $this->assertFileExists('/tmp/schema.txt');
         $this->assertFileEquals($expected, '/tmp/schema.txt');

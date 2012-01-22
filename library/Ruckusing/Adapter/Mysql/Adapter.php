@@ -184,6 +184,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
                 'version',
                 array('unique' => true)
             );
+            return true;
         }
     }
 
@@ -327,7 +328,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         $final = '';
         $views = '';
         $this->_loadTables(true);
-        foreach ($this->_tables as $tbl => $idx) {
+        foreach (array_keys($this->_tables) as $tbl) {
             if ($tbl == RUCKUSING_SCHEMA_TBL_NAME) {
                 continue;
             }
@@ -481,7 +482,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     public function dropTable($tbl)
     {
-        $ddl = sprintf('DROP TABLE IF EXISTS %s', $this->identifier($tbl));
+        $ddl = sprintf('DROP TABLE IF EXISTS %s;', $this->identifier($tbl));
         $result = $this->query($ddl);
         return $result;
     }
@@ -643,7 +644,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         if (empty($type)) {
             throw new Ruckusing_Exception_Argument('Missing type parameter');
         }
-        $columnInfo = $this->columnInfo($tableName, $columnName);
+        //$columnInfo = $this->columnInfo($tableName, $columnName);
         //default types
         if (! array_key_exists('limit', $options)) {
             $options['limit'] = null;
@@ -1083,6 +1084,11 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         return 'Ruckusing_Adapter_Mysql_Adapter, version: ' . $this->_version;
     }
 
+    /**
+     * Return the version of server MySQL
+     * 
+     * @return void
+     */
     public function getVersionServer()
     {
         $version = $this->_conn->getAttribute(PDO::ATTR_SERVER_VERSION);

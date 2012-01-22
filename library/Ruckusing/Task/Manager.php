@@ -311,7 +311,6 @@ class Ruckusing_Task_Manager
         }
         $namespaces = scandir($this->_tasksDir);
         $this->_logger->debug('Task dir: ' . $this->_tasksDir);
-        $regex = '/^(\w+)\.php$/';
         $this->_tasks = array();
         foreach ($namespaces as $namespace) {
             $this->_logger->debug('Namespace: ' . $namespace);
@@ -326,7 +325,6 @@ class Ruckusing_Task_Manager
             $files = scandir($this->_tasksDir . '/' . $namespace);
             foreach ($files as $file) {
                 $ext = substr($file, -4);
-                $basename = substr($file, 0, -4);
                 //skip over invalid files
                 if ($file == '.' || $file == '..' || $ext != '.php') {
                     continue;

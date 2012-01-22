@@ -9,8 +9,9 @@ class adapterTaskMock extends adapterMock
 
     public function __construct($dbConfig, $logger)
     {
+        $logger = Ruckusing_Logger::instance(RUCKUSING_BASE . '/tests/logs/tests.log');
         $this->_conn = new pdoTaskMock();
-        $this->_logger = new logMock();
+        $this->setLogger($logger);
     }
 
     public function supportsMigrations()
@@ -34,7 +35,11 @@ class adapterTaskMock extends adapterMock
         if ($this->upExceptionSchema) {
             throw new Exception('Up exception required');
         }
-        return parent::schema();
+        $schema = '';
+        if ($this->_conn->tableSchemaExist) {
+            $schema = file_get_contents(FIXTURES_PATH . '/tasks/Db/schema.txt');
+        }
+        return $schema;
     }
 
     public function selectAll($query)
