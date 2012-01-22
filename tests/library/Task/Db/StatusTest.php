@@ -108,7 +108,7 @@ class Task_Db_StatusTest extends PHPUnit_Framework_TestCase
         $expected =<<<USAGE
 Task: \033[36mdb:status\033[0m
 
-With this taks you'll get an overview of the already executed migrations and 
+With this taks you'll get an overview of the already executed migrations and
 which will be executed when running db:migrate.
 
 This task not take arguments.

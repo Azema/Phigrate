@@ -82,13 +82,13 @@ class Task_Db_SchemaTest extends PHPUnit_Framework_TestCase
         $expected =<<<USAGE
 Task: \033[36mdb:schema\033[0m
 
-It can be beneficial to get a dump of the DB in raw SQL format which represents 
+It can be beneficial to get a dump of the DB in raw SQL format which represents
 the current version.
 
-\033[31mNote\033[0m: This dump only contains the actual schema (e.g. the DML needed to 
-reconstruct the DB), but not any actual data. 
+\033[31mNote\033[0m: This dump only contains the actual schema (e.g. the DML needed to
+reconstruct the DB), but not any actual data.
 
-In MySQL terms, this task would not be the same as running the mysqldump command 
+In MySQL terms, this task would not be the same as running the mysqldump command
 (which by defaults does include any data in the tables).
 
 USAGE;

@@ -387,7 +387,7 @@ class Ruckusing_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
         $expected =<<<USAGE
 Task: \033[36mdb:version\033[0m
 
-It is always possible to ask the framework (really the DB) what version it is 
+It is always possible to ask the framework (really the DB) what version it is
 currently at.
 
 This task not take arguments.

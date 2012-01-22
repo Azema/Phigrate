@@ -70,7 +70,7 @@ class Task_Db_SetupTest extends PHPUnit_Framework_TestCase
         $expected =<<<USAGE
 Task: \033[36mdb:setup\033[0m
 
-A basic task to initialize your DB for migrations is available. One should 
+A basic task to initialize your DB for migrations is available. One should
 always run this task when first starting out.
 
 This task not take arguments.

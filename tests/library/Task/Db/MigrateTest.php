@@ -303,25 +303,25 @@ class Task_Db_MigrateTest extends PHPUnit_Framework_TestCase
         $expected =<<<USAGE
 Task: \033[36mdb:migrate\033[0m [\033[33mVERSION\033[0m]
 
-The primary purpose of the framework is to run migrations, and the 
+The primary purpose of the framework is to run migrations, and the
 execution of migrations is all handled by just a regular ol' task.
 
-\t\033[33mVERSION\033[0m can be specified to go up (or down) to a specific 
-\tversion, based on the current version. If not specified, 
-\tall migrations greater than the current database version 
+\t\033[33mVERSION\033[0m can be specified to go up (or down) to a specific
+\tversion, based on the current version. If not specified,
+\tall migrations greater than the current database version
 \twill be executed.
 
-\t\033[37mExample A:\033[0m The database is fresh and empty, assuming there 
+\t\033[37mExample A:\033[0m The database is fresh and empty, assuming there
 \tare 5 actual migrations, but only the first two should be run.
 
 \t\t\033[35mphp main.php db:migrate VERSION=20101006114707\033[0m
 
-\t\033[37mExample B:\033[0m The current version of the DB is 20101006114707 
+\t\033[37mExample B:\033[0m The current version of the DB is 20101006114707
 \tand we want to go down to 20100921114643
 
 \t\t\033[35mphp main.php db:migrate VERSION=20100921114643\033[0m
 
-\t\033[37mExample C:\033[0m You can also use relative number of revisions 
+\t\033[37mExample C:\033[0m You can also use relative number of revisions
 \t(positive migrate up, negative migrate down).
 
 \t\t\033[35mphp main.php db:migrate VERSION=-2\033[0m
