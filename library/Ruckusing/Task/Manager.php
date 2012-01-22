@@ -14,7 +14,7 @@
  */
 
 /**
- * @see Ruckusing_Util_Naming 
+ * @see Ruckusing_Util_Naming
  */
 require_once 'Ruckusing/Util/Naming.php';
 
@@ -32,43 +32,43 @@ require_once 'Ruckusing/Util/Naming.php';
 class Ruckusing_Task_Manager
 {
     /**
-     * adapter 
-     * 
+     * adapter
+     *
      * @var Ruckusing_Adapter_Base
      */
     private $_adapter;
 
     /**
-     * tasks 
-     * 
+     * tasks
+     *
      * @var array
      */
     private $_tasks = array();
 
     /**
-     * Directory of tasks 
-     * 
+     * Directory of tasks
+     *
      * @var string
      */
     private $_tasksDir;
 
     /**
-     * _migrationDir 
-     * 
+     * _migrationDir
+     *
      * @var string
      */
     private $_migrationDir;
 
     /**
-     * _logger 
-     * 
+     * _logger
+     *
      * @var Ruckusing_Logger
      */
     private $_logger;
-    
+
     /**
-     * __construct 
-     * 
+     * __construct
+     *
      * @param Ruckusing_Adapter_Base $adapter       Adapter RDBMS
      * @param string                 $tasksDir      The path of directory of tasks
      * @param string                 $migrationsDir The path of directory of migrations.
@@ -79,15 +79,17 @@ class Ruckusing_Task_Manager
     {
         $this->_logger = $adapter->getLogger();
         $this->setAdapter($adapter);
-        if (isset($tasksDir))
+        if (isset($tasksDir)) {
             $this->setDirectoryOfTasks($tasksDir, true);
-        if (isset($migrationsDir))
+        }
+        if (isset($migrationsDir)) {
             $this->setDirectoryOfMigrations($migrationsDir);
+        }
     }
 
     /**
-     * set directory of tasks 
-     * 
+     * set directory of tasks
+     *
      * @param string  $tasksDir The path of directory of tasks
      * @param boolean $reload   Reload all tasks
      *
@@ -113,10 +115,10 @@ class Ruckusing_Task_Manager
         $this->_logger->debug(__METHOD__ . ' End');
         return $this;
     }
-    
+
     /**
-     * set directory of migrations 
-     * 
+     * set directory of migrations
+     *
      * @param string $migrationsDir The path of directory of migrations
      *
      * @return Ruckusing_Task_Manager
@@ -136,15 +138,15 @@ class Ruckusing_Task_Manager
         $this->_logger->debug(__METHOD__ . ' End');
         return $this;
     }
-    
+
     /**
-     * set adapter 
+     * set adapter
      *
      * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
-     * 
+     *
      * @return Ruckusing_Task_Manager
      */
-    public function setAdapter($adapter) 
+    public function setAdapter($adapter)
     {
         if (! $adapter instanceof Ruckusing_Adapter_Base) {
             require_once 'Ruckusing/Exception/Argument.php';
@@ -153,12 +155,15 @@ class Ruckusing_Task_Manager
             );
         }
         $this->_adapter = $adapter;
+        foreach ($this->_tasks as $task) {
+            $task->setAdapter($adapter);
+        }
         return $this;
     }
 
     /**
-     * get adapter 
-     * 
+     * get adapter
+     *
      * @return Ruckusing_Adapter_Base
      */
     public function getAdapter()
@@ -167,19 +172,19 @@ class Ruckusing_Task_Manager
     }
 
     /**
-     * getLogger 
-     * 
+     * getLogger
+     *
      * @return Ruckusing_Logger
      */
     public function getLogger()
     {
         return $this->_logger;
     }
-    
+
     /**
      * Searches for the given task, and if found
      * returns it. Otherwise null is returned.
-     * 
+     *
      * @param string $key The key to identify the task
      *
      * @return Ruckusing_ITask
@@ -203,8 +208,8 @@ class Ruckusing_Task_Manager
     }
 
     /**
-     * has task 
-     * 
+     * has task
+     *
      * @param string $key The key to identitfy the task
      *
      * @return boolean
@@ -224,7 +229,7 @@ class Ruckusing_Task_Manager
      * Register a new task name under the specified key.
      * $obj is a class which implements the ITask interface
      * and has an execute() method defined.
-     * 
+     *
      * @param string               $taskName The name of task
      * @param Ruckusing_Task_ITask $taskObj  The task object
      *
@@ -253,16 +258,16 @@ class Ruckusing_Task_Manager
         $this->_logger->debug(__METHOD__ . ' End');
         return true;
     }
-    
+
     /**
-     * execute 
-     * 
-     * @param string $taskName The task name 
+     * execute
+     *
+     * @param string $taskName The task name
      * @param array  $options  The options of task
      *
      * @return string
      */
-    public function execute($taskName, $options)
+    public function execute($taskName, $options = array())
     {
         $this->_logger->debug(__METHOD__ . ' Start');
         $task = $this->getTask($taskName);
@@ -270,11 +275,11 @@ class Ruckusing_Task_Manager
         $this->_logger->debug(__METHOD__ . ' End');
         return $output;
     }
-    
+
     /**
      * Get display help of task
-     * 
-     * @param string $taskName The task name 
+     *
+     * @param string $taskName The task name
      *
      * @return string
      */
@@ -286,13 +291,13 @@ class Ruckusing_Task_Manager
         $this->_logger->debug(__METHOD__ . ' End');
         return $output;
     }
-    
+
     //---------------------
     // PRIVATE METHODS
     //---------------------
     /**
-     * load all tasks 
-     * 
+     * load all tasks
+     *
      * @return void
      * @throws Ruckusing_Exception_Argument
      */
@@ -311,7 +316,9 @@ class Ruckusing_Task_Manager
         foreach ($namespaces as $namespace) {
             $this->_logger->debug('Namespace: ' . $namespace);
             //skip over invalid files
-            if ($namespace == '.' || $namespace == '..' || ! is_dir($this->_tasksDir . '/' . $namespace)) {
+            if ($namespace == '.' || $namespace == '..'
+                || ! is_dir($this->_tasksDir . '/' . $namespace)
+            ) {
                 continue;
             }
             $this->_logger->debug('Namespace: ' . $namespace);
@@ -325,7 +332,9 @@ class Ruckusing_Task_Manager
                     continue;
                 }
                 $this->_logger->debug('include ' . $namespace . '/' . $file);
-                $klass = Ruckusing_Util_Naming::classFromFileName($this->_tasksDir . '/' . $namespace . '/' . $file);
+                $klass = Ruckusing_Util_Naming::classFromFileName(
+                    $this->_tasksDir . '/' . $namespace . '/' . $file
+                );
                 $this->_logger->debug('className ' . $klass);
                 $taskName = Ruckusing_Util_Naming::taskFromClassName($klass);
                 $this->_logger->debug('TaskName: ' . $taskName);

@@ -14,7 +14,7 @@
  */
 
 /**
- * @see Ruckusing_Task_Manager 
+ * @see Ruckusing_Task_Manager
  */
 require_once 'Ruckusing/Task/Manager.php';
 
@@ -34,94 +34,94 @@ class Ruckusing_FrameworkRunner
 {
     /**
      * reference to our DB connection
-     * 
+     *
      * @var array
      */
-    private $_db = null;
+    protected $_db = null;
 
     /**
      * Available config of application
-     * 
+     *
      * @var array
      */
-    private $_config;
+    protected $_config;
 
     /**
      * Available DB config (e.g. test,development, production)
-     * 
+     *
      * @var array
      */
-    private $_configDb;
+    protected $_configDb;
 
     /**
-     * task manager 
-     * 
+     * task manager
+     *
      * @var Ruckusing_Task_Manager
      */
-    private $_taskMgr = null;
+    protected $_taskMgr = null;
 
     /**
-     * adapter 
-     * 
+     * adapter
+     *
      * @var Ruckusing_Adapter_Base
      */
-    private $_adapter = null;
+    protected $_adapter = null;
 
     /**
-     * current task name 
-     * 
+     * current task name
+     *
      * @var string
      */
-    private $_curTaskName;
+    protected $_curTaskName;
 
     /**
      * Flag to display help of task
      * @see Ruckusing_FrameworkRunner::_parseArgs
-     * 
+     *
      * @var boolean
      */
-    private $_helpTask = false;
+    protected $_helpTask = false;
 
     /**
-     * task options 
-     * 
+     * task options
+     *
      * @var string
      */
-    private $_taskOptions = '';
+    protected $_taskOptions = '';
 
     /**
      * Directory of tasks
-     * 
+     *
      * @var string
      */
-    private $_taskDir;
+    protected $_taskDir;
 
     /**
      * Directory migration
-     * 
+     *
      * @var string
      */
-    private $_migrationDir;
+    protected $_migrationDir;
 
     /**
      * Environment
-     * default is development 
+     * default is development
      * but can also be one 'test', 'production', etc...
-     * 
+     *
      * @var string
      */
-    private $_env = 'development';
-    
+    protected $_env = 'development';
+
     /**
-     * _logger 
-     * 
+     * _logger
+     *
      * @var Ruckusing_Logger
      */
-    private $_logger;
-    
+    protected $_logger;
+
     /**
-     * __construct 
-     * 
+     * __construct
+     *
      * @param array $argv Arguments of the command line
      *
      * @return Ruckusing_FrameworkRunner
@@ -133,8 +133,8 @@ class Ruckusing_FrameworkRunner
             $this->_parseArgs($argv);
             $this->getLogger()->debug(__METHOD__ . ' Start');
             // initialize DB
-            $this->initializeDb();
-            $this->initTasks();
+            $this->_initializeDb();
+            $this->_initTasks();
         } catch (Exception $e) {
             if (isset($this->_logger)) {
                 $this->_logger->err('Exception: ' . $e->getMessage());
@@ -144,9 +144,12 @@ class Ruckusing_FrameworkRunner
         $this->_logger->debug(__METHOD__ . ' End');
     }
 
+    //-------------------------
+    // PUBLIC METHODS
+    //-------------------------
     /**
-     * getLogger 
-     * 
+     * getLogger
+     *
      * @return Ruckusing_Logger
      */
     public function getLogger()
@@ -159,7 +162,7 @@ class Ruckusing_FrameworkRunner
 
     /**
      * getConfig : Return the config application
-     * 
+     *
      * @return array
      */
     public function getConfig()
@@ -175,7 +178,7 @@ class Ruckusing_FrameworkRunner
 
     /**
      * getConfigDb : Return the config DB
-     * 
+     *
      * @return array
      */
     public function getConfigDb()
@@ -191,12 +194,23 @@ class Ruckusing_FrameworkRunner
         return $this->_configDb;
     }
 
-    //-------------------------
-    // PUBLIC METHODS
-    //------------------------- 
     /**
-     * execute 
-     * 
+     * setAdapter
+     *
+     * @param Ruckusing_Adapter_IAdapter $adapter Adapter RDBMS
+     *
+     * @return Ruckusing_FrameworkRunner
+     */
+    public function setAdapter(Ruckusing_Adapter_IAdapter $adapter)
+    {
+        $this->_adapter = $adapter;
+        $this->_taskMgr->setAdapter($adapter);
+        return $this;
+    }
+
+    /**
+     * execute
+     *
      * @return void
      */
     public function execute()
@@ -208,7 +222,7 @@ class Ruckusing_FrameworkRunner
                 $output = $this->_taskMgr->help($this->_curTaskName);
             } else {
                 $output = $this->_taskMgr->execute(
-                    $this->_curTaskName, 
+                    $this->_curTaskName,
                     $this->_taskOptions
                 );
             }
@@ -221,24 +235,10 @@ class Ruckusing_FrameworkRunner
         $this->_logger->debug(__METHOD__ . ' End');
         return $output;
     }
-    
-    /**
-     * initialize tasks 
-     *
-     * @return void
-     */
-    public function initTasks()
-    {
-        $this->_logger->debug(__METHOD__ . ' Start');
-        $this->_taskMgr = new Ruckusing_Task_Manager(
-            $this->_adapter, $this->getTaskDir(), $this->getMigrationDir()
-        );
-        $this->_logger->debug(__METHOD__ . ' End');
-    }
 
     /**
      * getTaskDir : Return the directory of tasks
-     * 
+     *
      * @return string
      */
     public function getTaskDir()
@@ -259,7 +259,7 @@ class Ruckusing_FrameworkRunner
 
     /**
      * getMigrationDir : Return the directory of migrations
-     * 
+     *
      * @return string
      */
     public function getMigrationDir()
@@ -274,11 +274,79 @@ class Ruckusing_FrameworkRunner
     }
 
     /**
-     * _initMigrationDir 
-     * 
+     * Update the local schema to handle multiple records versus the prior architecture
+     * of storing a single version. In addition take all existing migration files
+     * and register them in our new table, as they have already been executed.
+     *
+     * @return void
+     */
+    public function updateSchemaForTimestamps()
+    {
+        //only create the table if it doesnt already exist
+        $this->_adapter->createSchemaVersionTable();
+        //insert all existing records into our new table
+        $migratorUtil = new Ruckusing_Util_Migrator($this->_adapter);
+        $files = $migratorUtil->getMigrationFiles(
+            $this->getMigrationDir(), 'up'
+        );
+        foreach ($files as $file) {
+            if ((int)$file['version'] >= PHP_INT_MAX) {
+                //its new style like '20081010170207' so its not a candidate
+                continue;
+            }
+            // query old table, if it less than or equal to our max version,
+            // then its a candidate for insertion
+            $querySql = sprintf(
+                'SELECT version FROM %s WHERE version >= %d',
+                RUCKUSING_SCHEMA_TBL_NAME,
+                $file['version']
+            );
+            $existingVersionOldStyle = $this->_adapter->selectOne($querySql);
+            if (count($existingVersionOldStyle) > 0) {
+                // make sure it doesnt exist in our new table,
+                // who knows how it got inserted?
+                $newVersSql = sprintf(
+                    'SELECT version FROM %s WHERE version = %d',
+                    RUCKUSING_TS_SCHEMA_TBL_NAME,
+                    $file['version']
+                );
+                $existingVersionNewStyle = $this->_adapter
+                    ->selectOne($newVersSql);
+                if (empty($existingVersionNewStyle)) {
+                    // use printf & %d to force it to be stripped of any
+                    // leading zeros, we *know* this represents an old version style
+                    // so we dont have to worry about PHP and integer overflow
+                    $insertSql = sprintf(
+                        'INSERT INTO %s (version) VALUES (%d)',
+                        RUCKUSING_TS_SCHEMA_TBL_NAME,
+                        $file['version']
+                    );
+                    $this->_adapter->query($insertSql);
+                }
+            }
+        }
+    }
+
+    /**
+     * initialize tasks
+     *
+     * @return void
+     */
+    protected function _initTasks()
+    {
+        $this->_logger->debug(__METHOD__ . ' Start');
+        $this->_taskMgr = new Ruckusing_Task_Manager(
+            $this->_adapter, $this->getTaskDir(), $this->getMigrationDir()
+        );
+        $this->_logger->debug(__METHOD__ . ' End');
+    }
+
+    /**
+     * _initMigrationDir
+     *
      * @return string
      */
-    private function _initMigrationDir()
+    protected function _initMigrationDir()
     {
         $config = $this->getConfig();
         if (! isset($config->migration) || ! isset($config->migration->dir)) {
@@ -292,11 +360,11 @@ class Ruckusing_FrameworkRunner
     }
 
     /**
-     * initialize db 
-     * 
+     * initialize db
+     *
      * @return void
      */
-    public function initializeDb()
+    protected function _initializeDb()
     {
         $this->_logger->debug(__METHOD__ . ' Start');
         try {
@@ -305,27 +373,30 @@ class Ruckusing_FrameworkRunner
             $this->_logger->debug('Config DB ' . var_export($configDb, true));
             $adapter = $this->_getAdapterClass($configDb->type);
             $this->_logger->debug('adapter ' . $adapter);
-            //construct our adapter         
+            //construct our adapter
             $this->_adapter = new $adapter($configDb->toArray(), $this->_logger);
         } catch (Exception $ex) {
             $this->_logger->err('Exception: ' . $ex->getMessage());
-            //trigger_error(sprintf("\n%s\n", $ex->getMessage()));
             throw $ex;
         }
         $this->_logger->debug(__METHOD__ . ' End');
     }
-    
+
+    //-------------------------
+    // PRIVATE METHODS
+    //-------------------------
+
     /**
-     * parse args 
+     * parse args
      * $argv is our complete command line argument set.
-     * PHP gives us: 
+     * PHP gives us:
      * [0] = the actual file name we're executing
      * [1..N] = all other arguments
-     * 
-     * Our task name should be at slot [1] 
+     *
+     * Our task name should be at slot [1]
      * Anything else are additional parameters that we can pass
      * to our task and they can deal with them as they see fit.
-     * 
+     *
      * @param array $argv Arguments of command line
      *
      * @return void
@@ -418,66 +489,8 @@ class Ruckusing_FrameworkRunner
     }
 
     /**
-     * Update the local schema to handle multiple records versus the prior architecture
-     * of storing a single version. In addition take all existing migration files
-     * and register them in our new table, as they have already been executed.
-     * 
-     * @return void
-     */
-    public function updateSchemaForTimestamps()
-    {
-        //only create the table if it doesnt already exist
-        $this->_adapter->createSchemaVersionTable();
-        //insert all existing records into our new table
-        $migratorUtil = new Ruckusing_Util_Migrator($this->_adapter);
-        $files = $migratorUtil->getMigrationFiles(
-            $this->getMigrationDir(), 'up'
-        );
-        foreach ($files as $file) {
-            if ((int)$file['version'] >= PHP_INT_MAX) {
-                //its new style like '20081010170207' so its not a candidate
-                continue;
-            }
-            // query old table, if it less than or equal to our max version, 
-            // then its a candidate for insertion     
-            $querySql = sprintf(
-                'SELECT version FROM %s WHERE version >= %d', 
-                RUCKUSING_SCHEMA_TBL_NAME, 
-                $file['version']
-            );
-            $existingVersionOldStyle = $this->_adapter->selectOne($querySql);
-            if (count($existingVersionOldStyle) > 0) {
-                // make sure it doesnt exist in our new table, 
-                // who knows how it got inserted?
-                $newVersSql = sprintf(
-                    'SELECT version FROM %s WHERE version = %d', 
-                    RUCKUSING_TS_SCHEMA_TBL_NAME, 
-                    $file['version']
-                );
-                $existingVersionNewStyle = $this->_adapter
-                    ->selectOne($newVersSql);
-                if (empty($existingVersionNewStyle)) {       
-                    // use printf & %d to force it to be stripped of any 
-                    // leading zeros, we *know* this represents an old version style
-                    // so we dont have to worry about PHP and integer overflow
-                    $insertSql = sprintf(
-                        'INSERT INTO %s (version) VALUES (%d)', 
-                        RUCKUSING_TS_SCHEMA_TBL_NAME,
-                        $file['version']
-                    );
-                    $this->_adapter->query($insertSql);
-                }
-            }
-        }
-    }
-
-    //-------------------------
-    // PRIVATE METHODS
-    //------------------------- 
-    
-    /**
-     * _getConfigFile : Return the filename of config application 
-     * 
+     * _getConfigFile : Return the filename of config application
+     *
      * @return string
      */
     private function _getConfigFile()
@@ -497,7 +510,7 @@ class Ruckusing_FrameworkRunner
 
     /**
      * _getConfigDbFile : Return the filename of config DB
-     * 
+     *
      * @return string
      */
     private function _getConfigDbFile()
@@ -518,8 +531,8 @@ class Ruckusing_FrameworkRunner
     }
 
     /**
-     * verify db config 
-     * 
+     * verify db config
+     *
      * @return void
      * @throws Exception
      */
@@ -546,7 +559,7 @@ class Ruckusing_FrameworkRunner
 
     /**
      * Initialize and return an instance of logger
-     * 
+     *
      * @return Ruckusing_Logger
      */
     private function _initLogger()
@@ -586,8 +599,8 @@ class Ruckusing_FrameworkRunner
     }
 
     /**
-     * get adapter class 
-     * 
+     * get adapter class
+     *
      * @param string $dbType The type of RDBMS
      *
      * @return string

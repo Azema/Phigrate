@@ -124,6 +124,8 @@ class taskMock implements Ruckusing_Task_ITask
 {
     public $dir;
 
+    public $adapter;
+
     /**
      * execute the task
      * 
@@ -149,5 +151,11 @@ class taskMock implements Ruckusing_Task_ITask
     public function setDirectoryOfMigrations($dir)
     {
         $this->dir = $dir;
+    }
+
+    public function setAdapter(Ruckusing_Adapter_IAdapter $adapter)
+    {
+        $this->adapter = $adapter;
+        return $this;
     }
 }

@@ -27,56 +27,56 @@
 abstract class Task_Base
 {
     /**
-     * adapter 
-     * 
+     * adapter
+     *
      * @var Ruckusing_Adapter_Base
      */
     protected $_adapter = null;
 
     /**
-     * task args 
-     * 
+     * task args
+     *
      * @var array
      */
     protected $_taskArgs = array();
 
     /**
-     * debug 
-     * 
+     * debug
+     *
      * @var boolean
      */
     protected $_debug = false;
 
     /**
-     * _logger 
-     * 
+     * _logger
+     *
      * @var Ruckusing_Logger
      */
     protected $_logger;
 
     /**
-     * _migrationDir 
-     * 
+     * _migrationDir
+     *
      * @var string
      */
     protected $_migrationDir;
-	
+
     /**
-     * __construct 
-     * 
+     * __construct
+     *
      * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
      *
      * @return Task_Db_Migrate
      */
     function __construct($adapter)
     {
-        $this->_adapter = $adapter;
+        $this->setAdapter($adapter);
         $this->_logger = $adapter->getLogger();
-	}
-	
+    }
+
     /**
      * setDirectoryOfMigrations : Define directory of migrations
-     * 
+     *
      * @param string $migrationDir Directory of migrations
      *
      * @return Migration_Db_Schema
@@ -84,6 +84,19 @@ abstract class Task_Base
     public function setDirectoryOfMigrations($migrationDir)
     {
         $this->_migrationDir = $migrationDir;
+        return $this;
+    }
+
+    /**
+     * setAdapter
+     *
+     * @param Ruckusing_Adapter_IAdapter $adapter Adapter RDBMS
+     *
+     * @return Ruckusing_Task_ITask
+     */
+    public function setAdapter(Ruckusing_Adapter_IAdapter $adapter)
+    {
+        $this->_adapter = $adapter;
         return $this;
     }
 }

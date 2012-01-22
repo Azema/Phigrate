@@ -71,7 +71,7 @@ class Ruckusing_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
-        $this->object = null;
+        //$this->object = null;
     }
 
     public function testConstructorWithoutParameters()
@@ -483,7 +483,7 @@ USAGE;
         }
     }
     
-    public function testExecuteWithVersionTask()
+    public function testExecuteWithVersionTaskWithTableSchema()
     {
         $parameters = array(
             'monScript.php',
@@ -494,10 +494,37 @@ USAGE;
             'db:version',
         );
         $actual = new Ruckusing_FrameworkRunner($parameters);
+        $adapter = new adapterTaskMock(array(), '');
+        $adapter->setTableSchemaExist(true);
+        $adapter->versions = array(array('version' => '20120110064438'));
+        $actual->setAdapter($adapter);
         $task = $actual->execute();
         $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
         . '\[db:version\]:\012+\t+Current version: \d+\012+Finished: '
         . '\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
+        $this->assertNotEmpty($task);
+        $this->assertRegExp($regexp, $task);
+    }
+
+    public function testExecuteWithVersionTaskWithoutTableSchema()
+    {
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            RUCKUSING_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            RUCKUSING_BASE . '/tests/fixtures/config/application.ini',
+            'db:version',
+        );
+        $actual = new Ruckusing_FrameworkRunner($parameters);
+        $adapter = new adapterTaskMock(array(), '');
+        $adapter->setTableSchemaExist(false);
+        $actual->setAdapter($adapter);
+        $task = $actual->execute(array());
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
+            . '\[db:version\]:\012+\t+Schema version table \(schema_migrations\) '
+            . "does not exist\. Do you need to run 'db:setup'\?"
+            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
         $this->assertNotEmpty($task);
         $this->assertRegExp($regexp, $task);
     }
