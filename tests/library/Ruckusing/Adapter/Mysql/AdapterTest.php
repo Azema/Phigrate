@@ -576,7 +576,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $versionMysqld = $this->object->getVersionServer();
         $versionMysqld = (float)substr($versionMysqld, 0, 3);
         echo 'versionMysqld: '.$versionMysqld;
-        if ($versionMysqld <= 5.2) {
+        if ($versionMysqld <= 5.0) {
             $expected = "CREATE TABLE `users` (
   `name` varchar(20) default NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
