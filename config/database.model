@@ -12,4 +12,4 @@ host     = "localhost"
 port     = 3306
 database = "rucku_migrations_test"
 user     = "rucku_test"
-password = "rucku"
+password = ""

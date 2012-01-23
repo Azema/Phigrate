@@ -1,0 +1,17 @@
+<phpunit bootstrap="./test_helper.php" colors="true">
+    <testsuite name="Ruckusing Migrations">
+        <directory>./library</directory>
+    </testsuite>
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">../library</directory>
+        </whitelist>
+        <blacklist>
+            <directory>../config</directory>
+            <directory>../db</directory>
+            <directory>../logs</directory>
+            <directory>../tests</directory>
+        </blacklist>
+    </filter>
+</phpunit>
+

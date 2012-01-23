@@ -1,0 +1,13 @@
+language: php
+php:
+  - 5.3
+mysql:
+  adapter: mysql2
+  database: rucku_migrations_test
+  username: rucku_test
+  encoding: utf8
+before_script:
+  - "mysql -e 'create database rucku_migrations_test;'"
+script: phpunit --configuration /tests/phpunit-travis.xml --coverage-text
+rvm: 1.9.2
+script: "bundle exec rake cucumber:ci"
