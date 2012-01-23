@@ -1,0 +1,10 @@
+[default]
+task.dir = RUCKUSING_BASE "/library/Task"
+migration.dir = RUCKUSING_BASE "/db/migrate"
+debug = 0
+
+[development : default]
+debug = 1
+
+[test : development]
+migration.dir = RUCKUSING_BASE "/tests/dummy/db/migrate"

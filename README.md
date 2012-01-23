@@ -4,6 +4,8 @@ Ruckusing is a framework written in PHP5 for generating and managing a set of "d
 
 The idea of the framework was borrowed from the migration system built into Ruby on Rails. Any one who is familiar with Migrations in RoR will be immediately at home.
 
+The project is built on a continuous integration Jenkins (http://www.sourceslist.org:8080/)
+
 ## Features
 
 

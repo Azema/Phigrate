@@ -1,0 +1,2 @@
+default: features --no-source --format pretty
+jenkins: features --format junit --out build/cucumber/
