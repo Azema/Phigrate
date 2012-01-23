@@ -580,7 +580,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
   `name` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW `v_users` AS select `users`.`name` AS `name` from `users`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_users` AS select `users`.`name` AS `name` from `users`;
 
 ";
         } else {
