@@ -27,6 +27,7 @@
   <delete dir="${basedir}/build/coverage"/>
   <delete dir="${basedir}/build/logs"/>
   <delete dir="${basedir}/build/pdepend"/>
+  <delete dir="${basedir}/build/cucumber"/>
  </target>
 
  <target name="prepare" depends="clean"
@@ -36,6 +37,7 @@
   <mkdir dir="${basedir}/build/coverage"/>
   <mkdir dir="${basedir}/build/logs"/>
   <mkdir dir="${basedir}/build/pdepend"/>
+  <mkdir dir="${basedir}/build/cucumber"/>
   <copy file="${basedir}/config/application.model" tofile="${basedir}/config/application.ini" />
   <copy file="${basedir}/config/database.model" tofile="${basedir}/config/database.ini" />
  </target>
