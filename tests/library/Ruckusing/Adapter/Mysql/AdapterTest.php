@@ -178,7 +178,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
 
     public function testGetDsn()
     {
-        $expected = 'mysql:dbname=ruckusing_migrations_test;host=localhost;port=3306';
+        $expected = 'mysql:dbname=rucku_migrations_test;host=localhost;port=3306';
         $this->assertEquals($expected, $this->object->getDsn());
     }
 
@@ -273,10 +273,10 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     public function testGetConnexion()
     {
         $dbConfig = array(
-            'database' => 'ruckusing_migrations_test',
+            'database' => 'rucku_migrations_test',
             'socket' => '/var/run/mysqld/mysqld.sock',
-            'user' => 'rucku',
-            'password' => 'rucku',
+            'user' => 'root',
+            'password' => '',
             'options' => array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"),
         );
         $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
@@ -284,10 +284,10 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('PDO', $actual->getConnexion());
 
         $dbConfig = array(
-            'database' => 'ruckusing_migrations_test',
+            'database' => 'rucku_migrations_test',
             'socket' => '/tmp/wrong.sock',
-            'user' => 'rucku',
-            'password' => 'rucku',
+            'user' => 'root',
+            'password' => '',
         );
         $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
         $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
@@ -525,7 +525,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     public function testDatabaseExists()
     {
         $this->assertFalse($this->object->databaseExists('unknownDb'));
-        $this->assertTrue($this->object->databaseExists('ruckusing_migrations_test'));
+        $this->assertTrue($this->object->databaseExists('rucku_migrations_test'));
     }
 
     /**
@@ -535,9 +535,9 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $dsn = array(
             'host' => 'localhost',
             'port' => 3306,
-            'database' => 'ruckusing_migrations_test',
-            'user' => 'rucku_test',
-            'password' => 'rucku',
+            'database' => 'rucku_migrations_test',
+            'user' => 'root',
+            'password' => '',
         );
         $object = new Ruckusing_Adapter_Mysql_Adapter($dsn, $this->_logger);
         $db = "users";
@@ -554,9 +554,9 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $dsn = array(
             'host' => 'localhost',
             'port' => 3306,
-            'database' => 'ruckusing_migrations_test',
-            'user' => 'rucku_test',
-            'password' => 'rucku',
+            'database' => 'rucku_migrations_test',
+            'user' => 'root',
+            'password' => '',
         );
         $object = new Ruckusing_Adapter_Mysql_Adapter($dsn, $this->_logger);
         $db = "users";
@@ -588,7 +588,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW
   `name` varchar(20) default NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`rucku`@`localhost` SQL SECURITY DEFINER VIEW `v_users` AS select `users`.`name` AS `name` from `users`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_users` AS select `users`.`name` AS `name` from `users`;
 
 ";
         }
