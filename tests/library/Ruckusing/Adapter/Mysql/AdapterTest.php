@@ -27,9 +27,9 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $this->_dsn = array(
             'host' => 'localhost',
             'port' => 3306,
-            'database' => 'ruckusing_migrations_test',
-            'user' => 'rucku',
-            'password' => 'rucku',
+            'database' => 'rucku_migrations_test',
+            'user' => 'root',
+            'password' => '',
         );
         $this->_logger = Ruckusing_Logger::instance(RUCKUSING_BASE . '/tests/logs/tests.log');
     }
