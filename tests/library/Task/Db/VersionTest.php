@@ -12,7 +12,7 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
     protected $object;
 
     /**
-     * @var adapterMock
+     * @var adapterTaskMock
      */
     protected $_adapter;
 
@@ -97,7 +97,7 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
         $expected =<<<USAGE
 Task: \033[36mdb:version\033[0m
 
-It is always possible to ask the framework (really the DB) what version it is
+It is always possible to ask the framework (really the DB) what version it is 
 currently at.
 
 This task not take arguments.
