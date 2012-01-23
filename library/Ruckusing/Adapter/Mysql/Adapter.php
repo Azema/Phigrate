@@ -294,7 +294,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         if ($this->databaseExists($db)) {
             return false;
         }
-        $ddl = sprintf('CREATE DATABASE %s', $this->identifier($db));
+        $ddl = sprintf('CREATE DATABASE %s;', $this->identifier($db));
         return $this->query($ddl);
     }
 

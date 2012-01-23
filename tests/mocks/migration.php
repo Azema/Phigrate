@@ -34,11 +34,10 @@ class migrationAdapterMock extends Ruckusing_Adapter_Mysql_Adapter
         $this->_logger = new logMock();
     }
 
-    public function createDatabase($name, $options)
+    public function createDatabase($name)
     {
         $this->datas['createDatabase'] = array(
             'name' => $name,
-            'options' => $options,
         );
         return true;
     }

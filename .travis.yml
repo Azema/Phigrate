@@ -8,4 +8,4 @@ mysql:
   encoding: utf8
 before_script:
   - "mysql -e 'create database rucku_migrations_test;'"
-script: phpunit --configuration /tests/phpunit-travis.xml --coverage-text
+script: phpunit --configuration tests/phpunit-travis.xml --coverage-text

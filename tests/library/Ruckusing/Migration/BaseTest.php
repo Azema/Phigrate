@@ -83,11 +83,9 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     public function testCreateDatabase()
     {
         $name = 'migration_test';
-        $options = array('NAMES utf8');
-        $return = $this->object->createDatabase($name, $options);
+        $return = $this->object->createDatabase($name);
         $this->assertTrue($return);
         $this->assertEquals($name, $this->_adapter->datas['createDatabase']['name']);
-        $this->assertEquals($options, $this->_adapter->datas['createDatabase']['options']);
     }
 
     /**
