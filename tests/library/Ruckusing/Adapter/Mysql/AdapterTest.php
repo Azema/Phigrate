@@ -575,9 +575,10 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $this->assertNotEmpty($schema);
         $versionMysqld = $this->object->getVersionServer();
         $versionMysqld = (float)substr($versionMysqld, 0, 3);
-        if ($versionMysqld >= 5.5) {
+        echo 'versionMysqld: '.$versionMysqld;
+        if ($versionMysqld <= 5.2) {
             $expected = "CREATE TABLE `users` (
-  `name` varchar(20) DEFAULT NULL
+  `name` varchar(20) default NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_users` AS select `users`.`name` AS `name` from `users`;
@@ -585,7 +586,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 ";
         } else {
             $expected = "CREATE TABLE `users` (
-  `name` varchar(20) default NULL
+  `name` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `v_users` AS select `users`.`name` AS `name` from `users`;
