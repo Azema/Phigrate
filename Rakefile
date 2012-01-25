@@ -10,4 +10,4 @@ Cucumber::Rake::Task.new(:local) do |t|
     t.profile = "default"
 end
 
-task :default => :local
+task :default => :ci
