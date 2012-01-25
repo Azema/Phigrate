@@ -12,6 +12,8 @@ before_script:
   - "cp config/database.model config/database.ini"
   - ./tests/travis.sh
 
+phpenv rehash
+
 script: phpunit --configuration tests/phpunit-travis.xml --coverage-text
 script: phpcs --standard=build/phpcs.xml library/
 
