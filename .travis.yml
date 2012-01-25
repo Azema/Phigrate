@@ -1,16 +1,19 @@
 language: php
+
 php:
   - 5.3
+
 mysql:
   adapter: mysql2
   database: rucku_migrations_test
   username: rucku_test
   encoding: utf8
+
 before_script:
   - "mysql -e 'create database rucku_migrations_test;'"
   - "cp config/application.model config/application.ini"
   - "cp config/database.model config/database.ini"
-  - ./tests/travis.sh
+  - bash ./tests/travis.sh
 
 phpenv rehash
 
