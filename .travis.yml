@@ -14,6 +14,7 @@ before_script:
 
 phpenv rehash
 
-script: phpunit --configuration tests/phpunit-travis.xml --coverage-text
-script: phpcs --standard=build/phpcs.xml library/
+script: 
+  - phpunit --configuration tests/phpunit-travis.xml --coverage-text
+  - phpcs --standard=build/phpcs.xml library/
 
