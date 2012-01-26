@@ -13,9 +13,8 @@ before_script:
   - "mysql -e 'create database rucku_migrations_test;'"
   - "cp config/application.model config/application.ini"
   - "cp config/database.model config/database.ini"
-  - bash ./tests/travis.sh
-
-phpenv rehash
+  - pyrus install pear/PHP_CodeSniffer
+  - phpenv rehash
 
 script: 
   - phpunit --configuration tests/phpunit-travis.xml --coverage-text
