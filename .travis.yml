@@ -14,7 +14,6 @@ before_script:
   - "cp config/application.model config/application.ini"
   - "cp config/database.model config/database.ini"
   - pyrus install pear/PHP_CodeSniffer
-  - phpenv rehash
 
 script: 
   - phpunit --configuration tests/phpunit-travis.xml --coverage-text
