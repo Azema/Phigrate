@@ -516,7 +516,8 @@ class Ruckusing_FrameworkRunner
     private function _getConfigDbFile()
     {
         $this->getLogger()->debug(__METHOD__ . ' Start');
-        if (! isset($this->_configDbFile)) {
+        $config = $this->getConfig();
+        if (! isset($this->_configDbFile) && ! isset($config->database->file)) {
             $this->_configDbFile = RUCKUSING_BASE . '/config/database.ini';
             if (! is_file(RUCKUSING_BASE . '/config/database.ini')) {
                 require_once 'Ruckusing/Exception/Config.php';
@@ -524,6 +525,14 @@ class Ruckusing_FrameworkRunner
                     'Config file for DB not found! Please, create config file'
                 );
             }
+        } elseif (isset($config->database->file)) {
+            if (! is_file($config->database->file)) {
+                require_once 'Ruckusing/Exception/Config.php';
+                throw new Ruckusing_Exception_Config(
+                    'Config file for DB not found! Please, create config file'
+                );
+            }
+            $this->_configDbFile = $config->database->file;
         }
         $this->getLogger()->info('configDbFile: ' . $this->_configDbFile);
         $this->getLogger()->debug(__METHOD__ . ' End');

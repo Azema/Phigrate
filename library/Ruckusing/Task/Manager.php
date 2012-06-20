@@ -79,11 +79,11 @@ class Ruckusing_Task_Manager
     {
         $this->_logger = $adapter->getLogger();
         $this->setAdapter($adapter);
-        if (isset($tasksDir)) {
-            $this->setDirectoryOfTasks($tasksDir, true);
-        }
         if (isset($migrationsDir)) {
             $this->setDirectoryOfMigrations($migrationsDir);
+        }
+        if (isset($tasksDir)) {
+            $this->setDirectoryOfTasks($tasksDir, true);
         }
     }
 
@@ -216,7 +216,7 @@ class Ruckusing_Task_Manager
      */
     public function hasTask($key)
     {
-        $this->_logger->debug(__METHOD__ . ' Start');
+        $this->_logger->debug(__METHOD__ . ' Start : ' . $key);
         $exists = false;
         if (array_key_exists($key, $this->_tasks)) {
             $exists = true;
