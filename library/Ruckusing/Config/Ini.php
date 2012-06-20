@@ -109,6 +109,14 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
             throw new Ruckusing_Exception_Config('Filename is not set');
         }
 
+        if (! is_file($filename)) {
+            /**
+             * @see Ruckusing_Exception_Config
+             */
+            require_once 'Ruckusing/Exception/Config.php';
+            throw new Ruckusing_Exception_Config('Config filename does not exist');
+        }
+
         if (is_array($options)) {
             if (isset($options['nestSeparator'])) {
                 $this->_nestSeparator = (string)$options['nestSeparator'];

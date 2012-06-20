@@ -104,6 +104,13 @@ class Ruckusing_FrameworkRunner
     protected $_migrationDir;
 
     /**
+     * Directory logs
+     * 
+     * @var string
+     */
+    protected $_logDir;
+
+    /**
      * Environment
      * default is development
      * but can also be one 'test', 'production', etc...
@@ -461,6 +468,19 @@ class Ruckusing_FrameworkRunner
                         }
                         $this->_migrationDir = $argv[$i];
                         break;
+                    // logs directory
+                    case '-l':
+                    case '--logdir':
+                        $i++;
+                        if (! array_key_exists($i, $argv)) {
+                            require_once 'Ruckusing/Exception/Argument.php';
+                            throw new Ruckusing_Exception_Argument(
+                                'Please, specify the directory of log files'
+                                . ' if you use the argument -l or --logdir'
+                            );
+                        }
+                        $this->_logDir = $argv[$i];
+                        break;
                     // other
                     default:
                         $arg = $argv[$i];
@@ -496,7 +516,9 @@ class Ruckusing_FrameworkRunner
     private function _getConfigFile()
     {
         if (! isset($this->_configFile)) {
-            if (! is_file(RUCKUSING_BASE . '/config/application.ini')) {
+            if (! defined('RUCKUSING_BASE')
+                || ! is_file(RUCKUSING_BASE . '/config/application.ini'))
+            {
                 require_once 'Ruckusing/Exception/Config.php';
                 throw new Ruckusing_Exception_Config(
                     'Config file not found! Please, '
@@ -516,23 +538,24 @@ class Ruckusing_FrameworkRunner
     private function _getConfigDbFile()
     {
         $this->getLogger()->debug(__METHOD__ . ' Start');
-        $config = $this->getConfig();
-        if (! isset($this->_configDbFile) && ! isset($config->database->file)) {
-            $this->_configDbFile = RUCKUSING_BASE . '/config/database.ini';
-            if (! is_file(RUCKUSING_BASE . '/config/database.ini')) {
+        if (! isset($this->_configDbFile)) {
+            if ((! isset($this->getConfig()->database)
+                || ! isset($this->getConfig()->database->config))
+                && (! defined('RUCKUSING_BASE')
+                || ! is_file(RUCKUSING_BASE . '/config/database.ini')))
+            {
                 require_once 'Ruckusing/Exception/Config.php';
                 throw new Ruckusing_Exception_Config(
                     'Config file for DB not found! Please, create config file'
                 );
             }
-        } elseif (isset($config->database->file)) {
-            if (! is_file($config->database->file)) {
-                require_once 'Ruckusing/Exception/Config.php';
-                throw new Ruckusing_Exception_Config(
-                    'Config file for DB not found! Please, create config file'
-                );
+            if (isset($this->getConfig()->database)
+                && isset($this->getConfig()->database->config))
+            {
+                $this->_configDbFile = $this->getConfig()->database->config;
+            } elseif (defined('RUCKUSING_BASE')) {
+                $this->_configDbFile = RUCKUSING_BASE . '/config/database.ini';
             }
-            $this->_configDbFile = $config->database->file;
         }
         $this->getLogger()->info('configDbFile: ' . $this->_configDbFile);
         $this->getLogger()->debug(__METHOD__ . ' End');
@@ -574,10 +597,17 @@ class Ruckusing_FrameworkRunner
     private function _initLogger()
     {
         //initialize logger
-        $logDir = RUCKUSING_BASE . '/logs';
+        $logDir = '/tmp/';
         $config = $this->getConfig();
-        if (isset($config->log) && isset($config->log->dir)) {
+        if (isset($this->_logDir)) {
+            // First in arguments of command line
+            $logDir = $this->_logDir;
+        } elseif (isset($config->log) && isset($config->log->dir)) {
+            // Second in config file
             $logDir = $config->log->dir;
+        } elseif (defined('RUCKUSING_BASE')) {
+            // Third with constant directory base
+            $logDir = RUCKUSING_BASE . '/logs';
         }
         if (! is_dir($logDir)) {
             require_once 'Ruckusing/Exception/InvalidLog.php';
@@ -592,7 +622,9 @@ class Ruckusing_FrameworkRunner
                 . $logDir . '. Check permissions.'
             );
         }
-        $logger = Ruckusing_Logger::instance($logDir . '/' . $this->_env . '.log');
+        $logger = Ruckusing_Logger::instance(
+            $logDir . '/' . $this->_env . '.log'
+        );
 
         $priority = 99;
         if (isset($config->log->priority)) {

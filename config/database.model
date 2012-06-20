@@ -1,6 +1,15 @@
+[production]
+type     = "mysql"
+; You can use socket instead host
+socket   = "/var/run/mysqld/mysqld.sock"
+database = "rucku_migrations"
+user     = "rucku_test"
+password = "rucku"
+
 [development]
 type     = "mysql"
 host     = "localhost"
+; You can specify the port
 port     = 3306
 database = "rucku_migrations"
 user     = "rucku"
@@ -9,7 +18,5 @@ password = "rucku"
 [test]
 type     = "mysql"
 host     = "localhost"
-port     = 3306
 database = "rucku_migrations_test"
-user     = "rucku_test"
-password = ""
+; You do not have to specify the "user" & "password" if it's empty

@@ -56,9 +56,17 @@
  * Call with no arguments to see usage info.
  */
 
-if (!defined('RUCKUSING_BASE')) {
+if (strpos('@php_directory@', '@php_directory') === 0) {  // not a pear install
+    define('RUCKUSING_BASE', realpath(dirname(__FILE__) . '/..'));
+} else {
     define('RUCKUSING_BASE', '@pear_directory@/Ruckusing');
 }
+set_include_path(
+    implode(PATH_SEPARATOR, array(
+        RUCKUSING_BASE . '/library',
+        get_include_path(),
+    ))
+);
 
 // DB table where the version info is stored
 if (!defined('RUCKUSING_SCHEMA_TBL_NAME')) {
@@ -72,13 +80,6 @@ if (!defined('RUCKUSING_TS_SCHEMA_TBL_NAME')) {
 set_error_handler('scrErrorHandler', E_ALL);
 set_exception_handler('scrExceptionHandler');
 spl_autoload_register('loader', true, true);
-
-set_include_path(
-    implode(PATH_SEPARATOR, array(
-        RUCKUSING_BASE . '/library',
-        get_include_path(),
-    ))
-);
 
 // Parse args of command line
 if (!isset($argv)) {
@@ -103,10 +104,10 @@ function parseArgs($argv)
 {
     $nbArgs = count($argv);
     if ($nbArgs < 2) {
-        printHelp(true);
+        printHelp();
     } elseif ($nbArgs == 2) {
         if ($argv[1] == 'help') {
-            printHelp(true);
+            printHelp();
         }
     }
     return $argv;
@@ -120,7 +121,7 @@ function parseArgs($argv)
  *
  * @return void
  */
-function printHelp($exit = false)
+function printHelp()
 {
     $version = '0.9-experimental';
     $dateVersion = date('c', 1325578455);
@@ -135,6 +136,8 @@ Options:
     -d, --database       Path to the configuration file (INI) of databases.
 
     -t, --taskdir        Path of the directory of the tasks.
+
+    -l, --logdir         Path of the directory of logs.
 
     -m, --migrationdir   Path of the directory of the migrations.
 
@@ -172,9 +175,7 @@ Call with no arguments to see usage info.
 
 USAGE;
     echo $usage;
-    if ($exit) {
-        exit;
-    }
+    exit(0);
 }
 
 /**
@@ -209,18 +210,18 @@ function scrErrorHandler($errno, $errstr, $errfile, $errline)
  */
 function scrExceptionHandler($exception)
 {
-    echo 'Error: ' . $exception->getMessage() . "\n"
-        . "\nbacktrace: \n" . $exception->getTraceAsString() . "\n";
+    echo 'Error: ', $exception->getMessage(), "\n";
+        //. "\nbacktrace: \n" . $exception->getTraceAsString() . "\n";
     exit(1); // exit with error
 }
 
 function loader($classname)
 {
-    //echo 'load: ' . $classname . PHP_EOL;
     $filename = str_replace('_', '/', $classname) . '.php';
-    if (is_file(RUCKUSING_BASE . '/library/' . $filename)) {
+    if (defined('RUCKUSING_BASE')
+        && is_file(RUCKUSING_BASE . '/library/' . $filename)
+    ) {
         $filename = RUCKUSING_BASE . '/library/' . $filename;
     }
     include_once $filename;
 }
-?>

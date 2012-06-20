@@ -1107,17 +1107,13 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     protected function _initDsn()
     {
-        if (array_key_exists('uri', $this->_dbConfig)) {
-            $dsn = 'uri:' . $this->_dbConfig['uri'];
-        } else {
-            $dsn = 'mysql:dbname=' . $this->_dbConfig['database'];
-            if (array_key_exists('socket', $this->_dbConfig)) {
-                $dsn .= ';unix_socket=' . $this->_dbConfig['socket'];
-            } elseif (array_key_exists('host', $this->_dbConfig)) {
-                $dsn .= ';host=' . $this->_dbConfig['host'];
-                if (array_key_exists('port', $this->_dbConfig)) {
-                    $dsn .= ';port=' . $this->_dbConfig['port'];
-                }
+        $dsn = 'mysql:dbname=' . $this->_dbConfig['database'];
+        if (array_key_exists('socket', $this->_dbConfig)) {
+            $dsn .= ';unix_socket=' . $this->_dbConfig['socket'];
+        } elseif (array_key_exists('host', $this->_dbConfig)) {
+            $dsn .= ';host=' . $this->_dbConfig['host'];
+            if (array_key_exists('port', $this->_dbConfig)) {
+                $dsn .= ';port=' . $this->_dbConfig['port'];
             }
         }
         return $dsn;

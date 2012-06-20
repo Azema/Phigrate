@@ -36,20 +36,21 @@
  *
  */
 
-if (!defined('RUCKUSING_BASE')) {
+if (strpos('@php_directory@', '@php_directory') === 0) {  // not a pear install
+    define('RUCKUSING_BASE', realpath(dirname(__FILE__) . '/..'));
+} else {
     define('RUCKUSING_BASE', '@pear_directory@/Ruckusing');
 }
-
-set_error_handler('scrErrorHandler', E_ALL);
-set_exception_handler('scrExceptionHandler');
-spl_autoload_register('loader', true, true);
-
 set_include_path(
     implode(PATH_SEPARATOR, array(
         RUCKUSING_BASE . '/library',
         get_include_path(),
     ))
 );
+
+set_error_handler('scrErrorHandler', E_ALL);
+set_exception_handler('scrExceptionHandler');
+spl_autoload_register('loader', true, true);
 
 if (!isset($argv)) {
     $argv = '';
@@ -74,7 +75,7 @@ function parseArgs($argv)
     $nbArgs = count($argv);
     $options = array();
     if ($nbArgs < 2) {
-        printHelp(true);
+        printHelp();
     } elseif ($nbArgs >= 2) {
         for ($i = 1; $i < $nbArgs; $i++) {
             switch ($argv[$i]) {
@@ -82,7 +83,7 @@ function parseArgs($argv)
                 case '-h':
                 case '--help':
                 case '-?':
-                    printHelp(true);
+                    printHelp();
                     break;
                 // configuration file path
                 case '-c':
@@ -114,7 +115,7 @@ function parseArgs($argv)
                 default:
                     $arg = $argv[$i];
                     if ($arg == 'help') {
-                        printHelp(true);
+                        printHelp();
                     } elseif (strpos($arg, '=') !== false) {
                         list($key, $value) = explode('=', $arg);
                         $options[strtolower($key)] = $value;
@@ -126,7 +127,7 @@ function parseArgs($argv)
         }
     }
     if (! array_key_exists('name', $options)) {
-        printHelp(true);
+        printHelp();
     }
     return $options;
 }
@@ -157,15 +158,18 @@ function getEnvironment($options)
  */
 function getConfig($options, $env)
 {
-    $configFile = RUCKUSING_BASE . '/config/application.ini';
+    $configFile = realpath(dirname(__FILE__) . '../config/application.ini');
     if (array_key_exists('configFile', $options)) {
         $configFile = $options['configFile'];
     }
     if (! is_file($configFile)) {
+        require_once 'Ruckusing/Exception/Config.php';
         throw new Ruckusing_Exception_Config(
-            'The file "' . $configFile . '" does not exists or is not a file.'
+            'The configuration file "' . $configFile 
+            . '" does not exists or is not a file.'
         );
     }
+    require_once 'Ruckusing/Config/Ini.php';
     return new Ruckusing_Config_Ini($configFile, $env);
 }
 
@@ -177,7 +181,7 @@ function getConfig($options, $env)
  *
  * @return void
  */
-function printHelp($exit = false)
+function printHelp()
 {
     $version = '0.9-experimental';
     $dateVersion = date('c', 1325926800);
@@ -206,9 +210,7 @@ By default, ENV is "development"
 USAGE;
 
     echo $usage;
-    if ($exit) {
-        exit(0);
-    }
+    exit(0);
 }
 
 /**
@@ -226,6 +228,7 @@ function main($args, $config)
     } elseif (isset($config->migration) && isset($config->migration->dir)) {
         $migrationDir = $config->migration->dir;
     } else {
+        require_once 'Ruckusing/Exception/MissingMigrationDir.php';
         throw new Ruckusing_Exception_MissingMigrationDir(
             'Error: Migration directory must be specified!'
         );
@@ -236,18 +239,21 @@ function main($args, $config)
 
     //check to make sure our migration directory exists
     if (! is_dir($migrationDir)) {
+        require_once 'Ruckusing/Exception/InvalidMigrationDir.php';
         throw new Ruckusing_Exception_InvalidMigrationDir(
-            "ERROR: migration directory '" . $migrationDir
-            . "' does not exist. Specify 'migration.dir' in "
-            . "config/application.ini and try again."
+            'ERROR: migration directory \'' . $migrationDir
+            . '\' does not exist. Specify \'migration.dir\' in '
+            . 'config/application.ini and try again.'
         );
     }
 
     $migrationDir = realpath($migrationDir);
     //generate a complete migration file
+    require_once 'Ruckusing/Util/Migrator.php';
     $timestamp   = Ruckusing_Util_Migrator::generateTimestamp();
     $klass       = Ruckusing_Util_Naming::camelcase($migrationName);
     if (classNameIsDuplicated($klass, $migrationDir)) {
+        require_once 'Ruckusing/Exception/Argument.php';
         throw new Ruckusing_Exception_Argument(
             'This class name is already used. Please, choose another name.'
         );
@@ -258,6 +264,7 @@ function main($args, $config)
 
     //check to make sure our destination directory is writable
     if (! is_writable($migrationDir . '/')) {
+        require_once 'Ruckusing/Exception/InvalidMigrationDir.php';
         throw new Ruckusing_Exception_InvalidMigrationDir(
             'ERROR: migration directory (' . $migrationDir
             . ') is not writable by the current user. '
@@ -265,17 +272,18 @@ function main($args, $config)
         );
     }
 
-    //write it out!
+    // write it out!
     $fileResult = file_put_contents($fullPath, $templateStr);
-    if ($fileResult === false) {
+    // No three equals (check error and zero caracter writed)
+    if ($fileResult == false) {
+        require_once 'Ruckusing/Exception/InvalidMigrationDir.php';
         throw new Ruckusing_Exception_InvalidMigrationDir(
             'Error writing to migrations directory/file. '
             . 'Do you have sufficient privileges?'
             . "\nOr the file is maybe double ({$fileName})?"
         );
-    } else {
-        echo "\nCreated migration: {$fileName}\n\n";
     }
+    echo "\nCreated migration: {$fileName}\n\n";
 }
 
 /**
@@ -288,9 +296,11 @@ function main($args, $config)
  */
 function classNameIsDuplicated($classname, $migrationDir)
 {
+    require_once 'Ruckusing/Util/Migrator.php';
     $migrationFiles = Ruckusing_Util_Migrator::getMigrationFiles($migrationDir);
+    $classname = strtolower($classname);
     foreach ($migrationFiles as $file) {
-        if ($file['class'] == $classname) {
+        if (strtolower($file['class']) == $classname) {
             return true;
         }
     }
@@ -406,15 +416,17 @@ function scrErrorHandler($errno, $errstr, $errfile, $errline)
 function scrExceptionHandler($exception)
 {
     echo "\t\033[40m\033[1;31m " . $exception->getMessage() . " \033[0m\n\n";
-        //. "\nbacktrace: \n" . $exception->getTraceAsString() . "\n";
+    //. "\nbacktrace: \n" . $exception->getTraceAsString() . "\n";
+    printHelp();
     exit(1); // exit with error
 }
 
 function loader($classname)
 {
-    //echo 'load: ' . $classname . PHP_EOL;
     $filename = str_replace('_', '/', $classname) . '.php';
-    if (is_file(RUCKUSING_BASE . '/library/' . $filename)) {
+    if (defined('RUCKUSING_BASE')
+        && is_file(RUCKUSING_BASE . '/library/' . $filename)
+    ) {
         $filename = RUCKUSING_BASE . '/library/' . $filename;
     }
     include_once $filename;

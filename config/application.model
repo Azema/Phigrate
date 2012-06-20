@@ -1,6 +1,8 @@
 [default]
-task.dir = RUCKUSING_BASE "/library/Task"
-migration.dir = RUCKUSING_BASE "/db/migrate"
+database.config = "/etc/ruckusing/database.ini"
+task.dir = "/usr/share/pear/Ruckusing/library/Task"
+migration.dir = "/home/user/projects/MyProject/db/migrate"
+log.dir = "/tmp/"
 debug = 0
 
 [development : default]
