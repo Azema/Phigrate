@@ -57,7 +57,7 @@
  */
 
 if (!defined('RUCKUSING_BASE')) {
-    define('RUCKUSING_BASE', dirname(__FILE__));
+    define('RUCKUSING_BASE', '@pear_directory@/Ruckusing');
 }
 
 // DB table where the version info is stored

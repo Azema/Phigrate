@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<package xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0         http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd" version="2.0">
+  <name>Ruckusing</name>
+  <channel>Quazar.pearfarm.org</channel>
+  <summary>Migrations SQL with PHP as ActiveRecord Migrations</summary>
+  <description>Ruckusing is a framework written in PHP5 for generating and managing a set of &amp;quot;database
+             migrations&amp;quot;. Database migrations are declarative files which represent the state of a DB (its tables,
+             columns, indexes, etc) at a particular state of time. By using database migrations, multiple developers can
+             work on the same application and be guaranteed that the application is in a consistent state across all
+             remote developer machines.</description>
+  <lead>
+    <name>Manuel HERVO</name>
+    <user>Quazar</user>
+    <email>manuel.hervo@gmail.com</email>
+    <active>yes</active>
+  </lead>
+  <date>2012-06-20</date>
+  <time>20:02:26</time>
+  <version>
+    <release>0.9.0</release>
+    <api>0.0.1</api>
+  </version>
+  <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+  </stability>
+  <license uri="http://www.gnu.org/licenses/gpl-2.0.html">GPLv2</license>
+  <notes>Initial release.</notes>
+  <contents>
+    <dir name="/" baseinstalldir="Ruckusing">
+      <dir name="bin">
+        <file name="generate.php" role="script" baseinstalldir="/" md5sum="dbe022fc99db7419ff6f1e1c052e8c5d">
+          <tasks:replace type="pear-config" from="/usr/bin/env php" to="php_bin"/>
+          <tasks:replace type="pear-config" from="@php_bin@" to="php_bin"/>
+          <tasks:replace type="pear-config" from="@bin_dir@" to="bin_dir"/>
+          <tasks:replace type="pear-config" from="@pear_directory@" to="php_dir"/>
+        </file>
+        <file name="main.php" role="script" baseinstalldir="/" md5sum="a327ccb85fd885db5e97ea0b42806ba3">
+          <tasks:replace type="pear-config" from="/usr/bin/env php" to="php_bin"/>
+          <tasks:replace type="pear-config" from="@php_bin@" to="php_bin"/>
+          <tasks:replace type="pear-config" from="@bin_dir@" to="bin_dir"/>
+          <tasks:replace type="pear-config" from="@pear_directory@" to="php_dir"/>
+        </file>
+        <file name="update_ruckusing_database.php" role="php" md5sum="166c016b2c65326a1616b620a8fed09f"/>
+      </dir>
+      <dir name="library">
+        <dir name="Ruckusing">
+          <dir name="Adapter">
+            <file name="Base.php" role="php" md5sum="4c71879a5750218da9b456a4de6341e6"/>
+            <file name="ColumnDefinition.php" role="php" md5sum="375340768d9ad18cb1eab1c1e224db3c"/>
+            <file name="IAdapter.php" role="php" md5sum="f12db0f540674bba1631830844a5cd7b"/>
+            <dir name="Mysql">
+              <file name="Adapter.php" role="php" md5sum="e5e17bce28a278226d4e6d8337555e17"/>
+              <file name="ColumnDefinition.php" role="php" md5sum="39ccade7aff2584de253cf892bf2353d"/>
+              <file name="TableDefinition.php" role="php" md5sum="fe2df955fe56094f7cb253333ab08326"/>
+            </dir>
+            <file name="TableDefinition.php" role="php" md5sum="205767340a50be68e09f0f4edfde3d75"/>
+          </dir>
+          <file name="Config.php" role="php" md5sum="396322cdacf5dc044a244c7906ec5d6a"/>
+          <dir name="Config">
+            <file name="Ini.php" role="php" md5sum="732a65e9148d3c745c8c330090e879cd"/>
+          </dir>
+          <file name="Exception.php" role="php" md5sum="57d477b0018af6d6133a819fc471f032"/>
+          <dir name="Exception">
+            <file name="AdapterConnexion.php" role="php" md5sum="9db92f288d27f3b69a3b126172c6df34"/>
+            <file name="AdapterQuery.php" role="php" md5sum="f6cd46c535139ac1aa403ca40db220db"/>
+            <file name="Argument.php" role="php" md5sum="fab60ec3f919167885063bb7770623e5"/>
+            <file name="Config.php" role="php" md5sum="76f0a486a2ed6bd12c8fea188e556e2c"/>
+            <file name="InvalidAdapterType.php" role="php" md5sum="eaf42e455f3a3748ef51f8c8c55f7bdf"/>
+            <file name="InvalidIndexName.php" role="php" md5sum="446ef5ecb02101d61413c6a9775d7163"/>
+            <file name="InvalidLog.php" role="php" md5sum="1a82e335eb1c97fffc7c37c388ab3ea7"/>
+            <file name="InvalidMigrationDir.php" role="php" md5sum="db491de4b6606021fa3869c83d434ad1"/>
+            <file name="InvalidTableDefinition.php" role="php" md5sum="ca31ebdc4796f2d4ecbe9ec1aebb608f"/>
+            <file name="InvalidTargetMigration.php" role="php" md5sum="0f64ee61f394bdf4e585a94138fdc7a7"/>
+            <file name="InvalidTask.php" role="php" md5sum="d436f6d93b0d80d1428f31bd471e0b13"/>
+            <file name="MissingAdapter.php" role="php" md5sum="638a4e34e9bed926d7253b260bfccfa0"/>
+            <file name="MissingAdapterType.php" role="php" md5sum="e6a4b60527ed33a357f6d44b06aaf732"/>
+            <file name="MissingConfigDb.php" role="php" md5sum="2c13bad8f14c955ec52d23a6b56d0a4d"/>
+            <file name="MissingMigrationDir.php" role="php" md5sum="95b7ca324716317ed80905aa98153451"/>
+            <file name="MissingMigrationMethod.php" role="php" md5sum="f5fe8f80d2612d08b78d1e0cc810f4d4"/>
+            <file name="MissingSchemaInfoTable.php" role="php" md5sum="7c53e11cfca867b4a347a1d2252ed5ac"/>
+            <file name="MissingTable.php" role="php" md5sum="8b5e11271b71a56581b40d8b202b2062"/>
+            <file name="MissingTaskDir.php" role="php" md5sum="7bd1c1c123016c3c84ec2428f3f730b5"/>
+            <file name="Sql.php" role="php" md5sum="27016819ca6776bee8bb035b47a16622"/>
+            <file name="Task.php" role="php" md5sum="66c3d73ee33d5752dda756063c379212"/>
+          </dir>
+          <file name="FrameworkRunner.php" role="php" md5sum="bf87349cac0a6ea36d1bdd4094addfaf"/>
+          <file name="Logger.php" role="php" md5sum="499f423c50272bae485b398f17d4d53f"/>
+          <dir name="Migration">
+            <file name="Base.php" role="php" md5sum="e0cf4b0bcde929f074f8f5e149af4ad0"/>
+          </dir>
+          <dir name="Task">
+            <file name="ITask.php" role="php" md5sum="015b4b5a624dd20ea5fe9e3db8d35c42"/>
+            <file name="Manager.php" role="php" md5sum="8b8d776d06d6378c92cf87772a67e7ae"/>
+          </dir>
+          <dir name="Util">
+            <file name="Migrator.php" role="php" md5sum="16f4bef0c4b9db78a1af9ee4faa33a18"/>
+            <file name="Naming.php" role="php" md5sum="f807fdc2b891ffb62dd612d9b4bf1629"/>
+          </dir>
+        </dir>
+        <dir name="Task">
+          <file name="Base.php" role="php" md5sum="6eb68538fad14cae3db4ab868661eff8"/>
+          <dir name="Db">
+            <file name="Migrate.php" role="php" md5sum="ab6ecdc3b0d5306184a411501f7af507"/>
+            <file name="Schema.php" role="php" md5sum="8b4f43822b7eb7ecc060510300462d5f"/>
+            <file name="Setup.php" role="php" md5sum="305e6694888ec06ce3989e7e6be23122"/>
+            <file name="Status.php" role="php" md5sum="20464d6105231be36805644274776adb"/>
+            <file name="Version.php" role="php" md5sum="d7daeebbe1b62c235c1d1b787e81e9b8"/>
+          </dir>
+        </dir>
+      </dir>
+    </dir>
+  </contents>
+  <dependencies>
+    <required>
+      <php>
+        <min>5.0.0</min>
+      </php>
+      <pearinstaller>
+        <min>1.4.0</min>
+      </pearinstaller>
+    </required>
+  </dependencies>
+  <phprelease>
+    <filelist>
+      <install as="ruckusing" name="bin/main.php"/>
+      <install as="ruckusing-generate" name="bin/generate.php"/>
+    </filelist>
+  </phprelease>
+</package>
