@@ -82,16 +82,8 @@ set_exception_handler('scrExceptionHandler');
 spl_autoload_register('loader', true, true);
 
 /**
- * Recherche un fichier de configuration caché
- *
- * @return string
- */
-function searchConfigFile() {
-    return iterateDir(getcwd());
-}
-
-/**
  * Permet d'itérer à reculons sur un répertoire
+ * à la recherche d'un fichier de configuration caché
  *
  * @return string
  */
@@ -118,12 +110,14 @@ if (!isset($argv)) {
 
 $args = parseArgs($argv);
 if (! in_array('-c', $args)) {
-    $config = searchConfigFile();
+    $config = iterateDir(getcwd());
     if (null !== $config) {
+        echo 'Fichier de configuration trouvé: ', $config, "\n";
         $args[] = '-c';
         $args[] = $config;
     }
 }
+exit;
 $main = new Ruckusing_FrameworkRunner($args);
 $output = $main->execute();
 echo "\n", $output, "\n";
