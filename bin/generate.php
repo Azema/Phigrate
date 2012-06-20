@@ -37,7 +37,7 @@
  */
 
 if (!defined('RUCKUSING_BASE')) {
-    define('RUCKUSING_BASE', realpath(dirname(__FILE__) . '/..'));
+    define('RUCKUSING_BASE', '@pear_directory@/Ruckusing');
 }
 
 set_error_handler('scrErrorHandler', E_ALL);
