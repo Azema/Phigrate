@@ -52,10 +52,49 @@ set_error_handler('scrErrorHandler', E_ALL);
 set_exception_handler('scrExceptionHandler');
 spl_autoload_register('loader', true, true);
 
+/**
+ * Recherche un fichier de configuration caché
+ *
+ * @return string
+ */
+function searchConfigFile()
+{
+    return iterateDir(getcwd());
+}
+
+/**
+ * Permet d'itérer à reculons sur un répertoire
+ *
+ * @return string
+ */
+function iterateDir($dir) {
+    $fp = opendir($dir);
+    while(false !== ($entry = readdir($fp))) {
+        if ($entry == '.rucku') {
+            closedir($fp);
+            return $dir . '/.rucku';
+        }
+    }
+    if (is_dir($dir . '/..') && $dir != '/') {
+        closedir($fp);
+        return iterateDir(realpath($dir . '/..'));
+    }
+    closedir($fp);
+    return null;
+}
+
 if (!isset($argv)) {
     $argv = '';
 }
+
 $args = parseArgs($argv);
+if (! in_array('-c', $args)) {
+    $config = searchConfigFile();
+    if (null !== $config) {
+        $args[] = '-c';
+        $args[] = $config;
+    }
+}
 $env = getEnvironment($args);
 $config = getConfig($args, $env);
 main($args, $config);
