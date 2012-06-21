@@ -34,3 +34,5 @@ require_once 'Ruckusing/Adapter/ColumnDefinition.php';
 class Ruckusing_Adapter_Mysql_ColumnDefinition extends Ruckusing_Adapter_ColumnDefinition
 {
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

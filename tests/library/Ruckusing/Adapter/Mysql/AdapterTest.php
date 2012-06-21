@@ -1458,3 +1458,5 @@ Valid types are:
         $this->assertNull($actual);
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

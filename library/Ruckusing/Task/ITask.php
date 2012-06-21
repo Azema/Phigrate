@@ -60,3 +60,5 @@ interface Ruckusing_Task_ITask
      */
     public function setAdapter(Ruckusing_Adapter_IAdapter $adapter);
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

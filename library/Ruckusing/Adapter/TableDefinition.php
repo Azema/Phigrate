@@ -143,3 +143,5 @@ abstract class Ruckusing_Adapter_TableDefinition
      */
     abstract public function finish($wants_sql = false);
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

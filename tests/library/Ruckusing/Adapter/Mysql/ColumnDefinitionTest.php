@@ -195,3 +195,5 @@ class Ruckusing_Adapter_Mysql_ColumnDefinitionTest extends PHPUnit_Framework_Tes
         $this->assertEquals('`avatar` blob', $c->__toString());
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

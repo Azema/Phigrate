@@ -27,3 +27,5 @@
 class Ruckusing_Exception extends Exception
 {
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

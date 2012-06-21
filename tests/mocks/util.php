@@ -35,3 +35,5 @@ class utilAdapterMock extends adapterMock
     }
 }
 
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

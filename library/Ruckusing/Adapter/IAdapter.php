@@ -205,3 +205,5 @@ interface Ruckusing_Adapter_IAdapter
      */
     public function addIndex($tableName, $columnName, $options = array());
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

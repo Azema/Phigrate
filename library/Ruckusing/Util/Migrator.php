@@ -289,3 +289,5 @@ class Ruckusing_Util_Migrator
         return null;
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

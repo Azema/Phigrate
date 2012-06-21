@@ -249,3 +249,5 @@ abstract class Ruckusing_Adapter_Base
         return $pdo;
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

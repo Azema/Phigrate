@@ -230,3 +230,5 @@ class Ruckusing_Task_ManagerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $help);
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

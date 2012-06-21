@@ -9,6 +9,7 @@ class adapterTaskMock extends adapterMock
 
     public function __construct($dbConfig, $logger)
     {
+        require_once 'Ruckusing/Logger.php';
         $logger = Ruckusing_Logger::instance(RUCKUSING_BASE . '/tests/logs/tests.log');
         $this->_conn = new pdoTaskMock();
         $this->setLogger($logger);
@@ -124,6 +125,11 @@ class pdoTaskMock
     }
 }
 
+/**
+ * @see Ruckusing_Adapter_IAdapter
+ * @see Ruckusing_Task_ITask
+ */
+require_once 'Ruckusing/Adapter/IAdapter.php';
 require_once 'Ruckusing/Task/ITask.php';
 class taskMock implements Ruckusing_Task_ITask
 {
@@ -164,3 +170,5 @@ class taskMock implements Ruckusing_Task_ITask
         return $this;
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

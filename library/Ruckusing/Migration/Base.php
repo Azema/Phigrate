@@ -289,3 +289,5 @@ abstract class Ruckusing_Migration_Base
         return $this->_adapter->quote($value);
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

@@ -86,3 +86,5 @@ class logMock
         $this->info[] = $msg;
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

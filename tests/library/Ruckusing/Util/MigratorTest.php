@@ -370,3 +370,5 @@ class Ruckusing_Util_MigratorTest extends PHPUnit_Framework_TestCase
         $this->assertEmpty($actualFiles);
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

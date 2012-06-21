@@ -374,3 +374,5 @@ class Ruckusing_Config implements Countable, Iterator
         return $firstArray;
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

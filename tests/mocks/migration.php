@@ -178,3 +178,5 @@ class migrationAdapterMock extends Ruckusing_Adapter_Mysql_Adapter
     }
 }
 
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

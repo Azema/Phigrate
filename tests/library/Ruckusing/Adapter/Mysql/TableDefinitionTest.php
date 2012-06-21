@@ -256,3 +256,5 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
         $this->assertEquals($expected, $sql);
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

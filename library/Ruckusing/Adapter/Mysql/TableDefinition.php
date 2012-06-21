@@ -256,3 +256,5 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
         $this->_initialized = true;
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

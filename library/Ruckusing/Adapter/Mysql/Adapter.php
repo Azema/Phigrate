@@ -1277,3 +1277,5 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         $this->_inTrx = false;
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

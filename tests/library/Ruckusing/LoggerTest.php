@@ -203,3 +203,5 @@ class Ruckusing_LoggerTest extends PHPUnit_Framework_TestCase
         $this->assertNotRegExp($expected, $file[count($file)-1]);
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

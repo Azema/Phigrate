@@ -72,3 +72,5 @@ foreach ($files as $file) {
 if (is_file(RUCKUSING_BASE . '/tests/logs/tests.log')) {
     unlink(RUCKUSING_BASE . '/tests/logs/tests.log');
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

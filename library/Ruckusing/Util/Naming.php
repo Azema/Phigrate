@@ -197,3 +197,5 @@ class Ruckusing_Util_Naming
         return $name;
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

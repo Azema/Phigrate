@@ -464,3 +464,5 @@ function loader($classname)
     }
     include_once $filename;
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

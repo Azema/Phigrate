@@ -380,3 +380,5 @@ USAGE;
         $this->_logger->debug(__METHOD__ . ' End');
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

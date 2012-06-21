@@ -274,3 +274,5 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $return);
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

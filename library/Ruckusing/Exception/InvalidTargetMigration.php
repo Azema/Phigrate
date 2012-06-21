@@ -32,3 +32,5 @@ require_once 'Ruckusing/Exception.php';
 class Ruckusing_Exception_InvalidTargetMigration extends Ruckusing_Exception
 {
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

@@ -130,3 +130,5 @@ abstract class Ruckusing_Adapter_ColumnDefinition
         return $this->_adapter->typeToSql($this->type, $this->_options);
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

@@ -307,3 +307,5 @@ class Ruckusing_Config_IniTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(true, isset($config->{1002}));
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

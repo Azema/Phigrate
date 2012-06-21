@@ -199,3 +199,5 @@ class Ruckusing_Util_NamingTest extends PHPUnit_Framework_TestCase
         );
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */

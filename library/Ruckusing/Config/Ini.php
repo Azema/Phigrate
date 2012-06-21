@@ -327,3 +327,5 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
         return $config;
     }
 }
+
+/* vim: set expandtab tabstop=4 shiftwidth=4: */
