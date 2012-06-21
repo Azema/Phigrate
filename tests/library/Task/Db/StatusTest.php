@@ -48,14 +48,14 @@ class Task_Db_StatusTest extends PHPUnit_Framework_TestCase
     {
         $this->_adapter->setTableSchemaExist(true);
         $this->_adapter->versions = array();
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:status\]:\012+'
             . '===================== NOT APPLIED =======================\012+'
             . '\tCreateUsers \[ 20120109064438 \]\012+'
             . '\tAddIndexToUsers \[ 20120110064438 \]\012+'
             . '\tCreateAddresses \[ 20120111064438 \]\012+'
             . '\tMissingMethodUp \[ 20120112064438 \]\012+'
-            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
+            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $actual = $this->object->execute(array());
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);
@@ -67,7 +67,7 @@ class Task_Db_StatusTest extends PHPUnit_Framework_TestCase
         $this->_adapter->versions = array(
             array('version' => '20120109064438'),
         );
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:status\]:\012+'
             . '===================== APPLIED =======================\012+'
             . '\tCreateUsers \[ 20120109064438 \]\012+'
@@ -75,7 +75,7 @@ class Task_Db_StatusTest extends PHPUnit_Framework_TestCase
             . '\tAddIndexToUsers \[ 20120110064438 \]\012+'
             . '\tCreateAddresses \[ 20120111064438 \]\012+'
             . '\tMissingMethodUp \[ 20120112064438 \]\012+'
-            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
+            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $actual = $this->object->execute(array());
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);
@@ -90,14 +90,14 @@ class Task_Db_StatusTest extends PHPUnit_Framework_TestCase
             array('version' => '20120111064438'),
             array('version' => '20120112064438'),
         );
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:status\]:\012+'
             . '===================== APPLIED =======================\012+'
             . '\tCreateUsers \[ 20120109064438 \]\012+'
             . '\tAddIndexToUsers \[ 20120110064438 \]\012+'
             . '\tCreateAddresses \[ 20120111064438 \]\012+'
             . '\tMissingMethodUp \[ 20120112064438 \]\012+'
-            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
+            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $actual = $this->object->execute(array());
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);

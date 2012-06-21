@@ -160,11 +160,6 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         return $types;
     }
 
-    //-----------------------------------
-    // PUBLIC METHODS
-    //-----------------------------------
-
-    /*  */
     /**
      * Create the schema table, if necessary
      *
@@ -1107,13 +1102,19 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     protected function _initDsn()
     {
-        $dsn = 'mysql:dbname=' . $this->_dbConfig['database'];
-        if (array_key_exists('socket', $this->_dbConfig)) {
-            $dsn .= ';unix_socket=' . $this->_dbConfig['socket'];
-        } elseif (array_key_exists('host', $this->_dbConfig)) {
-            $dsn .= ';host=' . $this->_dbConfig['host'];
-            if (array_key_exists('port', $this->_dbConfig)) {
-                $dsn .= ';port=' . $this->_dbConfig['port'];
+        $dsn = 'mysql:';
+        if (array_key_exists('uri', $this->_dbConfig)) {
+            $dsn = 'uri:' . $this->_dbConfig['uri'];
+        } elseif (array_key_exists('database', $this->_dbConfig)) {
+            $dsn .= 'dbname=' . $this->_dbConfig['database'];
+
+            if (array_key_exists('socket', $this->_dbConfig)) {
+                $dsn .= ';unix_socket=' . $this->_dbConfig['socket'];
+            } elseif (array_key_exists('host', $this->_dbConfig)) {
+                $dsn .= ';host=' . $this->_dbConfig['host'];
+                if (array_key_exists('port', $this->_dbConfig)) {
+                    $dsn .= ';port=' . $this->_dbConfig['port'];
+                }
             }
         }
         return $dsn;

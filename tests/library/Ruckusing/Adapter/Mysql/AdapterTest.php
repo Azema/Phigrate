@@ -22,16 +22,20 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
      */
     protected $object;
 
-    public function __construct()
+    protected static $_dsn;
+
+    protected static $_logger;
+
+    public static function setUpBeforeClass()
     {
-        $this->_dsn = array(
+        self::$_dsn = array(
             'host' => 'localhost',
             'port' => 3306,
             'database' => 'rucku_migrations_test',
-            'user' => 'root',
-            'password' => '',
+            'user' => USER_MYSQL_DEFAULT,
+            'password' => PASSWORD_MYSQL_DEFAULT,
         );
-        $this->_logger = Ruckusing_Logger::instance(RUCKUSING_BASE . '/tests/logs/tests.log');
+        self::$_logger = Ruckusing_Logger::instance(RUCKUSING_BASE . '/tests/logs/tests.log');
     }
 
     /**
@@ -41,7 +45,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->object = new Ruckusing_Adapter_Mysql_Adapter($this->_dsn, $this->_logger);
+        $this->object = new Ruckusing_Adapter_Mysql_Adapter(self::$_dsn, self::$_logger);
     }
 
     /**
@@ -84,7 +88,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'password' => 'pass',
         );
         try {
-            new Ruckusing_Adapter_Mysql_Adapter($dsn, $this->_logger);
+            new Ruckusing_Adapter_Mysql_Adapter($dsn, self::$_logger);
         } catch (Ruckusing_Exception_AdapterConnexion $e) {
             $msg = "SQLSTATE[28000] [1045] Access denied for "
                 . "user 'toto'@'localhost' (using password: YES)";
@@ -98,7 +102,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'password' => 'rucku',
         );
         try {
-            new Ruckusing_Adapter_Mysql_Adapter($dsn, $this->_logger);
+            new Ruckusing_Adapter_Mysql_Adapter($dsn, self::$_logger);
         } catch (Ruckusing_Exception_AdapterConnexion $e) {
             $msg = "SQLSTATE[42000] [1044] Access denied for "
                 . "user 'rucku'@'localhost' to database 'ruckutest'";
@@ -140,7 +144,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'uri' => 'file:///path/to/dsnfile'
         );
         $expected = 'uri:file:///path/to/dsnfile';
-        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
+        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, self::$_logger);
         $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
         $this->assertEquals($expected, $actual->getDsn());
 
@@ -151,7 +155,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'password' => 'pass',
         );
         $expected = 'mysql:dbname=ruckutest;host=testhost';
-        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
+        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, self::$_logger);
         $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
         $this->assertEquals($expected, $actual->getDsn());
 
@@ -162,7 +166,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'password' => 'pass',
         );
         $expected = 'mysql:dbname=ruckutest;unix_socket=/tmp/mysqld.sock';
-        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
+        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, self::$_logger);
         $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
         $this->assertEquals($expected, $actual->getDsn());
 
@@ -197,7 +201,15 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $dbConfig = array();
         try {
             $this->object->checkDbConfig($dbConfig);
-            $this->fail('checkDbConfig wait for the "database" argument!');
+            $this->fail('checkDbConfig does not accept empty array!');
+        } catch (Ruckusing_Exception_Argument $ex) {
+            $msg = 'The argument dbConfig must be a array!';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        $dbConfig = array('not empty');
+        try {
+            $this->object->checkDbConfig($dbConfig);
+            $this->fail('checkDbConfig expect "database" argument!');
         } catch (Ruckusing_Exception_Argument $ex) {
             $msg = 'The argument dbConfig must be contains index "database"';
             $this->assertEquals($msg, $ex->getMessage());
@@ -205,7 +217,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $dbConfig = array('database' => 'test');
         try {
             $this->object->checkDbConfig($dbConfig);
-            $this->fail('checkDbConfig wait for the "host" argument!');
+            $this->fail('checkDbConfig expect "host" argument!');
         } catch (Ruckusing_Exception_Argument $ex) {
             $msg = 'The argument dbConfig must be contains '
                 . 'index "host" or index "socket"';
@@ -275,11 +287,11 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $dbConfig = array(
             'database' => 'rucku_migrations_test',
             'socket' => '/var/run/mysqld/mysqld.sock',
-            'user' => 'root',
-            'password' => '',
+            'user' => USER_MYSQL_DEFAULT,
+            'password' => PASSWORD_MYSQL_DEFAULT,
             'options' => array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"),
         );
-        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
+        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, self::$_logger);
         $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
         $this->assertInstanceOf('PDO', $actual->getConnexion());
 
@@ -289,7 +301,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'user' => 'root',
             'password' => '',
         );
-        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, $this->_logger);
+        $actual = new Ruckusing_Adapter_Mysql_Adapter($dbConfig, self::$_logger);
         $this->assertInstanceOf('Ruckusing_Adapter_Mysql_Adapter', $actual);
         try {
             $conn = $actual->getConnexion();
@@ -536,10 +548,10 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'host' => 'localhost',
             'port' => 3306,
             'database' => 'rucku_migrations_test',
-            'user' => 'root',
-            'password' => '',
+            'user' => USER_MYSQL_DEFAULT,
+            'password' => PASSWORD_MYSQL_DEFAULT,
         );
-        $object = new Ruckusing_Adapter_Mysql_Adapter($dsn, $this->_logger);
+        $object = new Ruckusing_Adapter_Mysql_Adapter($dsn, self::$_logger);
         $db = "users";
         $object->dropDatabase($db);
         $this->assertTrue($object->createDatabase($db));
@@ -555,10 +567,10 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'host' => 'localhost',
             'port' => 3306,
             'database' => 'rucku_migrations_test',
-            'user' => 'root',
-            'password' => '',
+            'user' => USER_MYSQL_DEFAULT,
+            'password' => PASSWORD_MYSQL_DEFAULT,
         );
-        $object = new Ruckusing_Adapter_Mysql_Adapter($dsn, $this->_logger);
+        $object = new Ruckusing_Adapter_Mysql_Adapter($dsn, self::$_logger);
         $db = "users";
         $this->assertTrue($object->dropDatabase($db));
         $this->assertFalse($object->databaseExists($db));
@@ -575,7 +587,6 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $this->assertNotEmpty($schema);
         $versionMysqld = $this->object->getVersionServer();
         $versionMysqld = (float)substr($versionMysqld, 0, 3);
-        echo 'versionMysqld: '.$versionMysqld;
         if ($versionMysqld <= 5.0) {
             $expected = "CREATE TABLE `users` (
   `name` varchar(20) default NULL

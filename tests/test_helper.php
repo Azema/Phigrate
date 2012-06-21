@@ -33,6 +33,16 @@ if (!defined('RUCKUSING_MIGRATION_DIR')) {
     define('RUCKUSING_MIGRATION_DIR', RUCKUSING_DB_DIR . '/migrate');
 }
 
+// User MySQL by default
+if (!defined('USER_MYSQL_DEFAULT')) {
+    define('USER_MYSQL_DEFAULT', 'root');
+}
+
+// User MySQL by default
+if (!defined('PASSWORD_MYSQL_DEFAULT')) {
+    define('PASSWORD_MYSQL_DEFAULT', '');
+}
+
 spl_autoload_register('loader', true, true);
 
 set_include_path(

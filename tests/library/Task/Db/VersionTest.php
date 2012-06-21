@@ -45,10 +45,10 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
     {
         $this->_adapter->setTableSchemaExist(false);
         $actual = $this->object->execute(array());
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:version\]:\012+\t+Schema version table \(schema_migrations\) '
             . "does not exist\. Do you need to run 'db:setup'\?"
-            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
+            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);
     }
@@ -57,9 +57,9 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
     {
         $this->_adapter->setTableSchemaExist(true);
         $actual = $this->object->execute(array());
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:version\]:\012+\t+No migrations have been executed\.'
-            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
+            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);
     }
@@ -69,9 +69,9 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
         $this->_adapter->setTableSchemaExist(true);
         $this->_adapter->versions = array(array('version' => '20120110064438'));
         $actual = $this->object->execute(array());
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:version\]:\012+\t+Current version: 20120110064438'
-            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
+            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);
     }
@@ -85,9 +85,9 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
             array('version' => '20120110064438'),
         );
         $actual = $this->object->execute(array());
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:version\]:\012+\t+Current version: 20120124064438'
-            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
+            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);
     }

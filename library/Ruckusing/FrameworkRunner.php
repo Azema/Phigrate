@@ -192,10 +192,15 @@ class Ruckusing_FrameworkRunner
     {
         $this->getLogger()->debug(__METHOD__ . ' Start');
         if (! isset($this->_configDb)) {
-            $this->_configDb = new Ruckusing_Config_Ini(
-                $this->_getConfigDbFile(),
-                $this->_env
-            );
+            try {
+                $this->_configDb = new Ruckusing_Config_Ini(
+                    $this->_getConfigDbFile(),
+                    $this->_env
+                );
+            } catch (Exception $e) {
+                $msg = 'Config file for DB not found! Please, create config file';
+                throw new Ruckusing_Exception_Config($msg, $e->getCode(), $e);
+            }
         }
         $this->getLogger()->debug(__METHOD__ . ' End');
         return $this->_configDb;

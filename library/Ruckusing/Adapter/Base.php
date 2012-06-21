@@ -70,12 +70,6 @@ abstract class Ruckusing_Adapter_Base
      */
     public function setDbConfig($dbConfig)
     {
-        if (! is_array($dbConfig) || empty($dbConfig)) {
-            require_once 'Ruckusing/Exception/Argument.php';
-            throw new Ruckusing_Exception_Argument(
-                'The argument dbConfig must be a array!'
-            );
-        }
         $this->checkDbConfig($dbConfig);
         $this->_dbConfig = $dbConfig;
         return $this;
@@ -91,7 +85,7 @@ abstract class Ruckusing_Adapter_Base
      */
     public function checkDbConfig($dbConfig)
     {
-        if (! is_array($dbConfig)) {
+        if (! is_array($dbConfig) || empty($dbConfig)) {
             require_once 'Ruckusing/Exception/Argument.php';
             throw new Ruckusing_Exception_Argument(
                 'The argument dbConfig must be a array!'

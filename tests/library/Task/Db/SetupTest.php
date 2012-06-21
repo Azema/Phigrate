@@ -45,10 +45,10 @@ class Task_Db_SetupTest extends PHPUnit_Framework_TestCase
     {
         $this->_adapter->setTableSchemaExist(true);
         $actual = $this->object->execute(array());
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . "\[db:setup\]: \012+\t+NOTICE: table 'schema_migrations' already exists\."
             . ' Nothing to do\.\012+Finished: '
-            . '\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
+            . '\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);
     }
@@ -57,10 +57,10 @@ class Task_Db_SetupTest extends PHPUnit_Framework_TestCase
     {
         $this->_adapter->setTableSchemaExist(false);
         $actual = $this->object->execute(array());
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . "\[db:setup\]: \012+\t+Creating table: 'schema_migrations'"
             . '\012+\t+Done\.\012+Finished: '
-            . '\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
+            . '\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);
     }

@@ -11,67 +11,49 @@ class Ruckusing_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
      */
     protected $object;
 
-    protected $_logger;
+    protected static $_logger;
 
-    protected $_existConfig = false;
+    protected static $_existConfig = false;
 
-    protected $_existConfigDb = false;
+    protected static $_existConfigDb = false;
 
-    public function __construct()
+    public static function setUpBeforeClass()
     {
-        $this->_saveConfigFiles();
-        $this->_logger = Ruckusing_Logger::instance(
+        self::_saveConfigFiles();
+        self::$_logger = Ruckusing_Logger::instance(
             RUCKUSING_BASE . '/tests/logs/tests.log'
         );
     }
 
-    public function __destruct()
+    public static function tearDownAfterClass()
     {
-        $this->_restoreConfigFiles();
+        self::_restoreConfigFiles();
     }
 
-    private function _saveConfigFiles()
+    protected static function _saveConfigFiles()
     {
         $pathFileConfigDb = RUCKUSING_BASE . '/config/database.ini';
         if (file_exists($pathFileConfigDb)) {
             rename($pathFileConfigDb, $pathFileConfigDb.'-saveTest');
-            $this->_existConfigDb = true;
+            self::$_existConfigDb = true;
         }
         $pathFileConfig = RUCKUSING_BASE . '/config/application.ini';
         if (file_exists($pathFileConfig)) {
             rename($pathFileConfig, $pathFileConfig.'-saveTest');
-            $this->_existConfig = true;
+            self::$_existConfig = true;
         }
     }
 
-    private function _restoreConfigFiles()
+    protected static function _restoreConfigFiles()
     {
         $pathFileConfigDb = RUCKUSING_BASE . '/config/database.ini';
-        if ($this->_existConfigDb) {
+        if (self::$_existConfigDb) {
             rename($pathFileConfigDb.'-saveTest', $pathFileConfigDb);
         }
         $pathFileConfig = RUCKUSING_BASE . '/config/application.ini';
-        if ($this->_existConfig) {
+        if (self::$_existConfig) {
             rename($pathFileConfig.'-saveTest', $pathFileConfig);
         }
-    }
-
-    /**
-     * Sets up the fixture, for example, opens a network connection.
-     * This method is called before a test is executed.
-     */
-    protected function setUp()
-    {
-        //$this->object = new Ruckusing_FrameworkRunner;
-    }
-
-    /**
-     * Tears down the fixture, for example, closes a network connection.
-     * This method is called after a test is executed.
-     */
-    protected function tearDown()
-    {
-        //$this->object = null;
     }
 
     public function testConstructorWithoutParameters()
@@ -158,6 +140,8 @@ class Ruckusing_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
             'db:version',
             '-d',
             RUCKUSING_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            $pathFile,
         );
         $actual = new Ruckusing_FrameworkRunner($parameters);
         $this->assertInstanceOf('Ruckusing_FrameworkRunner', $actual);
@@ -174,7 +158,7 @@ class Ruckusing_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
         $parameters = array(
             'monScript.php',
             '-c',
-            RUCKUSING_BASE . '/tests/fixtures/config/application.ini',
+            realpath(RUCKUSING_BASE . '/tests/fixtures/config/application.ini'),
             'db:version',
         );
         try {
@@ -249,6 +233,8 @@ class Ruckusing_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
             'db:version',
             '-c',
             RUCKUSING_BASE . '/tests/fixtures/config/application.ini',
+            '-d',
+            $pathFile,
             'ENV=test',
         );
         $actual = new Ruckusing_FrameworkRunner($parameters);
@@ -499,9 +485,9 @@ USAGE;
         $adapter->versions = array(array('version' => '20120110064438'));
         $actual->setAdapter($adapter);
         $task = $actual->execute();
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
         . '\[db:version\]:\012+\t+Current version: \d+\012+Finished: '
-        . '\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
+        . '\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($task);
         $this->assertRegExp($regexp, $task);
     }
@@ -521,10 +507,10 @@ USAGE;
         $adapter->setTableSchemaExist(false);
         $actual->setAdapter($adapter);
         $task = $actual->execute(array());
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+'
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:version\]:\012+\t+Schema version table \(schema_migrations\) '
             . "does not exist\. Do you need to run 'db:setup'\?"
-            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3}\012+$/';
+            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($task);
         $this->assertRegExp($regexp, $task);
     }
