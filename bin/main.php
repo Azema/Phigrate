@@ -154,7 +154,7 @@ function parseArgs($argv)
  */
 function printHelp()
 {
-    $version = '0.9-experimental';
+    $version = '0.9.0-alpha';
     $dateVersion = date('c', 1325578455);
     $usage =<<<USAGE
 Ruckusing Migrations v{$version} at {$dateVersion}

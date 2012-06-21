@@ -15,7 +15,7 @@
     <active>yes</active>
   </lead>
   <date>2012-06-21</date>
-  <time>09:04:05</time>
+  <time>22:32:33</time>
   <version>
     <release>0.9.0</release>
     <api>0.0.1</api>
@@ -29,13 +29,13 @@
   <contents>
     <dir name="/" baseinstalldir="Ruckusing">
       <dir name="bin">
-        <file name="generate.php" role="script" baseinstalldir="/" md5sum="c3fec1be5c1844136241b4eb8602451e">
+        <file name="generate.php" role="script" baseinstalldir="/" md5sum="a6d3f7a7d7cad8f2ee4275b92bffd981">
           <tasks:replace type="pear-config" from="/usr/bin/env php" to="php_bin"/>
           <tasks:replace type="pear-config" from="@php_bin@" to="php_bin"/>
           <tasks:replace type="pear-config" from="@bin_dir@" to="bin_dir"/>
           <tasks:replace type="pear-config" from="@pear_directory@" to="php_dir"/>
         </file>
-        <file name="main.php" role="script" baseinstalldir="/" md5sum="a28a7a458d357bf833fdfbc63965a795">
+        <file name="main.php" role="script" baseinstalldir="/" md5sum="3530c8a22609e4fab028a656839ca3b5">
           <tasks:replace type="pear-config" from="/usr/bin/env php" to="php_bin"/>
           <tasks:replace type="pear-config" from="@php_bin@" to="php_bin"/>
           <tasks:replace type="pear-config" from="@bin_dir@" to="bin_dir"/>
@@ -46,11 +46,11 @@
       <dir name="library">
         <dir name="Ruckusing">
           <dir name="Adapter">
-            <file name="Base.php" role="php" md5sum="4c71879a5750218da9b456a4de6341e6"/>
+            <file name="Base.php" role="php" md5sum="be5fb09e798e8b08ea4fc9e9497a38dc"/>
             <file name="ColumnDefinition.php" role="php" md5sum="375340768d9ad18cb1eab1c1e224db3c"/>
             <file name="IAdapter.php" role="php" md5sum="f12db0f540674bba1631830844a5cd7b"/>
             <dir name="Mysql">
-              <file name="Adapter.php" role="php" md5sum="ee6f4b5aa43ca19a1bbd4541c30bd778"/>
+              <file name="Adapter.php" role="php" md5sum="b3547ba2595f2bcd209d893644bf0c0b"/>
               <file name="ColumnDefinition.php" role="php" md5sum="39ccade7aff2584de253cf892bf2353d"/>
               <file name="TableDefinition.php" role="php" md5sum="fe2df955fe56094f7cb253333ab08326"/>
             </dir>
@@ -84,7 +84,7 @@
             <file name="Sql.php" role="php" md5sum="27016819ca6776bee8bb035b47a16622"/>
             <file name="Task.php" role="php" md5sum="66c3d73ee33d5752dda756063c379212"/>
           </dir>
-          <file name="FrameworkRunner.php" role="php" md5sum="264976ff94f270aaba47cb1122da4735"/>
+          <file name="FrameworkRunner.php" role="php" md5sum="adbdde8bb85659260aa46438d9ca9eb6"/>
           <file name="Logger.php" role="php" md5sum="499f423c50272bae485b398f17d4d53f"/>
           <dir name="Migration">
             <file name="Base.php" role="php" md5sum="e0cf4b0bcde929f074f8f5e149af4ad0"/>
