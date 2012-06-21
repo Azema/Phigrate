@@ -56,11 +56,12 @@
  * Call with no arguments to see usage info.
  */
 
-if (strpos('@php_directory@', '@php_directory') === 0) {  // not a pear install
+if (strpos('@pear_directory@', '@pear_directory') === 0) {  // not a pear install
     define('RUCKUSING_BASE', realpath(dirname(__FILE__) . '/..'));
 } else {
     define('RUCKUSING_BASE', '@pear_directory@/Ruckusing');
 }
+
 set_include_path(
     implode(PATH_SEPARATOR, array(
         RUCKUSING_BASE . '/library',
@@ -117,7 +118,6 @@ if (! in_array('-c', $args)) {
         $args[] = $config;
     }
 }
-exit;
 $main = new Ruckusing_FrameworkRunner($args);
 $output = $main->execute();
 echo "\n", $output, "\n";

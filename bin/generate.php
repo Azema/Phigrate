@@ -36,7 +36,7 @@
  *
  */
 
-if (strpos('@php_directory@', '@php_directory') === 0) {  // not a pear install
+if (strpos('@pear_directory@', '@pear_directory') === 0) {  // not a pear install
     define('RUCKUSING_BASE', realpath(dirname(__FILE__) . '/..'));
 } else {
     define('RUCKUSING_BASE', '@pear_directory@/Ruckusing');
