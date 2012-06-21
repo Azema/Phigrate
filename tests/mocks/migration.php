@@ -10,6 +10,7 @@
  * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link      https://github.com/ruckus/ruckusing-migrations
  */
+require_once 'Ruckusing/Migration/Base.php';
 class migrationMock extends Ruckusing_Migration_Base
 {}
 
