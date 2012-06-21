@@ -7,5 +7,5 @@ Then /^it should pass whith:$/ do |string|
 end
 
 Then /^it should fail whith:$/ do |string|
-  string.should =~ /\n\s+This class name is already used. Please, choose another name.\n/
+  string.should =~ /\n\s?This class name is already used. Please, choose another name.\n/
 end
