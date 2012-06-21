@@ -11,6 +11,10 @@ if (!defined('RUCKUSING_TS_SCHEMA_TBL_NAME')) {
 	define('RUCKUSING_TS_SCHEMA_TBL_NAME', 'schema_migrations');
 }
 
+require_once 'Ruckusing/Adapter/Mysql/Adapter.php';
+require_once 'Ruckusing/Adapter/Mysql/TableDefinition.php';
+require_once 'Ruckusing/Adapter/Mysql/ColumnDefinition.php';
+
 /**
  * @group Ruckusing_Adapter
  * @group Ruckusing_Adapter_Mysql
@@ -35,7 +39,10 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'user' => USER_MYSQL_DEFAULT,
             'password' => PASSWORD_MYSQL_DEFAULT,
         );
-        self::$_logger = Ruckusing_Logger::instance(RUCKUSING_BASE . '/tests/logs/tests.log');
+        require_once 'Ruckusing/Logger.php';
+        self::$_logger = Ruckusing_Logger::instance(
+            RUCKUSING_BASE . '/tests/logs/tests.log'
+        );
     }
 
     /**
@@ -87,6 +94,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'user' => 'toto',
             'password' => 'pass',
         );
+        require_once 'Ruckusing/Exception/AdapterConnexion.php';
         try {
             new Ruckusing_Adapter_Mysql_Adapter($dsn, self::$_logger);
         } catch (Ruckusing_Exception_AdapterConnexion $e) {
@@ -190,6 +198,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
      */
     public function testCheckDbConfig()
     {
+        require_once 'Ruckusing/Exception/Argument.php';
         $dbConfig = 'dsn';
         try {
             $this->object->checkDbConfig($dbConfig);

@@ -3,7 +3,7 @@
 //set up some preliminary defaults, this is so all of our
 //framework includes work!
 if (! defined('RUCKUSING_BASE')) {
-    define('RUCKUSING_BASE', dirname(__FILE__) . '/..');
+    define('RUCKUSING_BASE', realpath(dirname(__FILE__) . '/..'));
 }
 
 if (! defined('FIXTURES_PATH')) {
@@ -51,13 +51,16 @@ set_include_path(
         get_include_path(),
     ))
 );
+
 function loader($classname)
 {
-    //echo 'load: ' . $classname . PHP_EOL;
-    $filename = str_replace('_', '/', $classname) . '.php';
-    if (is_file(RUCKUSING_BASE . '/library/' . $filename)) {
-        $filename = RUCKUSING_BASE . '/library/' . $filename;
-        include_once $filename;
+    if (! class_exists($classname, false)) {
+        //echo 'load: ' . $classname . PHP_EOL;
+        $filename = str_replace('_', '/', $classname) . '.php';
+        if (is_file(RUCKUSING_BASE . '/library/' . $filename)) {
+            $filename = RUCKUSING_BASE . '/library/' . $filename;
+            include_once $filename;
+        }
     }
 }
 

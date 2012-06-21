@@ -28,6 +28,7 @@ class Ruckusing_Util_MigratorTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
+        require_once 'Ruckusing/Util/Migrator.php';
         $this->object = new Ruckusing_Util_Migrator($this->_adapter);
     }
 
@@ -275,6 +276,7 @@ class Ruckusing_Util_MigratorTest extends PHPUnit_Framework_TestCase
             true
         );
         $this->assertEquals($expectDownFiles, $actualDownFiles);
+        require_once 'Ruckusing/Exception/InvalidTargetMigration.php';
         try {
             $destination = 5;
             $this->object->getRunnableMigrations(
@@ -357,6 +359,7 @@ class Ruckusing_Util_MigratorTest extends PHPUnit_Framework_TestCase
 
     public function testGetMigrationFiles()
     {
+        require_once 'Ruckusing/Exception/InvalidMigrationDir.php';
         try {
             $directory = '/tmp/migrate';
             $this->object->getMigrationFiles($directory, 'up');
