@@ -69,6 +69,14 @@ set_include_path(
     ))
 );
 
+// PHP_VERSION_ID est disponible depuis PHP 5.2.7, 
+// si votre version est antérieure, émulez-le.
+if (!defined('PHP_VERSION_ID')) {
+   $version = explode('.',PHP_VERSION);
+
+   define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
+}
+
 // DB table where the version info is stored
 if (!defined('RUCKUSING_SCHEMA_TBL_NAME')) {
 	define('RUCKUSING_SCHEMA_TBL_NAME', 'schema_info');
@@ -159,7 +167,7 @@ function printHelp()
     $usage =<<<USAGE
 Ruckusing Migrations v{$version} at {$dateVersion}
 
-Usage: php main.php [options] [help] [ENV=environment] <task> [task parameters]
+Usage: {$argv[0]} [options] [help] [ENV=environment] <task> [task parameters]
 
 Options:
     -c, --configuration  Path to the configuration file (INI) of application.

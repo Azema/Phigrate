@@ -80,15 +80,15 @@ if (!isset($argv)) {
     $argv = '';
 }
 
-$args = parseArgs($argv);
-if (! in_array('-c', $args)) {
+if (! in_array('-c', $argv)) {
     $config = iterateDir(getcwd());
     if (null !== $config) {
         echo 'Fichier de configuration trouvé: ', $config, "\n";
-        $args[] = '-c';
-        $args[] = $config;
+        $argv[] = '-c';
+        $argv[] = $config;
     }
 }
+$args = parseArgs($argv);
 $env = getEnvironment($args);
 $config = getConfig($args, $env);
 main($args, $config);

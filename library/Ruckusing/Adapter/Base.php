@@ -239,11 +239,18 @@ abstract class Ruckusing_Adapter_Base
         try {
             $pdo = new PDO($this->getDsn(), $user, $password, $options);
         } catch (PDOException $e) {
-            throw new Ruckusing_Exception_AdapterConnexion(
-                $e->getMessage(),
-                $e->getCode(),
-                $e->getPrevious()
-            );
+            if (PHP_VERSION_ID >= 50300) {
+                throw new Ruckusing_Exception_AdapterConnexion(
+                    $e->getMessage(),
+                    $e->getCode(),
+                    $e->getPrevious()
+                );
+            } else {
+                throw new Ruckusing_Exception_AdapterConnexion(
+                    $e->getMessage(),
+                    $e->getCode()
+                );
+            }
         }
 
         return $pdo;

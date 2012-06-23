@@ -14,8 +14,8 @@
     <email>manuel.hervo@gmail.com</email>
     <active>yes</active>
   </lead>
-  <date>2012-06-21</date>
-  <time>23:05:44</time>
+  <date>2012-06-23</date>
+  <time>16:27:48</time>
   <version>
     <release>0.9.0</release>
     <api>0.0.1</api>
@@ -29,13 +29,13 @@
   <contents>
     <dir name="/" baseinstalldir="Ruckusing">
       <dir name="bin">
-        <file name="generate.php" role="script" baseinstalldir="/" md5sum="d1367964857cd25d49cac81f83274690">
+        <file name="generate.php" role="script" baseinstalldir="/" md5sum="fa04d0e8b8b26a09fae8aad78e0f5597">
           <tasks:replace type="pear-config" from="/usr/bin/env php" to="php_bin"/>
           <tasks:replace type="pear-config" from="@php_bin@" to="php_bin"/>
           <tasks:replace type="pear-config" from="@bin_dir@" to="bin_dir"/>
           <tasks:replace type="pear-config" from="@pear_directory@" to="php_dir"/>
         </file>
-        <file name="main.php" role="script" baseinstalldir="/" md5sum="3530c8a22609e4fab028a656839ca3b5">
+        <file name="main.php" role="script" baseinstalldir="/" md5sum="76b4dfa112d057ffd3a568c9afeef37e">
           <tasks:replace type="pear-config" from="/usr/bin/env php" to="php_bin"/>
           <tasks:replace type="pear-config" from="@php_bin@" to="php_bin"/>
           <tasks:replace type="pear-config" from="@bin_dir@" to="bin_dir"/>
@@ -46,66 +46,66 @@
       <dir name="library">
         <dir name="Ruckusing">
           <dir name="Adapter">
-            <file name="Base.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="ColumnDefinition.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="IAdapter.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
+            <file name="Base.php" role="php" md5sum="070a6fc3779cabd766786a359ddc99af"/>
+            <file name="ColumnDefinition.php" role="php" md5sum="91f5c000bb873bde1c65809d84764f87"/>
+            <file name="IAdapter.php" role="php" md5sum="004dd31327701311daea9b8871c0089d"/>
             <dir name="Mysql">
-              <file name="Adapter.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-              <file name="ColumnDefinition.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-              <file name="TableDefinition.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
+              <file name="Adapter.php" role="php" md5sum="05ccd774d4d6aafbe0b133528ed823c3"/>
+              <file name="ColumnDefinition.php" role="php" md5sum="94a42460bd8bec03303bfb9c935942ad"/>
+              <file name="TableDefinition.php" role="php" md5sum="362df56a07ccae1a84c7a5ed8ff5fb58"/>
             </dir>
-            <file name="TableDefinition.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
+            <file name="TableDefinition.php" role="php" md5sum="2022780cc4f0e572aec5be137839bd00"/>
           </dir>
-          <file name="Config.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
+          <file name="Config.php" role="php" md5sum="efbaa96dda02102b02231d8bc62cde0d"/>
           <dir name="Config">
-            <file name="Ini.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
+            <file name="Ini.php" role="php" md5sum="ad294be4aa71c2170e0aa4e27db0e532"/>
           </dir>
-          <file name="Exception.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
+          <file name="Exception.php" role="php" md5sum="cae53403f2530ae49af8197fbfe2db6c"/>
           <dir name="Exception">
-            <file name="AdapterConnexion.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="AdapterQuery.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="Argument.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="Config.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="InvalidAdapterType.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="InvalidIndexName.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="InvalidLog.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="InvalidMigrationDir.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="InvalidTableDefinition.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="InvalidTargetMigration.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="InvalidTask.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="MissingAdapter.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="MissingAdapterType.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="MissingConfigDb.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="MissingMigrationDir.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="MissingMigrationMethod.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="MissingSchemaInfoTable.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="MissingTable.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="MissingTaskDir.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="Sql.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="Task.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
+            <file name="AdapterConnexion.php" role="php" md5sum="0e8a1a5fe2ff0385e7a07ef232975087"/>
+            <file name="AdapterQuery.php" role="php" md5sum="5926c792eb1a7a942fcb94d9080cd9f8"/>
+            <file name="Argument.php" role="php" md5sum="d7c00630be78fb652262225613aaf21b"/>
+            <file name="Config.php" role="php" md5sum="893b84f937ba0879363d4ba1d31b56d4"/>
+            <file name="InvalidAdapterType.php" role="php" md5sum="db7ecf03263b458efad91ee787d4d537"/>
+            <file name="InvalidIndexName.php" role="php" md5sum="22c049295de2cad9080173f53c675210"/>
+            <file name="InvalidLog.php" role="php" md5sum="cb0340a31f8f30f1e399b62b7b4c5d26"/>
+            <file name="InvalidMigrationDir.php" role="php" md5sum="40e75c03b661b870f15f621f1bb7a9c2"/>
+            <file name="InvalidTableDefinition.php" role="php" md5sum="63135f07c72319ba43fbf651a10991cc"/>
+            <file name="InvalidTargetMigration.php" role="php" md5sum="245318411a0a9bf3fac4b0fc7001247d"/>
+            <file name="InvalidTask.php" role="php" md5sum="fe1f142fd7d2dff1c77601aafcdb6fd5"/>
+            <file name="MissingAdapter.php" role="php" md5sum="0cd10c2b0f40e24617068748d41fa539"/>
+            <file name="MissingAdapterType.php" role="php" md5sum="025dbea8e17b84d8e9dad27200577438"/>
+            <file name="MissingConfigDb.php" role="php" md5sum="f56f018b4ba147ba618ce9f793d294dc"/>
+            <file name="MissingMigrationDir.php" role="php" md5sum="fb290b623e7a4126bf36e2350bf4613d"/>
+            <file name="MissingMigrationMethod.php" role="php" md5sum="ef831d05a0d2a47998ee74a3b77cd8af"/>
+            <file name="MissingSchemaInfoTable.php" role="php" md5sum="39afa39175b5b9d1bd1ecdb497ac7d7c"/>
+            <file name="MissingTable.php" role="php" md5sum="e6c6c3b6d27d866f09a1cb065df0c6cb"/>
+            <file name="MissingTaskDir.php" role="php" md5sum="c5b8d62157f2854cf3f99456234d3f3e"/>
+            <file name="Sql.php" role="php" md5sum="72aec0e18f05b26ac60e375c7a5ae4a1"/>
+            <file name="Task.php" role="php" md5sum="853fdbdc14f05dddb7f746b35e730d82"/>
           </dir>
-          <file name="FrameworkRunner.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-          <file name="Logger.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
+          <file name="FrameworkRunner.php" role="php" md5sum="017fd50ec61a6105e9781f7efd00181d"/>
+          <file name="Logger.php" role="php" md5sum="b7ac98623aa185c5f23df36dff8cd0c2"/>
           <dir name="Migration">
-            <file name="Base.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
+            <file name="Base.php" role="php" md5sum="8071641027fef6171ead02602502ebc7"/>
           </dir>
           <dir name="Task">
-            <file name="ITask.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="Manager.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
+            <file name="ITask.php" role="php" md5sum="e2aaba77c69a94f310b23e1d134fa851"/>
+            <file name="Manager.php" role="php" md5sum="d337a9ebb5908739d0606b28b806915d"/>
           </dir>
           <dir name="Util">
-            <file name="Migrator.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="Naming.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
+            <file name="Migrator.php" role="php" md5sum="c25eae5e56c90eca6be3f0d1606ec465"/>
+            <file name="Naming.php" role="php" md5sum="c5ba0de07238a2d7c9ed155edd876ef5"/>
           </dir>
         </dir>
         <dir name="Task">
-          <file name="Base.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
+          <file name="Base.php" role="php" md5sum="9293c05d276de9d94055bef891f80ad7"/>
           <dir name="Db">
-            <file name="Migrate.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="Schema.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="Setup.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="Status.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
-            <file name="Version.php" role="php" md5sum="d1367964857cd25d49cac81f83274690"/>
+            <file name="Migrate.php" role="php" md5sum="c8b5d0df534b7512b9dbabce75c1b1a3"/>
+            <file name="Schema.php" role="php" md5sum="cc7832819f2bfa7e6d3184ec304a7985"/>
+            <file name="Setup.php" role="php" md5sum="31670c549a37d384e06d2c021608f76b"/>
+            <file name="Status.php" role="php" md5sum="33d995540194aa871892cf987614c9c1"/>
+            <file name="Version.php" role="php" md5sum="959252da822b9e550b30efd9bd3b992a"/>
           </dir>
         </dir>
       </dir>

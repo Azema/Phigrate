@@ -51,7 +51,9 @@ class Task_Db_SchemaTest extends PHPUnit_Framework_TestCase
         } catch (Ruckusing_Exception_Task $e) {
             $msg = 'Up exception required';
             $this->assertEquals($msg, $e->getMessage());
-            $this->assertInstanceOf('Exception', $e->getPrevious());
+            if (PHP_VERSION_ID >= 50300) {
+                $this->assertInstanceOf('Exception', $e->getPrevious());
+            }
         }
     }
 

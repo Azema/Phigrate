@@ -257,14 +257,11 @@ class Ruckusing_FrameworkRunner
     {
         if (! isset($this->_taskDir)) {
             $config = $this->getConfig();
-            if (! isset($config->task) || ! isset($config->task->dir)) {
-                require_once 'Ruckusing/Exception/MissingTaskDir.php';
-                throw new Ruckusing_Exception_MissingTaskDir(
-                    'Please, inform the variable "task.dir" '
-                    . 'in the configuration file'
-                );
+            if (isset($config->task) && isset($config->task->dir)) {
+                $this->_taskDir = $config->task->dir;
+            } else {
+                $this->_taskDir = RUCKUSING_BASE . '/library/Task';
             }
-            $this->_taskDir = $config->task->dir;
         }
         return $this->_taskDir;
     }
