@@ -43,19 +43,6 @@ class Ruckusing_Exception extends Exception
             parent::__construct($message, $code);
         }
     }
-
-    /**
-     * getPrevious Return previous exception if exists
-     * 
-     * @return Exception|null
-     */
-    public function getPrevious()
-    {
-        if (PHP_VERSION_ID >= 50300) {
-            return parent::getPrevious();
-        }
-        return null;
-    }
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */
