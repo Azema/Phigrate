@@ -316,8 +316,8 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             $conn = $actual->getConnexion();
             $this->fail('The socket path is incorrect');
         } catch (Ruckusing_Exception_AdapterConnexion $e) {
-            $msg = 'SQLSTATE[HY000] [2002] No such file or directory';
-            $this->assertEquals($msg, $e->getMessage());
+            $msg = 'SQLSTATE[HY000] [2002]';
+            $this->assertStringStartsWith($msg, $e->getMessage());
         }
     }
 
