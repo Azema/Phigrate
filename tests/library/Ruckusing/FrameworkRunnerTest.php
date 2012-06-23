@@ -268,14 +268,10 @@ class Ruckusing_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
             RUCKUSING_BASE . '/tests/fixtures/config/database.ini',
             'db:version',
         );
-        try {
-            new Ruckusing_FrameworkRunner($parameters);
-            $this->fail('No task dir in parameters and config file!');
-        } catch (Ruckusing_Exception_MissingTaskDir $e) {
-            $msg = 'Please, inform the variable "task.dir" '
-                . 'in the configuration file';
-            $this->assertEquals($msg, $e->getMessage());
-        }
+        $framework = new Ruckusing_FrameworkRunner($parameters);
+        $tasksDir = $framework->getTaskDir();
+        $this->assertEquals(RUCKUSING_BASE . '/library/Task', $tasksDir);
+
         $addParams = array(
             '-t',
             RUCKUSING_BASE . '/tests/fixtures/tasks',
