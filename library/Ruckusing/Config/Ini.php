@@ -149,7 +149,7 @@ class Ruckusing_Config_Ini extends Ruckusing_Config
                      */
                     require_once 'Ruckusing/Exception/Config.php';
                     throw new Ruckusing_Exception_Config(
-                        "Section '$section' cannot be found in $filename"
+                        "Section '$sectionName' cannot be found in $filename"
                     );
                 }
                 $dataArray = $this->_arrayMergeRecursive(
