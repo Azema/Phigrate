@@ -143,10 +143,10 @@ function parseArgs($argv)
 {
     $nbArgs = count($argv);
     if ($nbArgs < 2) {
-        printHelp();
+        printHelp($argv[0]);
     } elseif ($nbArgs == 2) {
         if ($argv[1] == 'help') {
-            printHelp();
+            printHelp($argv[0]);
         }
     }
     return $argv;
@@ -160,14 +160,14 @@ function parseArgs($argv)
  *
  * @return void
  */
-function printHelp()
+function printHelp($scriptName)
 {
-    $version = '0.9.0-alpha';
-    $dateVersion = date('c', 1325578455);
+    $version = '0.9.1-alpha';
+    $dateVersion = date('c', 1340620627);
     $usage =<<<USAGE
 Ruckusing Migrations v{$version} at {$dateVersion}
 
-Usage: {$argv[0]} [options] [help] [ENV=environment] <task> [task parameters]
+Usage: {$scriptName} [options] [help] [ENV=environment] <task> [task parameters]
 
 Options:
     -c, --configuration  Path to the configuration file (INI) of application.

@@ -14,10 +14,10 @@
     <email>manuel.hervo@gmail.com</email>
     <active>yes</active>
   </lead>
-  <date>2012-06-23</date>
-  <time>16:27:48</time>
+  <date>2012-06-25</date>
+  <time>12:39:23</time>
   <version>
-    <release>0.9.0</release>
+    <release>0.9.1</release>
     <api>0.0.1</api>
   </version>
   <stability>
@@ -29,13 +29,13 @@
   <contents>
     <dir name="/" baseinstalldir="Ruckusing">
       <dir name="bin">
-        <file name="generate.php" role="script" baseinstalldir="/" md5sum="fa04d0e8b8b26a09fae8aad78e0f5597">
+        <file name="generate.php" role="script" baseinstalldir="/" md5sum="7bcefa3c215bf9c89e7a45380e37352d">
           <tasks:replace type="pear-config" from="/usr/bin/env php" to="php_bin"/>
           <tasks:replace type="pear-config" from="@php_bin@" to="php_bin"/>
           <tasks:replace type="pear-config" from="@bin_dir@" to="bin_dir"/>
           <tasks:replace type="pear-config" from="@pear_directory@" to="php_dir"/>
         </file>
-        <file name="main.php" role="script" baseinstalldir="/" md5sum="76b4dfa112d057ffd3a568c9afeef37e">
+        <file name="main.php" role="script" baseinstalldir="/" md5sum="db18c6a914f34441062cdcbc79855a85">
           <tasks:replace type="pear-config" from="/usr/bin/env php" to="php_bin"/>
           <tasks:replace type="pear-config" from="@php_bin@" to="php_bin"/>
           <tasks:replace type="pear-config" from="@bin_dir@" to="bin_dir"/>
@@ -58,9 +58,9 @@
           </dir>
           <file name="Config.php" role="php" md5sum="efbaa96dda02102b02231d8bc62cde0d"/>
           <dir name="Config">
-            <file name="Ini.php" role="php" md5sum="ad294be4aa71c2170e0aa4e27db0e532"/>
+            <file name="Ini.php" role="php" md5sum="7a02404e9245b06c3d71ee8ab5d55e8b"/>
           </dir>
-          <file name="Exception.php" role="php" md5sum="cae53403f2530ae49af8197fbfe2db6c"/>
+          <file name="Exception.php" role="php" md5sum="74bdafa8f7314545b6d87ccf6cdfac45"/>
           <dir name="Exception">
             <file name="AdapterConnexion.php" role="php" md5sum="0e8a1a5fe2ff0385e7a07ef232975087"/>
             <file name="AdapterQuery.php" role="php" md5sum="5926c792eb1a7a942fcb94d9080cd9f8"/>

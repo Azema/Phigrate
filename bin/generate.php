@@ -108,7 +108,7 @@ function parseArgs($argv)
     $nbArgs = count($argv);
     $options = array();
     if ($nbArgs < 2) {
-        printHelp();
+        printHelp($argv[0]);
     } elseif ($nbArgs >= 2) {
         for ($i = 1; $i < $nbArgs; $i++) {
             switch ($argv[$i]) {
@@ -116,7 +116,7 @@ function parseArgs($argv)
                 case '-h':
                 case '--help':
                 case '-?':
-                    printHelp();
+                    printHelp($argv[0]);
                     break;
                 // configuration file path
                 case '-c':
@@ -148,7 +148,7 @@ function parseArgs($argv)
                 default:
                     $arg = $argv[$i];
                     if ($arg == 'help') {
-                        printHelp();
+                        printHelp($argv[0]);
                     } elseif (strpos($arg, '=') !== false) {
                         list($key, $value) = explode('=', $arg);
                         $options[strtolower($key)] = $value;
@@ -160,7 +160,7 @@ function parseArgs($argv)
         }
     }
     if (! array_key_exists('name', $options)) {
-        printHelp();
+        printHelp($argv[0]);
     }
     return $options;
 }
@@ -214,14 +214,14 @@ function getConfig($options, $env)
  *
  * @return void
  */
-function printHelp()
+function printHelp($scriptName = 'ruckusing-generate')
 {
-    $version = '0.9.0-alpha';
-    $dateVersion = date('c', 1325926800);
+    $version = '0.9.1-alpha';
+    $dateVersion = date('c', 1340620627);
     $usage =<<<USAGE
 Ruckusing Migrations v{$version} at {$dateVersion}
 
-Usage: php generate.php [options] [help] [ENV=environment] <migration name>
+Usage: {$scriptName} [options] [help] [ENV=environment] <migration name>
 
 Options:
     -c, --configuration  Path to the configuration file (INI) of application.

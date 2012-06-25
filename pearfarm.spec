@@ -22,7 +22,7 @@ $spec = Pearfarm_PackageSpec::create(array(Pearfarm_PackageSpec::OPT_BASEDIR => 
              columns, indexes, etc) at a particular state of time. By using database migrations, multiple developers can
              work on the same application and be guaranteed that the application is in a consistent state across all
              remote developer machines.')
-             ->setReleaseVersion('0.9.0')
+             ->setReleaseVersion('0.9.1')
              ->setReleaseStability('alpha')
              ->setApiVersion('0.0.1')
              ->setApiStability('alpha')
