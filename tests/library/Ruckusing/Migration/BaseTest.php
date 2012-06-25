@@ -273,6 +273,17 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($value, $this->_adapter->datas['quote']['value']);
         $this->assertEquals($expected, $return);
     }
+
+    public function testUnknownMethod()
+    {
+        try {
+            $this->object->unknown();
+            $this->fail('Unknown method called.');
+        } catch (Ruckusing_Exception_MissingMigrationMethod $e) {
+            $msg = 'The method (unknown) is unknown.';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+    }
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */

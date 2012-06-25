@@ -123,6 +123,24 @@ abstract class Ruckusing_Adapter_TableDefinition
     }
 
     /**
+     * __call 
+     * 
+     * @param string $name The method name
+     * @param array  $args The parameters of method called
+     *
+     * @return void
+     * @throws Ruckusing_Exception_MissingMigrationMethod
+     */
+    public function __call($name, $args)
+    {
+        if (!method_exists($this, $name)) {
+            throw new Ruckusing_Exception_MissingMigrationMethod(
+                'The method ('.$name.') is unknown.'
+            );
+        }
+    }
+
+    /**
      * column
      *
      * @param string $column_name The column name

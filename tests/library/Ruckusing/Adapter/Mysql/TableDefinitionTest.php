@@ -255,6 +255,21 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
         $sql = $table->toSql();
         $this->assertEquals($expected, $sql);
     }
+
+    public function testUnknownMethod()
+    {
+        $table = new Ruckusing_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users'
+        );
+        try {
+            $table->unknown();
+            $this->fail('Unknown method called.');
+        } catch (Ruckusing_Exception_MissingMigrationMethod $e) {
+            $msg = 'The method (unknown) is unknown.';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+    }
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */
