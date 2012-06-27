@@ -15,9 +15,9 @@
     <active>yes</active>
   </lead>
   <date>2012-06-25</date>
-  <time>12:39:23</time>
+  <time>22:17:42</time>
   <version>
-    <release>0.9.1</release>
+    <release>0.9.2</release>
     <api>0.0.1</api>
   </version>
   <stability>
@@ -29,13 +29,13 @@
   <contents>
     <dir name="/" baseinstalldir="Ruckusing">
       <dir name="bin">
-        <file name="generate.php" role="script" baseinstalldir="/" md5sum="7bcefa3c215bf9c89e7a45380e37352d">
+        <file name="generate.php" role="script" baseinstalldir="/" md5sum="11ed6c8be191ec084cf5c81f0aeb6faa">
           <tasks:replace type="pear-config" from="/usr/bin/env php" to="php_bin"/>
           <tasks:replace type="pear-config" from="@php_bin@" to="php_bin"/>
           <tasks:replace type="pear-config" from="@bin_dir@" to="bin_dir"/>
           <tasks:replace type="pear-config" from="@pear_directory@" to="php_dir"/>
         </file>
-        <file name="main.php" role="script" baseinstalldir="/" md5sum="db18c6a914f34441062cdcbc79855a85">
+        <file name="main.php" role="script" baseinstalldir="/" md5sum="a32c84fb6725e78593f76c10a56fa21f">
           <tasks:replace type="pear-config" from="/usr/bin/env php" to="php_bin"/>
           <tasks:replace type="pear-config" from="@php_bin@" to="php_bin"/>
           <tasks:replace type="pear-config" from="@bin_dir@" to="bin_dir"/>
@@ -54,7 +54,7 @@
               <file name="ColumnDefinition.php" role="php" md5sum="94a42460bd8bec03303bfb9c935942ad"/>
               <file name="TableDefinition.php" role="php" md5sum="362df56a07ccae1a84c7a5ed8ff5fb58"/>
             </dir>
-            <file name="TableDefinition.php" role="php" md5sum="2022780cc4f0e572aec5be137839bd00"/>
+            <file name="TableDefinition.php" role="php" md5sum="e2ffbdc34d62ae4fb61f33220a3d7af5"/>
           </dir>
           <file name="Config.php" role="php" md5sum="efbaa96dda02102b02231d8bc62cde0d"/>
           <dir name="Config">
@@ -87,7 +87,7 @@
           <file name="FrameworkRunner.php" role="php" md5sum="017fd50ec61a6105e9781f7efd00181d"/>
           <file name="Logger.php" role="php" md5sum="b7ac98623aa185c5f23df36dff8cd0c2"/>
           <dir name="Migration">
-            <file name="Base.php" role="php" md5sum="8071641027fef6171ead02602502ebc7"/>
+            <file name="Base.php" role="php" md5sum="b203d55413176abdaa794eb4756c9486"/>
           </dir>
           <dir name="Task">
             <file name="ITask.php" role="php" md5sum="e2aaba77c69a94f310b23e1d134fa851"/>

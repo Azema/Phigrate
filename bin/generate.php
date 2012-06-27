@@ -216,8 +216,8 @@ function getConfig($options, $env)
  */
 function printHelp($scriptName = 'ruckusing-generate')
 {
-    $version = '0.9.1-alpha';
-    $dateVersion = date('c', 1340620627);
+    $version = '0.9.2-alpha';
+    $dateVersion = date('c', mktime(22,10,0,6,25,2012));
     $usage =<<<USAGE
 Ruckusing Migrations v{$version} at {$dateVersion}
 

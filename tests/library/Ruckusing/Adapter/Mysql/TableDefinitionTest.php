@@ -263,10 +263,11 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
             'users'
         );
         try {
+            $line = __LINE__+1;
             $table->unknown();
             $this->fail('Unknown method called.');
         } catch (Ruckusing_Exception_MissingMigrationMethod $e) {
-            $msg = 'The method (unknown) is unknown.';
+            $msg = 'Method unknown (unknown in file '.__FILE__.':'.$line.')';
             $this->assertEquals($msg, $e->getMessage());
         }
     }

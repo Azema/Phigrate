@@ -134,8 +134,10 @@ abstract class Ruckusing_Adapter_TableDefinition
     public function __call($name, $args)
     {
         if (!method_exists($this, $name)) {
+            $backtrace = debug_backtrace();
             throw new Ruckusing_Exception_MissingMigrationMethod(
-                'The method ('.$name.') is unknown.'
+                'Method unknown (' . $name . ' in file '
+                . $backtrace[0]['file'] . ':' . $backtrace[0]['line'] . ')'
             );
         }
     }

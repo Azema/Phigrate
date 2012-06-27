@@ -277,10 +277,11 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     public function testUnknownMethod()
     {
         try {
+            $line = __LINE__+1;
             $this->object->unknown();
             $this->fail('Unknown method called.');
         } catch (Ruckusing_Exception_MissingMigrationMethod $e) {
-            $msg = 'The method (unknown) is unknown.';
+            $msg = 'Method unknown (unknown in file '.__FILE__.':'.$line.')';
             $this->assertEquals($msg, $e->getMessage());
         }
     }
