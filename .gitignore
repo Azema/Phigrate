@@ -12,3 +12,10 @@ config/application.ini
 config/database.ini
 .ant-targets-build.xml
 *.swp
+nbproject
+
+build/api
+build/code-browser
+build/coverage
+build/logs
+build/pdepend

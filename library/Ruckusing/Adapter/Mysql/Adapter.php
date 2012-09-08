@@ -290,7 +290,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
             return false;
         }
         $ddl = sprintf('CREATE DATABASE %s;', $this->identifier($db));
-        return $this->query($ddl);
+        return $this->executeDdl($ddl);
     }
 
     /**
@@ -306,7 +306,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
             return false;
         }
         $ddl = sprintf('DROP DATABASE IF EXISTS %s', $this->identifier($db));
-        return $this->query($ddl);
+        return $this->executeDdl($ddl);
     }
 
     /**
@@ -329,7 +329,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
             }
 
             $stmt = sprintf('SHOW CREATE TABLE %s;', $this->identifier($tbl));
-            $result = $this->query($stmt);
+            $result = $this->executeDdl($stmt);
 
             if (is_array($result) && count($result) == 1) {
                 $row = $result[0];
@@ -395,6 +395,10 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         if ($queryType == self::SQL_UNKNOWN_QUERY_TYPE) {
             return false;
         }
+        if ($this->hasExport()) {
+            $this->_sql .= $query . "\n\n";
+            return true;
+        }
         $data = array();
         $pdoStmt = $this->getConnexion()->query($query, PDO::FETCH_ASSOC);
         // Check error
@@ -429,7 +433,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
                 . $query
             );
         }
-        $result = $this->query($query);
+        $result = $this->executeDdl($query);
         return array_shift($result);
     }
 
@@ -450,7 +454,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
                 . $query
             );
         }
-        $results = $this->query($query);
+        $results = $this->executeDdl($query);
         return $results;
     }
 
@@ -478,7 +482,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     public function dropTable($tbl)
     {
         $ddl = sprintf('DROP TABLE IF EXISTS %s;', $this->identifier($tbl));
-        $result = $this->query($ddl);
+        $result = $this->executeDdl($ddl);
         return $result;
     }
 
@@ -786,7 +790,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
             $cols[] = $this->identifier($name);
         }
         $sql = sprintf(
-            'CREATE %sINDEX %s ON %s(%s)',
+            'CREATE %sINDEX %s ON %s(%s);',
             ($unique === true) ? 'UNIQUE ' : '',
             $indexName,
             $this->identifier($tableName),
@@ -820,7 +824,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         }
         $indexName = $this->_getIndexName($tableName, $columnName, $options);
         $sql = sprintf(
-            'DROP INDEX %s ON %s',
+            'DROP INDEX %s ON %s;',
             $this->identifier($indexName),
             $this->identifier($tableName)
         );

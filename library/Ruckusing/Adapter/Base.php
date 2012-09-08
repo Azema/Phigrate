@@ -46,6 +46,20 @@ abstract class Ruckusing_Adapter_Base
      * @var Ruckusing_Logger
      */
     protected $_logger;
+    
+    /**
+     * Export SQL
+     *
+     * @var boolean
+     */
+    protected $_export = false;
+
+    /**
+     * SQL to export
+     *
+     * @var string
+     */
+    protected $_sql;
 
     /**
      * __construct 
@@ -254,6 +268,52 @@ abstract class Ruckusing_Adapter_Base
         }
 
         return $pdo;
+    }
+    
+    /**
+     * Define flag export SQL
+     * 
+     * @param boolean $export The export flag
+     * 
+     * @return \Ruckusing_Adapter_Base
+     */
+    public function setExport($export = false)
+    {
+        $this->_export = (boolean)$export;
+        if ($this->hasExport()) {
+            $this->initSql();
+        }
+        return $this;
+    }
+    
+    /**
+     * Return the flag export SQL
+     * 
+     * @return boolean
+     */
+    public function hasExport()
+    {
+        return $this->_export;
+    }
+    
+    /**
+     * Return the SQL
+     * 
+     * @return string
+     */
+    public function getSql()
+    {
+        return $this->_sql;
+    }
+    
+    /**
+     * Initialize the variable SQL
+     * 
+     * @return void
+     */
+    public function initSql()
+    {
+        $this->_sql = '';
     }
 }
 

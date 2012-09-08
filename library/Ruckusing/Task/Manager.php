@@ -330,15 +330,18 @@ class Ruckusing_Task_Manager
                     continue;
                 }
                 $this->_logger->debug('include ' . $namespace . '/' . $file);
-                $klass = Ruckusing_Util_Naming::classFromFileName(
+                $class = Ruckusing_Util_Naming::classFromFileName(
                     $this->_tasksDir . '/' . $namespace . '/' . $file
                 );
-                $this->_logger->debug('className ' . $klass);
-                $taskName = Ruckusing_Util_Naming::taskFromClassName($klass);
-                $this->_logger->debug('TaskName: ' . $taskName);
-                $taskObj = new $klass($this->getAdapter());
-                $this->_logger->debug('obj: ' . get_class($taskObj));
-                $this->registerTask($taskName, $taskObj);
+                $refl = new ReflectionClass($class);
+                if ($refl->isInstantiable()) {
+                    $this->_logger->debug('className ' . $class);
+                    $taskName = Ruckusing_Util_Naming::taskFromClassName($class);
+                    $this->_logger->debug('TaskName: ' . $taskName);
+                    $taskObj = new $class($this->getAdapter());
+                    $this->_logger->debug('obj: ' . get_class($taskObj));
+                    $this->registerTask($taskName, $taskObj);
+                }
             }
         }
         $this->_logger->debug(__METHOD__ . ' End');

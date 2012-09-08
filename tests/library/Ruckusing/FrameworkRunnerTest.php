@@ -369,7 +369,7 @@ class Ruckusing_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
         );
         try {
             new Ruckusing_FrameworkRunner($parameters);
-            $this->fail('Parameters is empty');
+            $this->fail('task not defined');
         } catch (Ruckusing_Exception_Argument $e) {
             $msg = 'No task found!';
             $this->assertEquals($msg, $e->getMessage());

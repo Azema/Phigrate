@@ -37,6 +37,7 @@ class AddIndexToUsers extends Ruckusing_Migration_Base
     public function up()
     {
         // Add your code here
+        $this->addIndex('users', 'name');
     }
 
     /**
@@ -47,5 +48,6 @@ class AddIndexToUsers extends Ruckusing_Migration_Base
     public function down()
     {
         // Add your code here
+        $this->removeIndex('users', 'name');
     }
 }

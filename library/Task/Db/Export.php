@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Rucksing Migrations
  *
@@ -7,7 +8,6 @@
  * @category   RuckusingMigrations
  * @package    Task
  * @subpackage Db
- * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
@@ -26,14 +26,26 @@ require_once 'Task/Db/AMigration.php';
  * @category   RuckusingMigrations
  * @package    Task
  * @subpackage Db
- * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
  * @link       https://github.com/ruckus/ruckusing-migrations
  */
-class Task_Db_Migrate extends Task_Db_AMigration
+class Task_Db_Export extends Task_Db_AMigration
 {
+    /**
+     * __construct
+     *
+     * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
+     *
+     * @return Task_Db_Export
+     */
+    function __construct($adapter)
+    {
+        parent::__construct($adapter);
+        $this->_adapter->setExport(true);
+    }
+    
     /**
      * Primary task entry point
      *
@@ -50,13 +62,13 @@ class Task_Db_Migrate extends Task_Db_AMigration
             require_once 'Ruckusing/Exception/Task.php';
             throw new Ruckusing_Exception_Task($msg);
         }
-        
-        $this->_return = 'Started: ' . date('Y-m-d g:ia T') . PHP_EOL . PHP_EOL
-            . '[db:migrate]:' . PHP_EOL;
+        $this->_return = "--\n--\tExport SQL by Ruckusing\n--\n\n" 
+            . '-- Started: ' . date('Y-m-d g:ia T') . PHP_EOL . PHP_EOL
+            . '-- [db:migrate]:' . PHP_EOL;
         
         $this->_execute($args);
         
-        $this->_return .= "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";
+        $this->_return .= "\n\n-- Finished: " . date('Y-m-d g:ia T') . "\n\n";
         $this->_logger->debug(__METHOD__ . ' End');
         return $this->_return;
     }
@@ -70,7 +82,7 @@ class Task_Db_Migrate extends Task_Db_AMigration
     {
         $this->_logger->debug(__METHOD__ . ' Start');
         $output =<<<USAGE
-Task: \033[36mdb:migrate\033[0m [\033[33mVERSION\033[0m]
+Task: \033[36mdb:export\033[0m [\033[33mVERSION\033[0m]
 
 The primary purpose of the framework is to run migrations, and the
 execution of migrations is all handled by just a regular ol' task.
@@ -83,17 +95,17 @@ execution of migrations is all handled by just a regular ol' task.
 \t\033[37mExample A:\033[0m The database is fresh and empty, assuming there
 \tare 5 actual migrations, but only the first two should be run.
 
-\t\t\033[35mphp main.php db:migrate VERSION=20101006114707\033[0m
+\t\t\033[35mphp ruckusing db:export VERSION=20101006114707\033[0m
 
 \t\033[37mExample B:\033[0m The current version of the DB is 20101006114707
 \tand we want to go down to 20100921114643
 
-\t\t\033[35mphp main.php db:migrate VERSION=20100921114643\033[0m
+\t\t\033[35mphp ruckusing db:export VERSION=20100921114643\033[0m
 
 \t\033[37mExample C:\033[0m You can also use relative number of revisions
-\t(positive migrate up, negative migrate down).
+\t(positive export up, negative export down).
 
-\t\t\033[35mphp main.php db:migrate VERSION=-2\033[0m
+\t\t\033[35mphp ruckusing db:export VERSION=-2\033[0m
 
 USAGE;
         $this->_logger->debug(__METHOD__ . ' End');
@@ -153,10 +165,10 @@ USAGE;
                 'Cannot migration ' . $direction . ' via offset '
                 . $prefix . $offset
             );
-            $this->_return .= "\tCannot migrate " . strtoupper($direction)
+            $this->_return .= "--\tCannot migrate " . strtoupper($direction)
                 . " via offset \"{$prefix}{$offset}\": "
                 . "not enough migrations exist to execute.\n"
-                . "\tYou asked for ({$offset}) but only available are "
+                . "--\tYou asked for ({$offset}) but only available are "
                 . '(' . $numAvailable . '): ' . implode(', ', $names);
         } else {
             // run em
@@ -182,7 +194,7 @@ USAGE;
             . ' - direction: ' . $direction
         );
         try {
-            $this->_return .= "\tMigrating " . strtoupper($direction);
+            $this->_return .= "--\tMigrating " . strtoupper($direction);
             if (! is_null($destination)) {
                 $this->_return .= " to: {$destination}\n";
             } else {
@@ -197,7 +209,7 @@ USAGE;
             if (count($migrations) == 0) {
                 $msg = 'No relevant migrations to run. Exiting...';
                 $this->_logger->info($msg);
-                $this->_return .= "\n{$msg}\n";
+                $this->_return .= "--\n-- {$msg}\n";
                 return;
             }
             $this->_runMigrations($migrations, $direction);
@@ -220,7 +232,6 @@ USAGE;
     {
         $this->_logger->debug(__METHOD__ . ' Start');
         $lastVersion = -1;
-        $objMigrations = array();
         foreach ($migrations as $file) {
             $fullPath = $this->_migrationDir . '/' . $file['file'];
             $this->_logger->debug('file: ' . var_export($file, true));
@@ -241,42 +252,31 @@ USAGE;
                 require_once 'Ruckusing/Exception/MissingMigrationMethod.php';
                 throw new Ruckusing_Exception_MissingMigrationMethod($msg);
             }
-            $objMigrations[] = array(
-                'obj'  => $obj,
-                'file' => $file,
-            );
-        }
-        try {
-            //start transaction
-            $this->_adapter->startTransaction();
-            foreach ($objMigrations as $migration) {
-                $start = microtime(true);
-                try {
-                    $migration['obj']->$targetMethod();
-                } catch (Exception $e) {
-                    //wrap the caught exception in our own
-                    $msg = $migration['file']['class'] . ' - ' . $e->getMessage();
-                    $this->_logger->err($msg);
-                    throw new Ruckusing_Exception($msg, $e->getCode(), $e);
-                }
-                $end = microtime(true);
-                $diff = $this->_diffTimer($start, $end);
-                $this->_return .= sprintf(
-                    "========= %s ======== (%.2f)\n",
-                    $migration['file']['class'],
-                    $diff
-                );
+            $start = microtime(true);
+            try {
+                $obj->$targetMethod();
                 //successfully ran migration, update our version and commit
                 $this->_migratorUtil
-                    ->resolveCurrentVersion($migration['file']['version'], $targetMethod);
-                $lastVersion = $migration['file']['version'];
-                $this->_logger->info('last_version: ' . $lastVersion);
+                    ->resolveCurrentVersion($file['version'], $targetMethod);
+
+            } catch (\Exception $e) {
+                //wrap the caught exception in our own
+                $msg = $file['class'] . ' - ' . $e->getMessage();
+                $this->_logger->err($msg);
+                throw new Ruckusing_Exception($msg, $e->getCode(), $e);
             }
-            $this->_adapter->commitTransaction();
-        } catch (\Exception $e) {
-            $this->_adapter->rollbackTransaction();
-            throw $e;
-        }
+            $end = microtime(true);
+            $diff = $this->_diffTimer($start, $end);
+            $this->_return .= sprintf(
+                "-- ========= %s ======== (%.2f)\n",
+                $file['class'],
+                $diff
+            );
+            $this->_return .= $this->_adapter->getSql();
+            $this->_adapter->initSql();
+            $lastVersion = $file['version'];
+            $this->_logger->info('last_version: ' . $lastVersion);
+        }//foreach
         //update the schema info
         $this->_logger->debug(__METHOD__ . ' End');
         return array('last_version' => $lastVersion);

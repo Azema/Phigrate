@@ -66,7 +66,7 @@ abstract class Task_Base
      *
      * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
      *
-     * @return Task_Db_Migrate
+     * @return Task_Db_Base
      */
     function __construct($adapter)
     {

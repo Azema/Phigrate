@@ -37,6 +37,9 @@ class CreateUsers extends Ruckusing_Migration_Base
     public function up()
     {
         // Add your code here
+        $table = $this->createTable('users');
+        $table->column('name', 'text', array('length' => 50));
+        $table->finish();
     }
 
     /**
@@ -47,5 +50,6 @@ class CreateUsers extends Ruckusing_Migration_Base
     public function down()
     {
         // Add your code here
+        $this->dropTable('users');
     }
 }

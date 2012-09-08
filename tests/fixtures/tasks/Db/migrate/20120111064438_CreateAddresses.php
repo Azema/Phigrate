@@ -37,6 +37,11 @@ class CreateAddresses extends Ruckusing_Migration_Base
     public function up()
     {
         // Add your code here
+        $table = $this->createTable('addresses');
+        $table->column('street', 'text');
+        $table->column('user_id', 'integer');
+        $table->finish();
+        $this->addIndex('addresses', 'user_id');
     }
 
     /**
@@ -47,5 +52,7 @@ class CreateAddresses extends Ruckusing_Migration_Base
     public function down()
     {
         // Add your code here
+        $this->removeIndex('addresses', 'user_id');
+        $this->dropTable('addresses');
     }
 }

@@ -121,28 +121,28 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     public function testDetermineQueryType()
     {
         $query = '';
-        $this->assertFalse($this->object->query($query));
+        $this->assertFalse($this->object->execute($query));
         $query = 'UNKNOWN `name`';
-        $this->assertFalse($this->object->query($query));
+        $this->assertFalse($this->object->execute($query));
 
         $this->object->executeDdl('CREATE TABLE `users` (name varchar(20));');
         $query = 'SELECT * FROM `users`;';
-        $actual = $this->object->query($query);
+        $actual = $this->object->execute($query);
         $this->assertInternalType('array', $actual);
         $this->assertEmpty($actual);
         $query = 'INSERT INTO `users` VALUES (\'test\');';
-        $actual = $this->object->query($query);
+        $actual = $this->object->execute($query);
         $this->assertTrue($actual);
         $query = 'ALTER TABLE `users` CHANGE `name` `name` VARCHAR(50);';
-        $actual = $this->object->query($query);
+        $actual = $this->object->execute($query);
         $this->assertTrue($actual);
         $query = 'DROP TABLE IF EXISTS `new_users`;';
-        $this->object->query($query);
+        $this->object->execute($query);
         $query = 'RENAME TABLE `users` TO `new_users`;';
-        $actual = $this->object->query($query);
+        $actual = $this->object->execute($query);
         $this->assertTrue($actual);
         $query = 'SET NAMES \'utf8\';';
-        $actual = $this->object->query($query);
+        $actual = $this->object->execute($query);
         $this->assertTrue($actual);
     }
 
@@ -661,7 +661,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
     {
         $query = 'SHOW DATABASE `ruckusing`'; // not correct
         try {
-            $this->assertTrue($this->object->query($query));
+            $this->assertTrue($this->object->execute($query));
         } catch (Ruckusing_Exception_AdapterQuery $e) {
             $msg = "You have an error in your SQL syntax; "
                 . "check the manual that corresponds to your MySQL "

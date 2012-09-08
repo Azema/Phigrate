@@ -258,7 +258,7 @@ class Ruckusing_Migration_BaseTest extends PHPUnit_Framework_TestCase
     public function testQuery()
     {
         $query = 'SHOW DATABASES;';
-        $return = $this->object->query($query);
+        $return = $this->object->execute($query);
         $this->assertTrue($return);
         $this->assertEquals($query, $this->_adapter->datas['execute']['query']);
     }
