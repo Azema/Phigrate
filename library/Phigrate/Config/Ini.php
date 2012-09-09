@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Zend Framework
  *
@@ -21,12 +20,10 @@
  * @version    $Id: Ini.php 11206 2008-09-03 14:36:32Z ralph $
  */
 
-
 /**
  * @see Zend_Config
  */
 require_once 'Phigrate/Config.php';
-
 
 /**
  * Configuration for INI files

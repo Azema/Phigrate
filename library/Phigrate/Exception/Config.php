@@ -1,10 +1,9 @@
 <?php
 
-
 /**
  * Phigrate
  *
- * PHP Version 5.3.3
+ * PHP Version 5.3
  *
  * @category   Phigrate
  * @package    Phigrate_Exception
