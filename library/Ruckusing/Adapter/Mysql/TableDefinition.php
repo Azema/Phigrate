@@ -81,7 +81,7 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
         $this->_initSql($name, $options);
 
         if (array_key_exists('id', $options)) {
-            if (is_bool($options['id']) && $options['id'] == false) {
+            if ($options['id'] === false) {
                 $this->_autoGenerateId = false;
             } elseif (is_string($options['id']) && ! empty($options['id'])) {
                 //if its a string then we want to auto-generate an integer-based
@@ -106,7 +106,7 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
      * @param string $type        The type generic of the column
      * @param array  $options     The options defintion of the column
      *
-     * @return void
+     * @return Ruckusing_Adapter_TableDefinition
      */
     public function column($column_name, $type, $options = array())
     {
@@ -138,6 +138,8 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
         );
 
         $this->_columns[] = $column;
+        
+        return $this;
     }
 
     /**
@@ -182,10 +184,10 @@ class Ruckusing_Adapter_Mysql_TableDefinition extends Ruckusing_Adapter_TableDef
         if (is_array($this->_options)
             && array_key_exists('options', $this->_options)
         ) {
-            $opt_str = $this->_options['options'];
+            $opt_str = ' ' . $this->_options['options'];
         }
 
-        $close_sql = sprintf(') %s;', $opt_str);
+        $close_sql = sprintf(')%s;', $opt_str);
         $createTableSql = $this->_sql;
 
         if ($this->_autoGenerateId === true) {

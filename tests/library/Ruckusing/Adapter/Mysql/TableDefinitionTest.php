@@ -68,7 +68,7 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
         );
         $sql = $table->finish(true);
         $expected = "CREATE TABLE `users` (
-) ;";
+);";
         $this->assertEquals($expected, $sql);
         $table = new Ruckusing_Adapter_Mysql_TableDefinition(
             $this->_adapter,
@@ -78,7 +78,7 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
         $expected = "CREATE TABLE `users` (
 `id` int(11) UNSIGNED auto_increment NOT NULL,
 ,
- PRIMARY KEY (`id`)) ;";
+ PRIMARY KEY (`id`));";
         $this->assertEquals($expected, $sql);
         $options = array(
             'id' => 'my_id',
@@ -91,7 +91,7 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
         $sql = $table->finish(true);
         $expected = "CREATE TABLE `users` (
 `my_id` int(11) UNSIGNED auto_increment NOT NULL,
- PRIMARY KEY (`my_id`)) ;";
+ PRIMARY KEY (`my_id`));";
         $this->assertEquals($expected, $sql);
         $options = array(
             'options' => 'CHARSET utf8',
@@ -119,7 +119,7 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
         $expected = "CREATE TABLE `users` (
 `id` int(11) UNSIGNED auto_increment NOT NULL,
 ,
- PRIMARY KEY (`id`)) ;";
+ PRIMARY KEY (`id`));";
         $this->assertEquals($expected, $sql);
         $options = array(
             'temporary' => true,
@@ -133,7 +133,7 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
         $expected = "CREATE TEMPORARY TABLE `users` (
 `id` int(11) UNSIGNED auto_increment NOT NULL,
 ,
- PRIMARY KEY (`id`)) ;";
+ PRIMARY KEY (`id`));";
         $this->assertEquals($expected, $sql);
     }
 
@@ -147,8 +147,8 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
         $sql = $table->finish(true);
         $expected = "CREATE TABLE `users` (
 `id` int(11) UNSIGNED auto_increment NOT NULL,
-`test` int(11),
- PRIMARY KEY (`id`)) ;";
+`test` int(11) NULL DEFAULT NULL,
+ PRIMARY KEY (`id`));";
         $this->assertEquals($expected, $sql);
         $table = new Ruckusing_Adapter_Mysql_TableDefinition(
             $this->_adapter,
@@ -158,8 +158,8 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
         $sql = $table->finish(true);
         $expected = "CREATE TABLE `users` (
 `id` int(11) UNSIGNED auto_increment NOT NULL,
-`test` int(11),
- PRIMARY KEY (`test`,`id`)) ;";
+`test` int(11) NOT NULL,
+ PRIMARY KEY (`test`,`id`));";
         $this->assertEquals($expected, $sql);
         $table = new Ruckusing_Adapter_Mysql_TableDefinition(
             $this->_adapter,
@@ -169,8 +169,8 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
         $sql = $table->finish(true);
         $expected = "CREATE TABLE `users` (
 `id` int(11) UNSIGNED auto_increment NOT NULL,
-`test` int(11) auto_increment,
- PRIMARY KEY (`id`)) ;";
+`test` int(11) auto_increment NOT NULL,
+ PRIMARY KEY (`id`));";
         $this->assertEquals($expected, $sql);
         $table = new Ruckusing_Adapter_Mysql_TableDefinition(
             $this->_adapter,
@@ -180,8 +180,8 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
         $sql = $table->finish(true);
         $expected = "CREATE TABLE `users` (
 `id` int(11) UNSIGNED auto_increment NOT NULL,
-`test` varchar(255) auto_increment,
- PRIMARY KEY (`id`)) ;";
+`test` varchar(255) auto_increment NOT NULL,
+ PRIMARY KEY (`id`));";
         $this->assertEquals($expected, $sql);
         $table = new Ruckusing_Adapter_Mysql_TableDefinition(
             $this->_adapter,
@@ -192,8 +192,8 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
         $sql = $table->finish(true);
         $expected = "CREATE TABLE `users` (
 `id` int(11) UNSIGNED auto_increment NOT NULL,
-`test` varchar(255),
- PRIMARY KEY (`id`)) ;";
+`test` varchar(255) NULL DEFAULT NULL,
+ PRIMARY KEY (`id`));";
         $this->assertEquals($expected, $sql);
     }
 
@@ -209,8 +209,8 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
         $table->finish();
         $expected = array("CREATE TABLE `users` (
 `id` int(11) UNSIGNED auto_increment NOT NULL,
-`test` varchar(255) auto_increment,
- PRIMARY KEY (`id`)) ;");
+`test` varchar(255) auto_increment NOT NULL,
+ PRIMARY KEY (`id`));");
         $queries = $this->_adapter->getConnexion()->getQueries();
         $this->assertSame($expected, $queries);
     }
@@ -247,11 +247,11 @@ class Ruckusing_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_Test
             'users'
         );
         $table->column('test', 'string');
-        $expected = '`test` varchar(255)';
+        $expected = '`test` varchar(255) NULL DEFAULT NULL';
         $sql = $table->toSql();
         $this->assertEquals($expected, $sql);
         $table->column('new', 'integer');
-        $expected = '`test` varchar(255),`new` int(11)';
+        $expected = '`test` varchar(255) NULL DEFAULT NULL,`new` int(11) NULL DEFAULT NULL';
         $sql = $table->toSql();
         $this->assertEquals($expected, $sql);
     }

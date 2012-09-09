@@ -150,7 +150,7 @@ abstract class Ruckusing_Adapter_TableDefinition
      * @param string $type        The type generic of the column
      * @param array  $options     The options defintion of the column
      *
-     * @return void
+     * @return Ruckusing_Adapter_TableDefinition
      */
     abstract public function column($column_name, $type, $options = array());
 
