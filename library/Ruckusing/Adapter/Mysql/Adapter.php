@@ -170,10 +170,9 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         if (! $this->hasTable(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
             $t = $this->createTable(
                 RUCKUSING_TS_SCHEMA_TBL_NAME,
-                array('id' => false)
-            );
-            $t->column('version', 'string');
-            $t->finish();
+                array('id' => false))
+                ->column('version', 'string')
+                ->finish();
             $this->addIndex(
                 RUCKUSING_TS_SCHEMA_TBL_NAME,
                 'version',
@@ -190,6 +189,9 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     public function startTransaction()
     {
+        if ($this->hasExport()) {
+            return 'SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";' . "\nSET AUTOCOMMIT=0;\nSTART TRANSACTION;";
+        }
         try {
             $this->_beginTransaction();
         } catch (Exception $e) {
@@ -204,6 +206,9 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     public function commitTransaction()
     {
+        if ($this->hasExport()) {
+            return "COMMIT;";
+        }
         try {
             $this->_commit();
         } catch (Exception $e) {
@@ -218,6 +223,9 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     public function rollbackTransaction()
     {
+        if ($this->hasExport()) {
+            return "";
+        }
         try {
             $this->_rollback();
         } catch (Exception $e) {
@@ -246,7 +254,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      *
      * @return string
      */
-    public function columnDefinition($columnName, $type, $options = null)
+    public function columnDefinition($columnName, $type, $options = array())
     {
         $col = new Ruckusing_Adapter_Mysql_ColumnDefinition(
             $this,
@@ -329,7 +337,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
             }
 
             $stmt = sprintf('SHOW CREATE TABLE %s;', $this->identifier($tbl));
-            $result = $this->executeDdl($stmt);
+            $result = $this->execute($stmt);
 
             if (is_array($result) && count($result) == 1) {
                 $row = $result[0];
@@ -378,6 +386,11 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     public function execute($query)
     {
+        if ($this->hasExport()) {
+            $this->_logger->debug('Query hasExport true');
+            $this->_sql .= $query . "\n\n";
+            return true;
+        }
         return $this->query($query);
     }
 
@@ -394,10 +407,6 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         $queryType = $this->_determineQueryType($query);
         if ($queryType == self::SQL_UNKNOWN_QUERY_TYPE) {
             return false;
-        }
-        if ($this->hasExport()) {
-            $this->_sql .= $query . "\n\n";
-            return true;
         }
         $data = array();
         $pdoStmt = $this->getConnexion()->query($query, PDO::FETCH_ASSOC);
@@ -433,7 +442,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
                 . $query
             );
         }
-        $result = $this->executeDdl($query);
+        $result = $this->query($query);
         return array_shift($result);
     }
 
@@ -454,7 +463,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
                 . $query
             );
         }
-        $results = $this->executeDdl($query);
+        $results = $this->query($query);
         return $results;
     }
 
@@ -469,6 +478,11 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
      */
     public function executeDdl($ddl)
     {
+        if ($this->hasExport()) {
+            $this->_logger->debug('Query hasExport true');
+            $this->_sql .= $ddl . "\n\n";
+            return true;
+        }
         return $this->query($ddl);
     }
 
@@ -533,7 +547,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
             );
         }
         $sql = sprintf(
-            'RENAME TABLE %s TO %s',
+            'RENAME TABLE %s TO %s;',
             $this->identifier($name),
             $this->identifier($newName)
         );
@@ -582,7 +596,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
             $this->identifier($columnName),
             $this->typeToSql($type, $options)
         );
-        $sql .= $this->addColumnOptions($type, $options);
+        $sql .= $this->addColumnOptions($type, $options) . ';';
 
         return $this->executeDdl($sql);
     }
@@ -609,7 +623,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
             );
         }
         $sql = sprintf(
-            'ALTER TABLE %s DROP COLUMN %s',
+            'ALTER TABLE %s DROP COLUMN %s;',
             $this->identifier($tableName),
             $this->identifier($columnName)
         );
@@ -643,7 +657,6 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         if (empty($type)) {
             throw new Ruckusing_Exception_Argument('Missing type parameter');
         }
-        //$columnInfo = $this->columnInfo($tableName, $columnName);
         //default types
         if (! array_key_exists('limit', $options)) {
             $options['limit'] = null;
@@ -654,14 +667,17 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         if (! array_key_exists('scale', $options)) {
             $options['scale'] = null;
         }
+        if (!array_key_exists('new_name', $options) || empty($options['new_name'])) {
+            $options['new_name'] = $columnName;
+        }
         $sql = sprintf(
             'ALTER TABLE %s CHANGE %s %s %s',
             $this->identifier($tableName),
             $this->identifier($columnName),
-            $this->identifier($columnName),
+            $this->identifier($options['new_name']),
             $this->typeToSql($type, $options)
         );
-        $sql .= $this->addColumnOptions($type, $options);
+        $sql .= $this->addColumnOptions($type, $options) . ';';
 
         return $this->executeDdl($sql);
     }
@@ -696,7 +712,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         $columnInfo = $this->columnInfo($tableName, $columnName);
         $current_type = $columnInfo['type'];
         $sql = sprintf(
-            'ALTER TABLE %s CHANGE %s %s %s',
+            'ALTER TABLE %s CHANGE %s %s %s;',
             $this->identifier($tableName),
             $this->identifier($columnName),
             $this->identifier($newColumnName),
@@ -738,6 +754,120 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
             $result = array_change_key_case($result, CASE_LOWER);
         }
         return $result;
+    }
+    
+    /**
+     * Add foreign key
+     * 
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     * @param string $tableRef   The table ref name
+     * @param string $columnRef  The column ref name
+     * @param array  $options    The options array
+     * 
+     * @return boolean
+     * @throws Ruckusing_Exception_Argument
+     */
+    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    {
+        if (empty($tableName)) {
+            throw new Ruckusing_Exception_Argument(
+                'Missing table name parameter'
+            );
+        }
+        if (empty($columnName)) {
+            throw new Ruckusing_Exception_Argument(
+                'Missing column name parameter'
+            );
+        }
+        if (empty($tableRef)) {
+            throw new Ruckusing_Exception_Argument(
+                'Missing table ref name parameter'
+            );
+        }
+        if (empty($columnRef)) {
+            $columnRef = 'id';
+        }
+        
+        $constrainteName = $this->_getConstrainteName($tableName, $columnName, $tableRef, $columnRef, $options);
+        if (strlen($constrainteName) > self::MAX_IDENTIFIER_LENGTH) {
+            $msg = 'The auto-generated constrainte name is too long for '
+                . 'MySQL (max is 64 chars). Considering using \'name\' option '
+                . 'parameter to specify a custom name for this index. '
+                . 'Note: you will also need to specify this custom name '
+                . 'in a drop_index() - if you have one.';
+            require_once 'Ruckusing/Exception/InvalidIndexName.php';
+            throw new Ruckusing_Exception_InvalidIndexName($msg);
+        }
+        $actionsAllowed = array(
+            'CASCADE',
+            'SET NULL',
+            'NO ACTION',
+            'RESTRICT',
+        );
+        $update = 'NO ACTION';
+        if (array_key_exists('update', $options) && in_array($options['update'], $actionsAllowed)) {
+            $update = $options['update'];
+        }
+        $delete = 'NO ACTION';
+        if (array_key_exists('delete', $options) && in_array($options['delete'], $actionsAllowed)) {
+            $delete = $options['delete'];
+        }
+        $sql = sprintf(
+            'ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s) ON DELETE %s ON UPDATE %s;',
+            $this->identifier($tableName),
+            $constrainteName,
+            $this->identifier($columnName),
+            $this->identifier($tableRef),
+            $this->identifier($columnRef),
+            $delete,
+            $update
+        );
+
+        return $this->executeDdl($sql);
+    }
+    
+    /**
+     * Remove foreign key
+     * 
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     * @param string $tableRef   The table ref name
+     * @param string $columnRef  The column ref name
+     * @param array  $options    The options array
+     * 
+     * @return boolean
+     * @throws Ruckusing_Exception_Argument
+     */
+    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    {
+        if (empty($tableName)) {
+            throw new Ruckusing_Exception_Argument(
+                'Missing table name parameter'
+            );
+        }
+        if (empty($columnName)) {
+            throw new Ruckusing_Exception_Argument(
+                'Missing column name parameter'
+            );
+        }
+        if (empty($tableRef)) {
+            throw new Ruckusing_Exception_Argument(
+                'Missing table ref name parameter'
+            );
+        }
+        if (empty($columnRef)) {
+            $columnRef = 'id';
+        }
+        
+        $constrainteName = $this->_getConstrainteName($tableName, $columnName, $tableRef, $columnRef, $options);
+        $sql = sprintf(
+            'ALTER TABLE %s DROP FOREIGN KEY %s;',
+            $this->identifier($tableName),
+            $constrainteName
+        );
+
+        return $this->executeDdl($sql);
     }
 
     /**
@@ -970,6 +1100,9 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
                 $column_type_sql .= sprintf('(%d)', $limit);
             }
         }
+        if (array_key_exists('options', $options)) {
+            $column_type_sql .= ' ' . $options['options'];
+        }
 
         return $column_type_sql;
     }
@@ -977,7 +1110,6 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     /**
      * add column options
      *
-     * @param string $type    The type generic
      * @param array  $options The options definition
      *
      * @return string
@@ -986,10 +1118,10 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     {
         $sql = '';
 
-        if (! is_array($options) || empty($options)) {
+        if (!is_array($options)) {
             return $sql;
         }
-
+        
         // unsigned
         if (array_key_exists('unsigned', $options)
             && $options['unsigned'] === true
@@ -998,10 +1130,21 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
         }
 
         // auto_increment
-        if (array_key_exists('auto_increment', $options)
-            && $options['auto_increment'] === true
-        ) {
+        if (array_key_exists('auto_increment', $options) && $options['auto_increment'] === true) {
             $sql .= ' auto_increment';
+            $options['null'] = false;
+        }
+
+        // default null
+        if ((array_key_exists('null', $options) && $options['null'] === false)
+            || (array_key_exists('default', $options) && isset($options['default']))
+            || (array_key_exists('primary_key', $options) && $options['primary_key'] === true))
+        {
+            $sql .= ' NOT NULL';
+        } elseif (! array_key_exists('default', $options) || ! isset($options['default'])) {
+            $sql .= ' NULL DEFAULT NULL';
+        } else {
+            $sql .= ' NULL';
         }
 
         // default value
@@ -1019,16 +1162,22 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
                 $default_format = '%d';
             } elseif (is_bool($options['default'])) {
                 $default_format = "'%d'";
+            } elseif (($type == 'timestamp' || $type == 'datetime' || $type == 'date' || $type == 'time')
+                && $options['default'] == 'CURRENT_TIMESTAMP')
+            {
+                $default_format = "%s";
             } else {
                 $default_format = "'%s'";
             }
             $default_value = sprintf($default_format, $options['default']);
             $sql .= sprintf(' DEFAULT %s', $default_value);
         }
-
-        // default null
-        if (array_key_exists('null', $options) && $options['null'] === false) {
-            $sql .= ' NOT NULL';
+        
+        // on update
+        if (($type == 'timestamp' || $type == 'datetime' || $type == 'date' || $type == 'time')
+            && array_key_exists('update', $options))
+        {
+            $sql .= ' ON UPDATE ' . $options['update'];
         }
 
         // position of column
@@ -1049,7 +1198,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     public function setCurrentVersion($version)
     {
         $sql = sprintf(
-            "INSERT INTO %s (version) VALUES ('%s')",
+            "INSERT INTO %s (version) VALUES ('%s');",
             RUCKUSING_TS_SCHEMA_TBL_NAME,
             $version
         );
@@ -1066,7 +1215,7 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
     public function removeVersion($version)
     {
         $sql = sprintf(
-            "DELETE FROM %s WHERE version = '%s'",
+            "DELETE FROM %s WHERE version = '%s';",
             RUCKUSING_TS_SCHEMA_TBL_NAME,
             $version
         );
@@ -1219,6 +1368,33 @@ class Ruckusing_Adapter_Mysql_Adapter extends Ruckusing_Adapter_Base
             );
         }
         return $indexName;
+    }
+
+    /**
+     * _getIndexName
+     *
+     * @param string       $tableName  The table name
+     * @param string|array $columnName The column name(s)
+     * @param string       $tableRef   The table ref name
+     * @param string|array $columnRef  The column ref name(s)
+     * @param array        $options    The options definition of the index
+     *
+     * @return string
+     */
+    private function _getConstrainteName($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    {
+        //did the user specify an index name?
+        if (is_array($options) && array_key_exists('name', $options)) {
+            $constrainteName = $options['name'];
+        } else {
+            $constrainteName = Ruckusing_Util_Naming::constrainteName(
+                $tableName,
+                $columnName,
+                $tableRef,
+                $columnRef
+            );
+        }
+        return $constrainteName;
     }
 
     /**

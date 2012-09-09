@@ -249,6 +249,7 @@ USAGE;
         try {
             //start transaction
             $this->_adapter->startTransaction();
+            $this->_logger->info('Start transaction called');
             foreach ($objMigrations as $migration) {
                 $start = microtime(true);
                 try {
@@ -273,8 +274,10 @@ USAGE;
                 $this->_logger->info('last_version: ' . $lastVersion);
             }
             $this->_adapter->commitTransaction();
+            $this->_logger->info('Commit transaction called');
         } catch (\Exception $e) {
             $this->_adapter->rollbackTransaction();
+            $this->_logger->info('Rollback transaction called');
             throw $e;
         }
         //update the schema info

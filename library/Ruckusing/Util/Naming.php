@@ -196,6 +196,25 @@ class Ruckusing_Util_Naming
         $name .= sprintf('_%s', $columnStr);
         return $name;
     }
+
+    /**
+     * index name
+     *
+     * @param string       $tableName  The table name
+     * @param string|array $columnName The column name
+     * @param string       $tableRef   The table ref name
+     * @param string|array $columnRef  The column ref name
+     *
+     * @return string
+     */
+    public static function constrainteName($tableName, $columnName, $tableRef, $columnRef)
+    {
+        $name = sprintf('%s_ibfk_%s',
+            self::underscore($tableName),
+            self::underscore($columnName)
+        );
+        return $name;
+    }
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */

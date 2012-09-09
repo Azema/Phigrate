@@ -43,18 +43,6 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $this->object = null;
         parent::tearDown();
     }
-    
-    public function testAdapterHasExportSql()
-    {
-        $this->assertInstanceOf('Task_Db_Export', $this->object);
-        $this->assertTrue($this->_adapter->hasExport());
-    }
-
-    public function testAdapterSqlIsEmptyString()
-    {
-        $this->assertInternalType('string', $this->_adapter->getSql());
-        $this->assertEmpty($this->_adapter->getSql());
-    }
 
     public function testExecuteWithAdapterNoSupportMigration()
     {
@@ -128,7 +116,7 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
             . '-- \[db:migrate\]:\012+--\tMigrating UP to: 20120109064438\012+'
             . '-- ========= CreateUsers ======== \(\d+.\d{2}\)\012+'
             . 'CREATE TABLE `users` \(\012+`id` int\(11\) UNSIGNED auto_increment NOT NULL,\012'
-            . '`name` text,\012+ PRIMARY KEY \(`id`\)\) ;\012+'
+            . '`name` text NULL DEFAULT NULL,\012+ PRIMARY KEY \(`id`\)\);\012+'
             . '-- Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);

@@ -34,19 +34,6 @@ require_once 'Task/Db/AMigration.php';
 class Task_Db_Export extends Task_Db_AMigration
 {
     /**
-     * __construct
-     *
-     * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
-     *
-     * @return Task_Db_Export
-     */
-    function __construct($adapter)
-    {
-        parent::__construct($adapter);
-        $this->_adapter->setExport(true);
-    }
-    
-    /**
      * Primary task entry point
      *
      * @param array $args Arguments of task
@@ -62,11 +49,17 @@ class Task_Db_Export extends Task_Db_AMigration
             require_once 'Ruckusing/Exception/Task.php';
             throw new Ruckusing_Exception_Task($msg);
         }
+        $this->_adapter->setExport(true);
         $this->_return = "--\n--\tExport SQL by Ruckusing\n--\n\n" 
             . '-- Started: ' . date('Y-m-d g:ia T') . PHP_EOL . PHP_EOL
             . '-- [db:migrate]:' . PHP_EOL;
-        
-        $this->_execute($args);
+        try {
+            $this->_execute($args);
+        } catch(\Exception $e) {
+            $this->_adapter->setExport(false);
+            throw $e;
+        }
+        $this->_adapter->setExport(false);
         
         $this->_return .= "\n\n-- Finished: " . date('Y-m-d g:ia T') . "\n\n";
         $this->_logger->debug(__METHOD__ . ' End');
@@ -232,6 +225,7 @@ USAGE;
     {
         $this->_logger->debug(__METHOD__ . ' Start');
         $lastVersion = -1;
+        $this->_return .= $this->_adapter->startTransaction() . "\n\n";
         foreach ($migrations as $file) {
             $fullPath = $this->_migrationDir . '/' . $file['file'];
             $this->_logger->debug('file: ' . var_export($file, true));
@@ -277,6 +271,7 @@ USAGE;
             $lastVersion = $file['version'];
             $this->_logger->info('last_version: ' . $lastVersion);
         }//foreach
+        $this->_return .= $this->_adapter->commitTransaction();
         //update the schema info
         $this->_logger->debug(__METHOD__ . ' End');
         return array('last_version' => $lastVersion);

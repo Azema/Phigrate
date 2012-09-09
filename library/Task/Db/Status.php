@@ -52,7 +52,9 @@ class Task_Db_Status extends Task_Base implements Ruckusing_Task_ITask
         require_once 'Ruckusing/Util/Migrator.php';
         $util = new Ruckusing_Util_Migrator($this->_adapter);
         $migrations = $util->getExecutedMigrations();
+        $this->_logger->debug('Migrations: ' . var_export($migrations, true));
         $files = $util->getMigrationFiles($this->_migrationDir, 'up');
+        $this->_logger->debug('Files: ' . var_export($files, true));
         $applied = array();
         $notApplied = array();
         foreach ($files as $file) {

@@ -452,13 +452,13 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
      */
     public function testColumnDefinition()
     {
-        $expected = '`age` varchar(255)';
+        $expected = '`age` varchar(255) NULL DEFAULT NULL';
         $this->assertEquals(
             $expected,
             $this->object->columnDefinition('age', 'string')
         );
 
-        $expected = '`age` varchar(32)';
+        $expected = '`age` varchar(32) NULL DEFAULT NULL';
         $this->assertEquals(
             $expected,
             $this->object->columnDefinition(
@@ -481,7 +481,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             )
         );
 
-        $expected = '`age` varchar(32) DEFAULT \'abc\' NOT NULL';
+        $expected = '`age` varchar(32) NOT NULL DEFAULT \'abc\'';
         $this->assertEquals(
             $expected,
             $this->object->columnDefinition(
@@ -495,7 +495,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             )
         );
 
-        $expected = '`age` varchar(32) DEFAULT \'abc\'';
+        $expected = '`age` varchar(32) NOT NULL DEFAULT \'abc\'';
         $this->assertEquals(
             $expected,
             $this->object->columnDefinition(
@@ -508,19 +508,19 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             )
         );
 
-        $expected = '`age` int(11)';
+        $expected = '`age` int(11) NULL DEFAULT NULL';
         $this->assertEquals(
             $expected,
             $this->object->columnDefinition('age', 'integer')
         );
 
-        $expected = '`active` tinyint(1)';
+        $expected = '`active` tinyint(1) NULL DEFAULT NULL';
         $this->assertEquals(
             $expected,
             $this->object->columnDefinition('active', 'boolean')
         );	
         
-        $expected = '`weight` bigint(20)';
+        $expected = '`weight` bigint(20) NULL DEFAULT NULL';
         $this->assertEquals(
             $expected,
             $this->object->columnDefinition(
@@ -530,7 +530,7 @@ class Ruckusing_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             )
         );
         
-        $expected = '`age` int(11) AFTER `height`';
+        $expected = '`age` int(11) NULL DEFAULT NULL AFTER `height`';
         $this->assertEquals(
             $expected,
             $this->object->columnDefinition(
@@ -1382,25 +1382,25 @@ Valid types are:
         $this->assertEmpty($colOpts);
         $colOpts = $this->object->addColumnOptions('int', array('unsigned' => true));
         $this->assertInternalType('string', $colOpts);
-        $this->assertEquals(' UNSIGNED', $colOpts);
+        $this->assertEquals(' UNSIGNED NULL DEFAULT NULL', $colOpts);
         $colOpts = $this->object->addColumnOptions('int', array('auto_increment' => true));
         $this->assertInternalType('string', $colOpts);
-        $this->assertEquals(' auto_increment', $colOpts);
+        $this->assertEquals(' auto_increment NOT NULL', $colOpts);
         $colOpts = $this->object->addColumnOptions('int', array('null' => false));
         $this->assertInternalType('string', $colOpts);
         $this->assertEquals(' NOT NULL', $colOpts);
         $colOpts = $this->object->addColumnOptions('int', array('after' => 'name'));
         $this->assertInternalType('string', $colOpts);
-        $this->assertEquals(' AFTER `name`', $colOpts);
+        $this->assertEquals(' NULL DEFAULT NULL AFTER `name`', $colOpts);
         $colOpts = $this->object->addColumnOptions('int', array('default' => 1));
         $this->assertInternalType('string', $colOpts);
-        $this->assertEquals(' DEFAULT 1', $colOpts);
+        $this->assertEquals(' NOT NULL DEFAULT 1', $colOpts);
         $colOpts = $this->object->addColumnOptions('int', array('default' => true));
         $this->assertInternalType('string', $colOpts);
-        $this->assertEquals(" DEFAULT '1'", $colOpts);
+        $this->assertEquals(" NOT NULL DEFAULT '1'", $colOpts);
         $colOpts = $this->object->addColumnOptions('int', array('default' => 'string'));
         $this->assertInternalType('string', $colOpts);
-        $this->assertEquals(" DEFAULT 'string'", $colOpts);
+        $this->assertEquals(" NOT NULL DEFAULT 'string'", $colOpts);
         $colOpts = $this->object->addColumnOptions(
             'int', 
             array(
@@ -1412,7 +1412,7 @@ Valid types are:
             )
         );
         $this->assertInternalType('string', $colOpts);
-        $this->assertEquals(' UNSIGNED auto_increment DEFAULT 1 NOT NULL AFTER `name`', $colOpts);
+        $this->assertEquals(' UNSIGNED auto_increment NOT NULL DEFAULT 1 AFTER `name`', $colOpts);
     }
 
     /**

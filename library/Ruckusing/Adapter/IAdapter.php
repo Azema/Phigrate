@@ -161,6 +161,16 @@ interface Ruckusing_Adapter_IAdapter
      * @return boolean
      */
     public function addColumn($tableName, $columnName, $type, $options = array());
+    
+    /**
+     * add column options
+     *
+     * @param string $type    The type generic
+     * @param array  $options The options definition
+     *
+     * @return string
+     */
+    public function addColumnOptions($type, $options);
 
     /**
      * remove column
@@ -204,6 +214,34 @@ interface Ruckusing_Adapter_IAdapter
      * @return boolean
      */
     public function addIndex($tableName, $columnName, $options = array());
+    
+    /**
+     * Add foreign key
+     * 
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     * @param string $tableRef   The table ref name
+     * @param string $columnRef  The column ref name
+     * @param array  $options    The options array
+     * 
+     * @return boolean
+     * @throws Ruckusing_Exception_Argument
+     */
+    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array());
+    
+    /**
+     * Remove foreign key
+     * 
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     * @param string $tableRef   The table ref name
+     * @param string $columnRef  The column ref name
+     * @param array  $options    The options array
+     * 
+     * @return boolean
+     * @throws Ruckusing_Exception_Argument
+     */
+    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array());
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */

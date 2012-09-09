@@ -251,6 +251,38 @@ abstract class Ruckusing_Migration_Base
     }
 
     /**
+     * add foreign key
+     *
+     * @param string       $tableName  The table name
+     * @param string|array $columnName The column name
+     * @param string       $tableRef   The table ref name
+     * @param string|array $columnRef  The column ref name
+     * @param array        $options    The options defintion of the index
+     *
+     * @return boolean
+     */
+    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    {
+        return $this->_adapter->addForeignKey($tableName, $columnName, $tableRef, $columnRef, $options);
+    }
+
+    /**
+     * remove foreign key
+     *
+     * @param string       $tableName  The table name
+     * @param string|array $columnName The column name
+     * @param string       $tableRef   The table ref name
+     * @param string|array $columnRef  The column ref name
+     * @param array        $options    The options defintion of the index
+     *
+     * @return boolean
+     */
+    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    {
+        return $this->_adapter->removeForeignKey($tableName, $columnName, $tableRef, $columnRef, $options);
+    }
+
+    /**
      * execute
      *
      * @param string $query Query SQL
@@ -259,7 +291,7 @@ abstract class Ruckusing_Migration_Base
      */
     public function execute($query)
     {
-        return $this->_adapter->query($query);
+        return $this->_adapter->execute($query);
     }
 
     /**

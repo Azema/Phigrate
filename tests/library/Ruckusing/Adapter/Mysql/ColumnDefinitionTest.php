@@ -80,24 +80,27 @@ class Ruckusing_Adapter_Mysql_ColumnDefinitionTest extends PHPUnit_Framework_Tes
 
     public function testToSqlAndToString()
     {
+        $expected = '`last_name` varchar(32) NULL DEFAULT NULL';
         $c = new Ruckusing_Adapter_Mysql_ColumnDefinition(
             $this->_adapter,
             'last_name',
             'string',
             array('limit' => 32)
         );
-		$this->assertEquals('`last_name` varchar(32)', $c->toSql());
-		$this->assertEquals('`last_name` varchar(32)', $c->__toString());
+		$this->assertEquals($expected, $c->toSql());
+		$this->assertEquals($expected, $c->__toString());
 
+        $expected = '`last_name` varchar(255) NOT NULL';
         $c = new Ruckusing_Adapter_Mysql_ColumnDefinition(
             $this->_adapter,
             'last_name',
             'string',
             array('null' => false)
         );
-		$this->assertEquals('`last_name` varchar(255) NOT NULL', $c->toSql());
-		$this->assertEquals('`last_name` varchar(255) NOT NULL', $c->__toString());
+		$this->assertEquals($expected, $c->toSql());
+		$this->assertEquals($expected, $c->__toString());
 
+        $expected = '`last_name` varchar(255) NOT NULL DEFAULT \'abc\'';
         $c = new Ruckusing_Adapter_Mysql_ColumnDefinition(
             $this->_adapter,
             'last_name',
@@ -107,18 +110,33 @@ class Ruckusing_Adapter_Mysql_ColumnDefinitionTest extends PHPUnit_Framework_Tes
                 'null' => false,
             )
         );
-		$this->assertEquals("`last_name` varchar(255) DEFAULT 'abc' NOT NULL", $c->toSql());
-		$this->assertEquals("`last_name` varchar(255) DEFAULT 'abc' NOT NULL", $c->__toString());
+		$this->assertEquals($expected, $c->toSql());
+		$this->assertEquals($expected, $c->__toString());
 
+        $expected = '`last_name` varchar(5) NOT NULL DEFAULT \'abc\'';
+        $c = new Ruckusing_Adapter_Mysql_ColumnDefinition(
+            $this->_adapter,
+            'last_name',
+            'string',
+            array(
+                'limit' => 5,
+                'default' => 'abc',
+            )
+        );
+		$this->assertEquals($expected, $c->toSql());
+		$this->assertEquals($expected, $c->__toString());
+
+        $expected = '`created_at` datetime NOT NULL';
         $c = new Ruckusing_Adapter_Mysql_ColumnDefinition(
             $this->_adapter,
             'created_at',
             'datetime',
             array('null' => false)
         );
-		$this->assertEquals('`created_at` datetime NOT NULL', $c->toSql());
-		$this->assertEquals('`created_at` datetime NOT NULL', $c->__toString());
+		$this->assertEquals($expected, $c->toSql());
+		$this->assertEquals($expected, $c->__toString());
 
+        $expected = '`id` int(11) UNSIGNED NOT NULL';
         $c = new Ruckusing_Adapter_Mysql_ColumnDefinition(
             $this->_adapter,
             'id',
@@ -128,9 +146,10 @@ class Ruckusing_Adapter_Mysql_ColumnDefinitionTest extends PHPUnit_Framework_Tes
                 'unsigned' => true,
             )
         );
-        $this->assertEquals('`id` int(11) UNSIGNED', $c->toSql());
-        $this->assertEquals('`id` int(11) UNSIGNED', $c->__toString());
+        $this->assertEquals($expected, $c->toSql());
+        $this->assertEquals($expected, $c->__toString());
 
+        $expected = '`phone` varchar(10) NULL DEFAULT NULL';
         $c = new Ruckusing_Adapter_Mysql_ColumnDefinition(
             $this->_adapter,
             'phone',
@@ -139,9 +158,10 @@ class Ruckusing_Adapter_Mysql_ColumnDefinitionTest extends PHPUnit_Framework_Tes
                 'limit' => 10
             )
         );
-        $this->assertEquals('`phone` varchar(10)', $c->toSql());
-        $this->assertEquals('`phone` varchar(10)', $c->__toString());
+        $this->assertEquals($expected, $c->toSql());
+        $this->assertEquals($expected, $c->__toString());
 
+        $expected = '`price` decimal(2) NULL DEFAULT NULL';
         $c = new Ruckusing_Adapter_Mysql_ColumnDefinition(
             $this->_adapter,
             'price',
@@ -150,9 +170,10 @@ class Ruckusing_Adapter_Mysql_ColumnDefinitionTest extends PHPUnit_Framework_Tes
                 'precision' => 2,
             )
         );
-        $this->assertEquals('`price` decimal(2)', $c->toSql());
-        $this->assertEquals('`price` decimal(2)', $c->__toString());
+        $this->assertEquals($expected, $c->toSql());
+        $this->assertEquals($expected, $c->__toString());
 
+        $expected = '`price` decimal(2, 4) NULL DEFAULT NULL';
         $c = new Ruckusing_Adapter_Mysql_ColumnDefinition(
             $this->_adapter,
             'price',
@@ -162,9 +183,10 @@ class Ruckusing_Adapter_Mysql_ColumnDefinitionTest extends PHPUnit_Framework_Tes
                 'scale' => 4,
             )
         );
-        $this->assertEquals('`price` decimal(2, 4)', $c->toSql());
-        $this->assertEquals('`price` decimal(2, 4)', $c->__toString());
+        $this->assertEquals($expected, $c->toSql());
+        $this->assertEquals($expected, $c->__toString());
 
+        $expected = '`happy` tinyint(1) NOT NULL DEFAULT \'1\'';
         $c = new Ruckusing_Adapter_Mysql_ColumnDefinition(
             $this->_adapter,
             'happy',
@@ -173,26 +195,28 @@ class Ruckusing_Adapter_Mysql_ColumnDefinitionTest extends PHPUnit_Framework_Tes
                 'default' => true,
             )
         );
-        $this->assertEquals('`happy` tinyint(1) DEFAULT \'1\'', $c->toSql());
-        $this->assertEquals('`happy` tinyint(1) DEFAULT \'1\'', $c->__toString());
+        $this->assertEquals($expected, $c->toSql());
+        $this->assertEquals($expected, $c->__toString());
 
+        $expected = '`licence` text NULL DEFAULT NULL';
         $c = new Ruckusing_Adapter_Mysql_ColumnDefinition(
             $this->_adapter,
             'licence',
             'text',
             array()
         );
-        $this->assertEquals('`licence` text', $c->toSql());
-        $this->assertEquals('`licence` text', $c->__toString());
+        $this->assertEquals($expected, $c->toSql());
+        $this->assertEquals($expected, $c->__toString());
 
+        $expected = '`avatar` blob NULL DEFAULT NULL';
         $c = new Ruckusing_Adapter_Mysql_ColumnDefinition(
             $this->_adapter,
             'avatar',
             'binary',
             array()
         );
-        $this->assertEquals('`avatar` blob', $c->toSql());
-        $this->assertEquals('`avatar` blob', $c->__toString());
+        $this->assertEquals($expected, $c->toSql());
+        $this->assertEquals($expected, $c->__toString());
     }
 }
 
