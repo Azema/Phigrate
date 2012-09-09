@@ -1,8 +1,8 @@
-[![Build Status](https://secure.travis-ci.org/Azema/ruckusing-migrations.png)](http://travis-ci.org/Azema/ruckusing-migrations)
+[![Build Status](https://secure.travis-ci.org/Azema/Phigrate.png)](http://travis-ci.org/Azema/Phigrate)
 
 # Introduction
 
-Ruckusing is a framework written in PHP5 for generating and managing a set of "database migrations". Database migrations are declarative files which represent the state of a DB (its tables, columns, indexes, etc) at a particular state of time. By using database migrations, multiple developers can work on the same application and be guaranteed that the application is in a consistent state across all remote developer machines.
+Phigrate is a framework written in PHP5 for generating and managing a set of "database migrations". Database migrations are declarative files which represent the state of a DB (its tables, columns, indexes, etc) at a particular state of time. By using database migrations, multiple developers can work on the same application and be guaranteed that the application is in a consistent state across all remote developer machines.
 
 The idea of the framework was borrowed from the migration system built into Ruby on Rails. Any one who is familiar with Migrations in RoR will be immediately at home.
 

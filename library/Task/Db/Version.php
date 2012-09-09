@@ -1,17 +1,18 @@
 <?php
+
 /**
- * Rucksing Migrations
+ * Phigrate
  *
- * PHP Version 5
+ * PHP Version 5.3
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @subpackage Db
  * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  */
 
 /**
@@ -20,23 +21,23 @@
 require_once 'Task/Base.php';
 
 /**
- * @see Ruckusing_Task_ITask
+ * @see Phigrate_Task_ITask
  */
-require_once 'Ruckusing/Task/ITask.php';
+require_once 'Phigrate/Task/ITask.php';
 
 /**
  * This task retrieves the current version of the schema.
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @subpackage Db
  * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  */
-class Task_Db_Version extends Task_Base implements Ruckusing_Task_ITask
+class Task_Db_Version extends Task_Base implements Phigrate_Task_ITask
 {
     /**
      * Primary task entry point
@@ -49,9 +50,9 @@ class Task_Db_Version extends Task_Base implements Ruckusing_Task_ITask
     {
         $return = 'Started: ' . date('Y-m-d g:ia T') . "\n\n"
             . "[db:version]:\n";
-        if (! $this->_adapter->tableExists(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
+        if (! $this->_adapter->tableExists(PHIGRATE_TS_SCHEMA_TBL_NAME)) {
             //it doesnt exist, create it
-            $return .= "\tSchema version table (" . RUCKUSING_TS_SCHEMA_TBL_NAME
+            $return .= "\tSchema version table (" . PHIGRATE_TS_SCHEMA_TBL_NAME
                 . ") does not exist. Do you need to run 'db:setup'?";
         } else {
             //it exists, read the version from it
@@ -61,7 +62,7 @@ class Task_Db_Version extends Task_Base implements Ruckusing_Task_ITask
             $versions_nested = $this->_adapter->selectAll(
                 sprintf(
                     'SELECT version FROM %s',
-                    $this->_adapter->identifier(RUCKUSING_TS_SCHEMA_TBL_NAME)
+                    $this->_adapter->identifier(PHIGRATE_TS_SCHEMA_TBL_NAME)
                 )
             );
             $versions = array();

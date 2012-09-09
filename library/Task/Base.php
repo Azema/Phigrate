@@ -1,35 +1,36 @@
 <?php
+
 /**
- * Rucksing Migrations
+ * Phigrate
  *
- * PHP Version 5
+ * PHP Version 5.3
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  */
 
 /**
  * This is the abstract class of Tasks
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  */
 abstract class Task_Base
 {
     /**
      * adapter
      *
-     * @var Ruckusing_Adapter_Base
+     * @var Phigrate_Adapter_Base
      */
     protected $_adapter = null;
 
@@ -50,7 +51,7 @@ abstract class Task_Base
     /**
      * _logger
      *
-     * @var Ruckusing_Logger
+     * @var Phigrate_Logger
      */
     protected $_logger;
 
@@ -64,7 +65,7 @@ abstract class Task_Base
     /**
      * __construct
      *
-     * @param Ruckusing_Adapter_Base $adapter Adapter RDBMS
+     * @param Phigrate_Adapter_Base $adapter Adapter RDBMS
      *
      * @return Task_Db_Base
      */
@@ -90,11 +91,11 @@ abstract class Task_Base
     /**
      * setAdapter
      *
-     * @param Ruckusing_Adapter_IAdapter $adapter Adapter RDBMS
+     * @param Phigrate_Adapter_IAdapter $adapter Adapter RDBMS
      *
-     * @return Ruckusing_Task_ITask
+     * @return Phigrate_Task_ITask
      */
-    public function setAdapter(Ruckusing_Adapter_IAdapter $adapter)
+    public function setAdapter(Phigrate_Adapter_IAdapter $adapter)
     {
         $this->_adapter = $adapter;
         return $this;

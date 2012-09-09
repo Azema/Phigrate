@@ -1,5 +1,6 @@
 <?php
 
+
 // PHP_VERSION_ID est disponible depuis PHP 5.2.7, 
 // si votre version est antérieure, émulez-le.
 if (!defined('PHP_VERSION_ID')) {
@@ -10,8 +11,8 @@ if (!defined('PHP_VERSION_ID')) {
 
 //set up some preliminary defaults, this is so all of our
 //framework includes work!
-if (! defined('RUCKUSING_BASE')) {
-    define('RUCKUSING_BASE', realpath(dirname(__FILE__) . '/..'));
+if (! defined('PHIGRATE_BASE')) {
+    define('PHIGRATE_BASE', realpath(dirname(__FILE__) . '/..'));
 }
 
 if (! defined('FIXTURES_PATH')) {
@@ -23,22 +24,22 @@ if (! defined('MOCKS_PATH')) {
 }
 
 //Parent of migrations directory.
-if (!defined('RUCKUSING_DB_DIR')) {
-    define('RUCKUSING_DB_DIR', RUCKUSING_BASE . '/tests/dummy/db');
+if (!defined('PHIGRATE_DB_DIR')) {
+    define('PHIGRATE_DB_DIR', PHIGRATE_BASE . '/tests/dummy/db');
 }
 
 // DB table where the version info is stored
-if (!defined('RUCKUSING_SCHEMA_TBL_NAME')) {
-	define('RUCKUSING_SCHEMA_TBL_NAME', 'schema_info');
+if (!defined('PHIGRATE_SCHEMA_TBL_NAME')) {
+	define('PHIGRATE_SCHEMA_TBL_NAME', 'schema_info');
 }
 
-if (!defined('RUCKUSING_TS_SCHEMA_TBL_NAME')) {
-    define('RUCKUSING_TS_SCHEMA_TBL_NAME', 'schema_migrations');
+if (!defined('PHIGRATE_TS_SCHEMA_TBL_NAME')) {
+    define('PHIGRATE_TS_SCHEMA_TBL_NAME', 'schema_migrations');
 }
 
 //Where the dummy migrations reside
-if (!defined('RUCKUSING_MIGRATION_DIR')) {
-    define('RUCKUSING_MIGRATION_DIR', RUCKUSING_DB_DIR . '/migrate');
+if (!defined('PHIGRATE_MIGRATION_DIR')) {
+    define('PHIGRATE_MIGRATION_DIR', PHIGRATE_DB_DIR . '/migrate');
 }
 
 // User MySQL by default
@@ -55,7 +56,7 @@ spl_autoload_register('loader', true, true);
 
 set_include_path(
     implode(PATH_SEPARATOR, array(
-        RUCKUSING_BASE . '/library',
+        PHIGRATE_BASE . '/library',
         get_include_path(),
     ))
 );
@@ -65,8 +66,8 @@ function loader($classname)
     if (! class_exists($classname, false)) {
         //echo 'load: ' . $classname . PHP_EOL;
         $filename = str_replace('_', '/', $classname) . '.php';
-        if (is_file(RUCKUSING_BASE . '/library/' . $filename)) {
-            $filename = RUCKUSING_BASE . '/library/' . $filename;
+        if (is_file(PHIGRATE_BASE . '/library/' . $filename)) {
+            $filename = PHIGRATE_BASE . '/library/' . $filename;
             include_once $filename;
         }
     }
@@ -80,8 +81,8 @@ foreach ($files as $file) {
 }
 
 // Clean file logs
-if (is_file(RUCKUSING_BASE . '/tests/logs/tests.log')) {
-    unlink(RUCKUSING_BASE . '/tests/logs/tests.log');
+if (is_file(PHIGRATE_BASE . '/tests/logs/tests.log')) {
+    unlink(PHIGRATE_BASE . '/tests/logs/tests.log');
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */

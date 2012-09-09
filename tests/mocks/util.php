@@ -1,15 +1,16 @@
 <?php
 
-require_once 'Ruckusing/Adapter/Mysql/Adapter.php';
+
+require_once 'Phigrate/Adapter/Mysql/Adapter.php';
 /**
  * Mock class adapter RDBMS
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Mocks
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/azema/ruckusing-migrations
+ * @link       https://github.com/azema/phigrate-migrations
  */
 class utilAdapterMock extends adapterMock
 {

@@ -1,4 +1,5 @@
 <?php
+
 class adapterTaskMock extends adapterMock
 {
     public $upExceptionSchema = false;
@@ -9,8 +10,8 @@ class adapterTaskMock extends adapterMock
 
     public function __construct($dbConfig, $logger)
     {
-        require_once 'Ruckusing/Logger.php';
-        $logger = Ruckusing_Logger::instance(RUCKUSING_BASE . '/tests/logs/tests.log');
+        require_once 'Phigrate/Logger.php';
+        $logger = Phigrate_Logger::instance(PHIGRATE_BASE . '/tests/logs/tests.log');
         $this->_conn = new pdoTaskMock();
         $this->setLogger($logger);
     }
@@ -45,7 +46,7 @@ class adapterTaskMock extends adapterMock
 
     public function selectAll($query)
     {
-        if ($query == 'SELECT version FROM `'.RUCKUSING_TS_SCHEMA_TBL_NAME.'`') {
+        if ($query == 'SELECT version FROM `'.PHIGRATE_TS_SCHEMA_TBL_NAME.'`') {
             return $this->versions;
         }
     }
@@ -81,12 +82,12 @@ class adapterTaskMock extends adapterMock
 /**
  * Mock class PDO
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Mocks
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/azema/ruckusing-migrations
+ * @link       https://github.com/azema/phigrate-migrations
  */
 class pdoTaskMock
 {
@@ -99,13 +100,13 @@ class pdoTaskMock
         if (preg_match('/^SHOW TABLES/', $query)) {
             if ($this->tableSchemaExist) {
                 $return = array(
-                    array(RUCKUSING_TS_SCHEMA_TBL_NAME),
+                    array(PHIGRATE_TS_SCHEMA_TBL_NAME),
                 );
             } else {
                 $return = array();
             }
         } elseif (preg_match('/^SHOW CREATE TABLE `(.*)`$/', $query, $matches)) {
-            if (count($matches) > 1 && $matches[1] == RUCKUSING_TS_SCHEMA_TBL_NAME) {
+            if (count($matches) > 1 && $matches[1] == PHIGRATE_TS_SCHEMA_TBL_NAME) {
                 return array(
                     array('Create Table' => 'CREATE TABLE `schema_migrations` (
   `version` varchar(255) DEFAULT NULL,
@@ -126,12 +127,12 @@ class pdoTaskMock
 }
 
 /**
- * @see Ruckusing_Adapter_IAdapter
- * @see Ruckusing_Task_ITask
+ * @see Phigrate_Adapter_IAdapter
+ * @see Phigrate_Task_ITask
  */
-require_once 'Ruckusing/Adapter/IAdapter.php';
-require_once 'Ruckusing/Task/ITask.php';
-class taskMock implements Ruckusing_Task_ITask
+require_once 'Phigrate/Adapter/IAdapter.php';
+require_once 'Phigrate/Task/ITask.php';
+class taskMock implements Phigrate_Task_ITask
 {
     public $dir;
 
@@ -164,7 +165,7 @@ class taskMock implements Ruckusing_Task_ITask
         $this->dir = $dir;
     }
 
-    public function setAdapter(Ruckusing_Adapter_IAdapter $adapter)
+    public function setAdapter(Phigrate_Adapter_IAdapter $adapter)
     {
         $this->adapter = $adapter;
         return $this;

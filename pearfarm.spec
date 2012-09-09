@@ -14,15 +14,15 @@ $files = array();
 getFilesInDir(dirname(__FILE__).'/library', $files, 'library');
 getFilesInDir(dirname(__FILE__).'/bin', $files, 'bin');
 $spec = Pearfarm_PackageSpec::create(array(Pearfarm_PackageSpec::OPT_BASEDIR => dirname(__FILE__)))
-             ->setName('Ruckusing')
+             ->setName('Phigrate')
              ->setChannel('Quazar.pearfarm.org')
              ->setSummary('Migrations SQL with PHP as ActiveRecord Migrations')
-             ->setDescription('Ruckusing is a framework written in PHP5 for generating and managing a set of "database
+             ->setDescription('Phigrate is a framework written in PHP5 for generating and managing a set of "database
              migrations". Database migrations are declarative files which represent the state of a DB (its tables,
              columns, indexes, etc) at a particular state of time. By using database migrations, multiple developers can
              work on the same application and be guaranteed that the application is in a consistent state across all
              remote developer machines.')
-             ->setReleaseVersion('0.9.3')
+             ->setReleaseVersion('0.9.4')
              ->setReleaseStability('alpha')
              ->setApiVersion('0.0.1')
              ->setApiStability('alpha')
@@ -31,6 +31,6 @@ $spec = Pearfarm_PackageSpec::create(array(Pearfarm_PackageSpec::OPT_BASEDIR => 
              ->addMaintainer('lead', 'Manuel HERVO', 'Quazar', 'manuel.hervo@gmail.com')
              //->addGitFiles()
              ->addFilesSimple($files)
-             ->addExecutable('bin/main.php', 'ruckusing')
-             ->addExecutable('bin/generate.php', 'ruckusing-generate')
+             ->addExecutable('bin/main.php', 'phigrate')
+             ->addExecutable('bin/generate.php', 'phigrate-generate')
              ;

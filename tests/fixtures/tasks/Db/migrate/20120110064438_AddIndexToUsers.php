@@ -1,11 +1,12 @@
 <?php
 
+
 /**
- * Rucksing Migrations
+ * Phigrate
  *
- * PHP Version 5
+ * PHP Version 5.3
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Migrations
  * @author     
  * @copyright  
@@ -18,16 +19,16 @@
  * 
  * For documentation on the methods of migration
  *
- * @see https://github.com/Azema/ruckusing-migrations/wiki/Migration-Methods
+ * @see https://github.com/Azema/phigrate-migrations/wiki/Migration-Methods
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Migrations
  * @author     
  * @copyright  
  * @license    
  * @link       
  */
-class AddIndexToUsers extends Ruckusing_Migration_Base
+class AddIndexToUsers extends Phigrate_Migration_Base
 {
     /**
      * up 

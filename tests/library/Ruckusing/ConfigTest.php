@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Zend Framework
  *
@@ -13,7 +14,7 @@
  * to license@zend.com so we can send you a copy immediately.
  *
  * @category   Zend
- * @package    Ruckusing_Config
+ * @package    Phigrate_Config
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
@@ -21,19 +22,19 @@
  */
 
 /**
- * Ruckusing_Config
+ * Phigrate_Config
  */
-require_once 'Ruckusing/Config.php';
+require_once 'Phigrate/Config.php';
 
 /**
  * @category   Zend
- * @package    Ruckusing_Config
+ * @package    Phigrate_Config
  * @subpackage UnitTests
  * @copyright  Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @group      Ruckusing_Config
+ * @group      Phigrate_Config
  */
-class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
+class Phigrate_ConfigTest extends PHPUnit_Framework_TestCase
 {
     protected $_iniFileConfig;
     protected $_iniFileNested;
@@ -86,7 +87,7 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testLoadSingleSection()
     {
-        $config = new Ruckusing_Config($this->_all, false);
+        $config = new Phigrate_Config($this->_all, false);
 
         $this->assertEquals('all', $config->hostname);
         $this->assertEquals('live', $config->db->name);
@@ -97,7 +98,7 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
     public function testIsset()
     {
         if (version_compare(PHP_VERSION, '5.1', '>=')) {
-            $config = new Ruckusing_Config($this->_all, false);
+            $config = new Phigrate_Config($this->_all, false);
 
             $this->assertFalse(isset($config->notarealkey));
             $this->assertTrue(isset($config->hostname)); // top level
@@ -107,45 +108,45 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testNoModifications()
     {
-        $config = new Ruckusing_Config($this->_all);
+        $config = new Phigrate_Config($this->_all);
         try {
             $config->hostname = 'test';
-        } catch (Ruckusing_Exception_Config $expected) {
+        } catch (Phigrate_Exception_Config $expected) {
             $this->assertContains('is read only', $expected->getMessage());
             return;
         }
-        $this->fail('An expected Ruckusing_Exception_Config has not been raised');
+        $this->fail('An expected Phigrate_Exception_Config has not been raised');
     }
 
     public function testNoNestedModifications()
     {
-        $config = new Ruckusing_Config($this->_all);
+        $config = new Phigrate_Config($this->_all);
         try {
             $config->db->host = 'test';
-        } catch (Ruckusing_Exception_Config $expected) {
+        } catch (Phigrate_Exception_Config $expected) {
             $this->assertContains('is read only', $expected->getMessage());
             return;
         }
-        $this->fail('An expected Ruckusing_Exception_Config has not been raised');
+        $this->fail('An expected Phigrate_Exception_Config has not been raised');
     }
 
     public function testNumericKeys()
     {
-        $data = new Ruckusing_Config($this->_numericData);
+        $data = new Phigrate_Config($this->_numericData);
         $this->assertEquals('test', $data->{1});
         $this->assertEquals(34, $data->{0});
     }
 
     public function testCount()
     {
-        $data = new Ruckusing_Config($this->_menuData1);
+        $data = new Phigrate_Config($this->_menuData1);
         $this->assertEquals(3, count($data->button));
     }
 
     public function testIterator()
     {
         // top level
-        $config = new Ruckusing_Config($this->_all);
+        $config = new Phigrate_Config($this->_all);
         $var = '';
         foreach ($config as $key=>$value) {
             if (is_string($value)) {
@@ -162,7 +163,7 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
         $this->assertContains('key = host, value = 127.0.0.1', $var);
 
         // 2 nests
-        $config = new Ruckusing_Config($this->_menuData1);
+        $config = new Phigrate_Config($this->_menuData1);
         $var = '';
         foreach ($config->button->b1 as $key=>$value) {
             $var .= "\nkey = $key, value = $value";
@@ -172,7 +173,7 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testArray()
     {
-        $config = new Ruckusing_Config($this->_all);
+        $config = new Phigrate_Config($this->_all);
 
         ob_start();
         print_r($config->toArray());
@@ -185,15 +186,15 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testErrorWriteToReadOnly()
     {
-        $config = new Ruckusing_Config($this->_all);
+        $config = new Phigrate_Config($this->_all);
         try {
             $config->test = '32';
-        } catch (Ruckusing_Exception_Config $expected) {
+        } catch (Phigrate_Exception_Config $expected) {
             $this->assertContains('read only', $expected->getMessage());
             return;
         }
 
-        $this->fail('An expected Ruckusing_Exception_Config has not been raised');
+        $this->fail('An expected Phigrate_Exception_Config has not been raised');
     }
 
     public function testZF343()
@@ -207,7 +208,7 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
                 ),
             ),
         );
-        $form_config = new Ruckusing_Config($config_array, true);
+        $form_config = new Phigrate_Config($config_array, true);
         $this->assertSame(array(), $form_config->controls->visible->attribs->toArray());
     }
 
@@ -219,7 +220,7 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
             'false1' => false,
             'data3'  => 'someValue'
             );
-        $config = new Ruckusing_Config($configArray);
+        $config = new Phigrate_Config($configArray);
         $this->assertTrue(count($config) === count($configArray));
         $count = 0;
         foreach ($config as $key => $value) {
@@ -235,14 +236,14 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testZf1019_HandlingInvalidKeyNames()
     {
-        $config = new Ruckusing_Config($this->_leadingdot);
+        $config = new Phigrate_Config($this->_leadingdot);
         $array = $config->toArray();
         $this->assertContains('dot-test', $array['.test']);
     }
 
     public function testZF1019_EmptyKeys()
     {
-        $config = new Ruckusing_Config($this->_invalidkey);
+        $config = new Phigrate_Config($this->_invalidkey);
         $array = $config->toArray();
         $this->assertContains('test', $array[' ']);
         $this->assertContains('test', $array['']);
@@ -250,7 +251,7 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testZF1417_DefaultValues()
     {
-        $config = new Ruckusing_Config($this->_all);
+        $config = new Phigrate_Config($this->_all);
         $value = $config->get('notthere', 'default');
         $this->assertTrue($value === 'default');
         $this->assertTrue($config->notThere === null);
@@ -260,13 +261,13 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
     public function testUnsetException()
     {
         // allow modifications is off - expect an exception
-        $config = new Ruckusing_Config($this->_all, false);
+        $config = new Phigrate_Config($this->_all, false);
 
         $this->assertTrue(isset($config->hostname)); // top level
 
         try {
             unset($config->hostname);
-        } catch (Ruckusing_Exception_Config $expected) {
+        } catch (Phigrate_Exception_Config $expected) {
             $this->assertContains('is read only', $expected->getMessage());
             return;
         }
@@ -274,7 +275,7 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * Ensures that toArray() supports objects of types other than Ruckusing_Config
+     * Ensures that toArray() supports objects of types other than Phigrate_Config
      *
      * @return void
      */
@@ -287,7 +288,7 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
                 'd' => new stdClass()
                 )
             );
-        $config = new Ruckusing_Config($configData);
+        $config = new Phigrate_Config($configData);
         $this->assertEquals($config->toArray(), $configData);
         $this->assertInstanceOf('stdClass', $config->a);
         $this->assertInstanceOf('stdClass', $config->b->c);
@@ -296,7 +297,7 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testZF6995_toArrayDoesNotDisturbInternalIterator()
     {
-        $config = new Ruckusing_Config(range(1,10));
+        $config = new Phigrate_Config(range(1,10));
         $config->rewind();
         $this->assertEquals(1, $config->current());
 
@@ -306,7 +307,7 @@ class Ruckusing_ConfigTest extends PHPUnit_Framework_TestCase
 
     public function testClone()
     {
-        $parent = new Ruckusing_Config(array('key' => array('nested' => 'parent')));
+        $parent = new Phigrate_Config(array('key' => array('nested' => 'parent')));
         $newConfig = clone $parent;
         $this->assertEquals($parent, $newConfig);
         $this->assertNotSame($parent, $newConfig);

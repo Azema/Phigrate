@@ -1,5 +1,5 @@
 <phpunit bootstrap="./test_helper.php" colors="true">
-    <testsuite name="Ruckusing Migrations">
+    <testsuite name="Phigrate">
         <directory>./library</directory>
     </testsuite>
     <filter>

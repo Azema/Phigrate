@@ -1,31 +1,32 @@
 <?php
 
+
 /**
  * Migration Mock
  *
- * @category  RuckusingMigrations
- * @package   Ruckusing_Migration
+ * @category  Phigrate
+ * @package   Phigrate_Migration
  * @author    Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright 2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link      https://github.com/ruckus/ruckusing-migrations
+ * @link      https://github.com/Azema/Phigrate
  */
-require_once 'Ruckusing/Migration/Base.php';
-class migrationMock extends Ruckusing_Migration_Base
+require_once 'Phigrate/Migration/Base.php';
+class migrationMock extends Phigrate_Migration_Base
 {}
 
-require_once 'Ruckusing/Adapter/Mysql/Adapter.php';
+require_once 'Phigrate/Adapter/Mysql/Adapter.php';
 /**
  * Mock class adapter RDBMS
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Mocks
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/azema/ruckusing-migrations
+ * @link       https://github.com/azema/phigrate-migrations
  */
-class migrationAdapterMock extends Ruckusing_Adapter_Mysql_Adapter
+class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
 {
     public $createDatabase;
 

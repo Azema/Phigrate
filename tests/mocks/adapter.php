@@ -1,16 +1,17 @@
 <?php
-require_once 'Ruckusing/Adapter/Mysql/Adapter.php';
+
+require_once 'Phigrate/Adapter/Mysql/Adapter.php';
 /**
  * Mock class adapter RDBMS
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Mocks
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/azema/ruckusing-migrations
+ * @link       https://github.com/azema/phigrate-migrations
  */
-class adapterMock extends Ruckusing_Adapter_Mysql_Adapter
+class adapterMock extends Phigrate_Adapter_Mysql_Adapter
 {
     public function __construct($dbConfig, $logger)
     {
@@ -22,12 +23,12 @@ class adapterMock extends Ruckusing_Adapter_Mysql_Adapter
 /**
  * Mock class PDO
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Mocks
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/azema/ruckusing-migrations
+ * @link       https://github.com/azema/phigrate-migrations
  */
 class pdoMock
 {
@@ -47,12 +48,12 @@ class pdoMock
 /**
  * Mock class log
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Mocks
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/azema/ruckusing-migrations
+ * @link       https://github.com/azema/phigrate-migrations
  */
 class logMock
 {

@@ -1,17 +1,18 @@
 <?php
+
 /**
- * Rucksing Migrations
+ * Phigrate
  *
- * PHP Version 5
+ * PHP Version 5.3
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @subpackage Db
  * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  */
 
 /**
@@ -20,24 +21,24 @@
 require_once 'Task/Base.php';
 
 /**
- * @see Ruckusing_Task_ITask
+ * @see Phigrate_Task_ITask
  */
-require_once 'Ruckusing/Task/ITask.php';
+require_once 'Phigrate/Task/ITask.php';
 
 /**
  * This is a generic task which dumps the schema of the DB
  * as a text file.
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @subpackage Db
  * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  */
-class Task_Db_Schema extends Task_Base implements Ruckusing_Task_ITask
+class Task_Db_Schema extends Task_Base implements Phigrate_Task_ITask
 {
     /**
      * Primary task entry point
@@ -56,8 +57,8 @@ class Task_Db_Schema extends Task_Base implements Ruckusing_Task_ITask
             $schema_file = $this->_migrationDir . '/schema.txt';
             file_put_contents($schema_file, $schema, LOCK_EX);
         } catch (Exception $ex) {
-            if (! $ex instanceof Ruckusing_Exception_Task) {
-                $ex = new Ruckusing_Exception_Task(
+            if (! $ex instanceof Phigrate_Exception_Task) {
+                $ex = new Phigrate_Exception_Task(
                     $ex->getMessage(),
                     $ex->getCode(),
                     $ex

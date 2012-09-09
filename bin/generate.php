@@ -1,20 +1,22 @@
 #!/usr/bin/env php
 
 <?php
+
 /**
- * Rucksing Migrations
+ * Phigrate
  *
- * PHP Version 5
+ * PHP Version 5.3
  *
- * @category  RuckusingMigrations
+ * @category  Phigrate
  * @package   Main
+ * @author    Manuel HERVO <manuel.hervo % gmail . com>
  * @author    Cody Caughlan <codycaughlan % gmail . com>
  * @copyright 2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link      https://github.com/ruckus/ruckusing-migrations
+ * @link      https://github.com/Azema/Phigrate
  *
  * Generator for migrations.
- * Ruckusing Migrations v{$version} at {$dateVersion}
+ * Phigrate v{$version} at {$dateVersion}
  *
  * Usage: php generate.php [options] [help] [ENV=environment] <migration name>
  *
@@ -37,13 +39,13 @@
  */
 
 if (strpos('@pear_directory@', '@pear_directory') === 0) {  // not a pear install
-    define('RUCKUSING_BASE', realpath(dirname(__FILE__) . '/..'));
+    define('PHIGRATE_BASE', realpath(dirname(__FILE__) . '/..'));
 } else {
-    define('RUCKUSING_BASE', '@pear_directory@/Ruckusing');
+    define('PHIGRATE_BASE', '@pear_directory@/Phigrate');
 }
 set_include_path(
     implode(PATH_SEPARATOR, array(
-        RUCKUSING_BASE . '/library',
+        PHIGRATE_BASE . '/library',
         get_include_path(),
     ))
 );
@@ -123,8 +125,8 @@ function parseArgs($argv)
                 case '--configuration':
                     $i++;
                     if (! array_key_exists($i, $argv)) {
-                        require_once 'Ruckusing/Exception/Argument.php';
-                        throw new Ruckusing_Exception_Argument(
+                        require_once 'Phigrate/Exception/Argument.php';
+                        throw new Phigrate_Exception_Argument(
                             'Please, specify the configuration file if you use'
                             . ' the argument -c or --configuration'
                         );
@@ -136,8 +138,8 @@ function parseArgs($argv)
                 case '--migrationdir':
                     $i++;
                     if (! array_key_exists($i, $argv)) {
-                        require_once 'Ruckusing/Exception/Argument.php';
-                        throw new Ruckusing_Exception_Argument(
+                        require_once 'Phigrate/Exception/Argument.php';
+                        throw new Phigrate_Exception_Argument(
                             'Please, specify the directory of migration files '
                             . ' if you use the argument -m or --migrationdir'
                         );
@@ -187,7 +189,7 @@ function getEnvironment($options)
  * @param array  $options
  * @param string $env
  *
- * @return Ruckusing_Config
+ * @return Phigrate_Config
  */
 function getConfig($options, $env)
 {
@@ -196,14 +198,14 @@ function getConfig($options, $env)
         $configFile = $options['configFile'];
     }
     if (! is_file($configFile)) {
-        require_once 'Ruckusing/Exception/Config.php';
-        throw new Ruckusing_Exception_Config(
+        require_once 'Phigrate/Exception/Config.php';
+        throw new Phigrate_Exception_Config(
             'The configuration file "' . $configFile 
             . '" does not exists or is not a file.'
         );
     }
-    require_once 'Ruckusing/Config/Ini.php';
-    return new Ruckusing_Config_Ini($configFile, $env);
+    require_once 'Phigrate/Config/Ini.php';
+    return new Phigrate_Config_Ini($configFile, $env);
 }
 
 /**
@@ -214,12 +216,12 @@ function getConfig($options, $env)
  *
  * @return void
  */
-function printHelp($scriptName = 'ruckusing-generate')
+function printHelp($scriptName = 'phigrate-generate')
 {
-    $version = '0.9.2-alpha';
+    $version = '0.9.4-alpha';
     $dateVersion = date('c', mktime(22,10,0,6,25,2012));
     $usage =<<<USAGE
-Ruckusing Migrations v{$version} at {$dateVersion}
+Phigrate v{$version} at {$dateVersion}
 
 Usage: {$scriptName} [options] [help] [ENV=environment] <migration name>
 
@@ -261,8 +263,8 @@ function main($args, $config)
     } elseif (isset($config->migration) && isset($config->migration->dir)) {
         $migrationDir = $config->migration->dir;
     } else {
-        require_once 'Ruckusing/Exception/MissingMigrationDir.php';
-        throw new Ruckusing_Exception_MissingMigrationDir(
+        require_once 'Phigrate/Exception/MissingMigrationDir.php';
+        throw new Phigrate_Exception_MissingMigrationDir(
             'Error: Migration directory must be specified!'
         );
     }
@@ -272,8 +274,8 @@ function main($args, $config)
 
     //check to make sure our migration directory exists
     if (! is_dir($migrationDir)) {
-        require_once 'Ruckusing/Exception/InvalidMigrationDir.php';
-        throw new Ruckusing_Exception_InvalidMigrationDir(
+        require_once 'Phigrate/Exception/InvalidMigrationDir.php';
+        throw new Phigrate_Exception_InvalidMigrationDir(
             'ERROR: migration directory \'' . $migrationDir
             . '\' does not exist. Specify \'migration.dir\' in '
             . 'config/application.ini and try again.'
@@ -282,12 +284,12 @@ function main($args, $config)
 
     $migrationDir = realpath($migrationDir);
     //generate a complete migration file
-    require_once 'Ruckusing/Util/Migrator.php';
-    $timestamp   = Ruckusing_Util_Migrator::generateTimestamp();
-    $klass       = Ruckusing_Util_Naming::camelcase($migrationName);
+    require_once 'Phigrate/Util/Migrator.php';
+    $timestamp   = Phigrate_Util_Migrator::generateTimestamp();
+    $klass       = Phigrate_Util_Naming::camelcase($migrationName);
     if (classNameIsDuplicated($klass, $migrationDir)) {
-        require_once 'Ruckusing/Exception/Argument.php';
-        throw new Ruckusing_Exception_Argument(
+        require_once 'Phigrate/Exception/Argument.php';
+        throw new Phigrate_Exception_Argument(
             'This class name is already used. Please, choose another name.'
         );
     }
@@ -297,8 +299,8 @@ function main($args, $config)
 
     //check to make sure our destination directory is writable
     if (! is_writable($migrationDir . '/')) {
-        require_once 'Ruckusing/Exception/InvalidMigrationDir.php';
-        throw new Ruckusing_Exception_InvalidMigrationDir(
+        require_once 'Phigrate/Exception/InvalidMigrationDir.php';
+        throw new Phigrate_Exception_InvalidMigrationDir(
             'ERROR: migration directory (' . $migrationDir
             . ') is not writable by the current user. '
             . 'Check permissions and try again.'
@@ -309,8 +311,8 @@ function main($args, $config)
     $fileResult = file_put_contents($fullPath, $templateStr);
     // No three equals (check error and zero caracter writed)
     if ($fileResult == false) {
-        require_once 'Ruckusing/Exception/InvalidMigrationDir.php';
-        throw new Ruckusing_Exception_InvalidMigrationDir(
+        require_once 'Phigrate/Exception/InvalidMigrationDir.php';
+        throw new Phigrate_Exception_InvalidMigrationDir(
             'Error writing to migrations directory/file. '
             . 'Do you have sufficient privileges?'
             . "\nOr the file is maybe double ({$fileName})?"
@@ -329,8 +331,8 @@ function main($args, $config)
  */
 function classNameIsDuplicated($classname, $migrationDir)
 {
-    require_once 'Ruckusing/Util/Migrator.php';
-    $migrationFiles = Ruckusing_Util_Migrator::getMigrationFiles($migrationDir);
+    require_once 'Phigrate/Util/Migrator.php';
+    $migrationFiles = Phigrate_Util_Migrator::getMigrationFiles($migrationDir);
     $classname = strtolower($classname);
     foreach ($migrationFiles as $file) {
         if (strtolower($file['class']) == $classname) {
@@ -364,11 +366,11 @@ function getTemplate($klass)
     $template = <<<TPL
 <?php\n
 /**
- * Rucksing Migrations
+ * Phigrate
  *
  * PHP Version 5
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Migrations
  * @author
  * @copyright
@@ -381,16 +383,16 @@ function getTemplate($klass)
  *
  * For documentation on the methods of migration
  *
- * @see https://github.com/Azema/ruckusing-migrations/wiki/Migration-Methods
+ * @see https://github.com/Azema/Phigrate/wiki/Migration-Methods
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Migrations
  * @author
  * @copyright
  * @license
  * @link
  */
-class $klass extends Ruckusing_Migration_Base
+class $klass extends Phigrate_Migration_Base
 {
     /**
      * up
@@ -457,10 +459,10 @@ function scrExceptionHandler($exception)
 function loader($classname)
 {
     $filename = str_replace('_', '/', $classname) . '.php';
-    if (defined('RUCKUSING_BASE')
-        && is_file(RUCKUSING_BASE . '/library/' . $filename)
+    if (defined('PHIGRATE_BASE')
+        && is_file(PHIGRATE_BASE . '/library/' . $filename)
     ) {
-        $filename = RUCKUSING_BASE . '/library/' . $filename;
+        $filename = PHIGRATE_BASE . '/library/' . $filename;
     }
     include_once $filename;
 }

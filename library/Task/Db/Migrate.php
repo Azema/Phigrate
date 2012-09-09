@@ -1,17 +1,18 @@
 <?php
+
 /**
- * Rucksing Migrations
+ * Phigrate
  *
- * PHP Version 5
+ * PHP Version 5.3
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @subpackage Db
  * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  */
 
 /**
@@ -23,14 +24,14 @@ require_once 'Task/Db/AMigration.php';
  * This is the primary work-horse method, it runs all migrations available,
  * up to the current version.
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @subpackage Db
  * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  */
 class Task_Db_Migrate extends Task_Db_AMigration
 {
@@ -47,8 +48,8 @@ class Task_Db_Migrate extends Task_Db_AMigration
         if (! $this->_adapter->supportsMigrations()) {
             $msg = 'This database does not support migrations.';
             $this->_logger->warn($msg);
-            require_once 'Ruckusing/Exception/Task.php';
-            throw new Ruckusing_Exception_Task($msg);
+            require_once 'Phigrate/Exception/Task.php';
+            throw new Phigrate_Exception_Task($msg);
         }
         
         $this->_return = 'Started: ' . date('Y-m-d g:ia T') . PHP_EOL . PHP_EOL
@@ -83,17 +84,17 @@ execution of migrations is all handled by just a regular ol' task.
 \t\033[37mExample A:\033[0m The database is fresh and empty, assuming there
 \tare 5 actual migrations, but only the first two should be run.
 
-\t\t\033[35mphp main.php db:migrate VERSION=20101006114707\033[0m
+\t\t\033[35mphigrate db:migrate VERSION=20101006114707\033[0m
 
 \t\033[37mExample B:\033[0m The current version of the DB is 20101006114707
 \tand we want to go down to 20100921114643
 
-\t\t\033[35mphp main.php db:migrate VERSION=20100921114643\033[0m
+\t\t\033[35mphigrate db:migrate VERSION=20100921114643\033[0m
 
 \t\033[37mExample C:\033[0m You can also use relative number of revisions
 \t(positive migrate up, negative migrate down).
 
-\t\t\033[35mphp main.php db:migrate VERSION=-2\033[0m
+\t\t\033[35mphigrate db:migrate VERSION=-2\033[0m
 
 USAGE;
         $this->_logger->debug(__METHOD__ . ' End');
@@ -212,7 +213,7 @@ USAGE;
      * run migrations
      *
      * @param array                   $migrations   The table of migration files
-     * @param Ruckusing_BaseMigration $targetMethod The migration class
+     * @param Phigrate_BaseMigration $targetMethod The migration class
      *
      * @return void
      */
@@ -229,17 +230,17 @@ USAGE;
             }
             $this->_logger->debug('include file: ' . $file['file']);
             include_once $fullPath;
-            require_once 'Ruckusing/Util/Naming.php';
-            $class = Ruckusing_Util_Naming::classFromMigrationFile($file['file']);
-            /** @param Ruckusing_Migration_Base $obj */
+            require_once 'Phigrate/Util/Naming.php';
+            $class = Phigrate_Util_Naming::classFromMigrationFile($file['file']);
+            /** @param Phigrate_Migration_Base $obj */
             $obj = new $class($this->_adapter);
             $refl = new ReflectionObject($obj);
             if (! $refl->hasMethod($targetMethod)) {
                 $msg = $class . ' does not have (' . $targetMethod
                     . ') method defined!';
                 $this->_logger->warn($msg);
-                require_once 'Ruckusing/Exception/MissingMigrationMethod.php';
-                throw new Ruckusing_Exception_MissingMigrationMethod($msg);
+                require_once 'Phigrate/Exception/MissingMigrationMethod.php';
+                throw new Phigrate_Exception_MissingMigrationMethod($msg);
             }
             $objMigrations[] = array(
                 'obj'  => $obj,
@@ -258,7 +259,7 @@ USAGE;
                     //wrap the caught exception in our own
                     $msg = $migration['file']['class'] . ' - ' . $e->getMessage();
                     $this->_logger->err($msg);
-                    throw new Ruckusing_Exception($msg, $e->getCode(), $e);
+                    throw new Phigrate_Exception($msg, $e->getCode(), $e);
                 }
                 $end = microtime(true);
                 $diff = $this->_diffTimer($start, $end);

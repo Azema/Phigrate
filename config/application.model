@@ -1,6 +1,6 @@
 [default]
-database.config = "/etc/ruckusing/database.ini"
-task.dir = "/usr/share/pear/Ruckusing/library/Task"
+database.config = "/etc/phigrate/database.ini"
+task.dir = "/usr/share/pear/Phigrate/library/Task"
 migration.dir = "/home/user/projects/MyProject/db/migrate"
 log.dir = "/tmp/"
 debug = 0
@@ -9,4 +9,4 @@ debug = 0
 debug = 1
 
 [test : development]
-migration.dir = RUCKUSING_BASE "/tests/dummy/db/migrate"
+migration.dir = PHIGRATE_BASE "/tests/dummy/db/migrate"

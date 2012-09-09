@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Rucksing Migrations
+ * Phigrate
  *
- * PHP Version 5
+ * PHP Version 5.3
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @subpackage Db
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  */
 
 /**
@@ -20,24 +20,24 @@
 require_once 'Task/Base.php';
 
 /**
- * @see Ruckusing_Task_ITask
+ * @see Phigrate_Task_ITask
  */
-require_once 'Ruckusing/Task/ITask.php';
+require_once 'Phigrate/Task/ITask.php';
 
 /**
  * This is the primary work-horse method, it runs all migrations available,
  * up to the current version.
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @subpackage Db
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  * @abstract
  */
-abstract class Task_Db_AMigration extends Task_Base implements Ruckusing_Task_ITask
+abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITask
 {
     /** @var integer */
     const STYLE_REGULAR = 1;
@@ -47,7 +47,7 @@ abstract class Task_Db_AMigration extends Task_Base implements Ruckusing_Task_IT
     /**
      * migrator util
      *
-     * @var Ruckusing_Util_Migrator
+     * @var Phigrate_Util_Migrator
      */
     protected $_migratorUtil = null;
 
@@ -76,7 +76,7 @@ abstract class Task_Db_AMigration extends Task_Base implements Ruckusing_Task_IT
             // and if not, automatically create it
             $this->_verifyEnvironment();
 
-            $this->_migratorUtil = new Ruckusing_Util_Migrator($this->_adapter);
+            $this->_migratorUtil = new Phigrate_Util_Migrator($this->_adapter);
 
             $targetVersion = null;
             $style = self::STYLE_REGULAR;
@@ -117,11 +117,11 @@ abstract class Task_Db_AMigration extends Task_Base implements Ruckusing_Task_IT
                 $this->_logger->debug('STYLE OFFSET');
                 $this->_migrateFromOffset($offset, $currentVersion, $direction);
             }
-        } catch (Ruckusing_Exception_MissingSchemaInfoTable $ex) {
+        } catch (Phigrate_Exception_MissingSchemaInfoTable $ex) {
             $this->_return .= $ex->getMessage();
-        } catch (Ruckusing_Exception_MissingMigrationMethod $ex) {
+        } catch (Phigrate_Exception_MissingMigrationMethod $ex) {
             $this->_return .= $ex->getMessage();
-        } catch (Ruckusing_Exception $ex) {
+        } catch (Phigrate_Exception $ex) {
             $this->_logger->err('Exception: ' . $ex->getMessage());
             $this->_return .= "\n" . $ex->getMessage() . "\n";
         }
@@ -138,11 +138,11 @@ abstract class Task_Db_AMigration extends Task_Base implements Ruckusing_Task_IT
     protected function _verifyEnvironment()
     {
         $this->_logger->debug(__METHOD__ . ' Start');
-        if (! $this->_adapter->tableExists(RUCKUSING_TS_SCHEMA_TBL_NAME)) {
+        if (! $this->_adapter->tableExists(PHIGRATE_TS_SCHEMA_TBL_NAME)) {
             $msg = 'Schema version table does not exist.';
             $this->_logger->warn($msg);
-            require_once 'Ruckusing/Exception/MissingSchemaInfoTable.php';
-            throw new Ruckusing_Exception_MissingSchemaInfoTable("\n\t" . $msg);
+            require_once 'Phigrate/Exception/MissingSchemaInfoTable.php';
+            throw new Phigrate_Exception_MissingSchemaInfoTable("\n\t" . $msg);
         }
         $this->_logger->debug(__METHOD__ . ' End');
     }

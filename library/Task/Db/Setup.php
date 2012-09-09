@@ -1,17 +1,18 @@
 <?php
+
 /**
- * Rucksing Migrations
+ * Phigrate
  *
- * PHP Version 5
+ * PHP Version 5.3
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @subpackage Db
  * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  */
 
 /**
@@ -20,9 +21,9 @@
 require_once 'Task/Base.php';
 
 /**
- * @see Ruckusing_Task_ITask
+ * @see Phigrate_Task_ITask
  */
-require_once 'Ruckusing/Task/ITask.php';
+require_once 'Phigrate/Task/ITask.php';
 
 /**
  * This is a generic task which initializes a table
@@ -30,16 +31,16 @@ require_once 'Ruckusing/Task/ITask.php';
  * This task is non-destructive and will only create the table
  * if it does not already exist, otherwise no other actions are performed.
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @subpackage Db
  * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  */
-class Task_Db_Setup extends Task_Base implements Ruckusing_Task_ITask
+class Task_Db_Setup extends Task_Base implements Phigrate_Task_ITask
 {
     /**
      * Primary task entry point
@@ -53,14 +54,14 @@ class Task_Db_Setup extends Task_Base implements Ruckusing_Task_ITask
         $return = 'Started: ' . date('Y-m-d g:ia T') . "\n\n"
             . "[db:setup]: \n";
         //it doesnt exist, create it
-        if (! $this->_adapter->tableExists(RUCKUSING_TS_SCHEMA_TBL_NAME, true)) {
-            $return .= sprintf("\tCreating table: '%s'", RUCKUSING_TS_SCHEMA_TBL_NAME);
+        if (! $this->_adapter->tableExists(PHIGRATE_TS_SCHEMA_TBL_NAME, true)) {
+            $return .= sprintf("\tCreating table: '%s'", PHIGRATE_TS_SCHEMA_TBL_NAME);
             $this->_adapter->createSchemaVersionTable();
             $return .= "\n\tDone.";
         } else {
             $return .= sprintf(
                 "\tNOTICE: table '%s' already exists. Nothing to do.",
-                RUCKUSING_TS_SCHEMA_TBL_NAME
+                PHIGRATE_TS_SCHEMA_TBL_NAME
             );
         }
         $return .= "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";

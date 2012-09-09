@@ -1,17 +1,18 @@
 <?php
+
 /**
- * Rucksing Migrations
+ * Phigrate
  *
- * PHP Version 5
+ * PHP Version 5.3
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @subpackage Db
  * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  */
 
 /**
@@ -20,23 +21,23 @@
 require_once 'Task/Base.php';
 
 /**
- * @see Ruckusing_Task_ITask
+ * @see Phigrate_Task_ITask
  */
-require_once 'Ruckusing/Task/ITask.php';
+require_once 'Phigrate/Task/ITask.php';
 
 /**
  * Prints out a list of migrations that have and haven't been applied
  *
- * @category   RuckusingMigrations
+ * @category   Phigrate
  * @package    Task
  * @subpackage Db
  * @author     Cody Caughlan <codycaughlan % gmail . com>
  * @author     Manuel HERVO <manuel.hervo % gmail .com>
  * @copyright  2007 Cody Caughlan (codycaughlan % gmail . com)
  * @license    GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
- * @link       https://github.com/ruckus/ruckusing-migrations
+ * @link       https://github.com/Azema/Phigrate
  */
-class Task_Db_Status extends Task_Base implements Ruckusing_Task_ITask
+class Task_Db_Status extends Task_Base implements Phigrate_Task_ITask
 {
     /**
      * Primary task entry point
@@ -49,8 +50,8 @@ class Task_Db_Status extends Task_Base implements Ruckusing_Task_ITask
     {
         $return = 'Started: ' . date('Y-m-d g:ia T') . "\n\n"
             . "[db:status]:\n";
-        require_once 'Ruckusing/Util/Migrator.php';
-        $util = new Ruckusing_Util_Migrator($this->_adapter);
+        require_once 'Phigrate/Util/Migrator.php';
+        $util = new Phigrate_Util_Migrator($this->_adapter);
         $migrations = $util->getExecutedMigrations();
         $this->_logger->debug('Migrations: ' . var_export($migrations, true));
         $files = $util->getMigrationFiles($this->_migrationDir, 'up');
