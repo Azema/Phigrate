@@ -20,3 +20,4 @@ build/coverage
 build/logs
 build/pdepend
 tests/logs
+library/Phigrate/.tags
