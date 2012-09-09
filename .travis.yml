@@ -6,12 +6,12 @@ php:
 
 mysql:
   adapter: mysql2
-  database: rucku_migrations_test
-  username: rucku_test
+  database: phigrate_test
+  username: phigrate_test
   encoding: utf8
 
 before_script:
-  - "mysql -e 'create database rucku_migrations_test;'"
+  - "mysql -e 'create database phigrate_test;'"
   - "cp config/application.model config/application.ini"
   - "cp config/database.model config/database.ini"
 
