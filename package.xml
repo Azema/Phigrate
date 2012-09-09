@@ -15,9 +15,9 @@
     <active>yes</active>
   </lead>
   <date>2012-09-09</date>
-  <time>12:51:36</time>
+  <time>13:28:37</time>
   <version>
-    <release>0.9.2</release>
+    <release>0.9.3</release>
     <api>0.0.1</api>
   </version>
   <stability>
@@ -50,7 +50,7 @@
             <file name="ColumnDefinition.php" role="php" md5sum="91f5c000bb873bde1c65809d84764f87"/>
             <file name="IAdapter.php" role="php" md5sum="c65d5a0563c5b838853a1ac40847a47f"/>
             <dir name="Mysql">
-              <file name="Adapter.php" role="php" md5sum="eefb5be036b65d588c1038d33d25c12d"/>
+              <file name="Adapter.php" role="php" md5sum="6b0be7043df7a6a6c061a34aa5eec5c4"/>
               <file name="ColumnDefinition.php" role="php" md5sum="94a42460bd8bec03303bfb9c935942ad"/>
               <file name="TableDefinition.php" role="php" md5sum="f1dd7509f228d7940c45ade8522d6dc2"/>
             </dir>
@@ -87,7 +87,7 @@
           <file name="FrameworkRunner.php" role="php" md5sum="017fd50ec61a6105e9781f7efd00181d"/>
           <file name="Logger.php" role="php" md5sum="b7ac98623aa185c5f23df36dff8cd0c2"/>
           <dir name="Migration">
-            <file name="Base.php" role="php" md5sum="d8204925aeb48e6bdb1dde5465792c6c"/>
+            <file name="Base.php" role="php" md5sum="ad5c07869447cf66865ac7bcb240af1e"/>
           </dir>
           <dir name="Task">
             <file name="ITask.php" role="php" md5sum="e2aaba77c69a94f310b23e1d134fa851"/>
