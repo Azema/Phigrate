@@ -25,6 +25,8 @@ The project is built on a continuous integration Jenkins (http://www.sourceslist
 
 # Limitations
 
-* PHP5 is a hard requirement. The framework employes extensive use of object-oriented features of PHP5. There are no plans to make the framework backwards compatible.
+* PHP 5.3 or above is a hard requirement. The framework employes extensive use of object-oriented features of PHP5. There are no plans to make the framework backwards compatible.
 
 * As of August 2007, only the MySQL RDBMS is supported.
+
+* As of september 2012, PHP 5.2 is not supported
