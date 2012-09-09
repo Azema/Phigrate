@@ -52,7 +52,7 @@ class Task_Db_Export extends Task_Db_AMigration
         $this->_adapter->setExport(true);
         $this->_return = "--\n--\tExport SQL by Ruckusing\n--\n\n" 
             . '-- Started: ' . date('Y-m-d g:ia T') . PHP_EOL . PHP_EOL
-            . '-- [db:migrate]:' . PHP_EOL;
+            . '-- [db:export]:' . PHP_EOL;
         try {
             $this->_execute($args);
         } catch(\Exception $e) {
@@ -106,7 +106,7 @@ USAGE;
     }
 
     /**
-     * migrate from offset
+     * export from offset
      *
      * @param int    $offset         The offset
      * @param int    $currentVersion The current version
@@ -158,7 +158,7 @@ USAGE;
                 'Cannot migration ' . $direction . ' via offset '
                 . $prefix . $offset
             );
-            $this->_return .= "--\tCannot migrate " . strtoupper($direction)
+            $this->_return .= "--\tCannot export " . strtoupper($direction)
                 . " via offset \"{$prefix}{$offset}\": "
                 . "not enough migrations exist to execute.\n"
                 . "--\tYou asked for ({$offset}) but only available are "
@@ -172,7 +172,7 @@ USAGE;
     }
 
     /**
-     * prepare to migrate
+     * prepare to export
      *
      * @param string $destination The version desired
      * @param string $direction   Up or Down

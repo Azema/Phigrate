@@ -15,7 +15,7 @@
     <active>yes</active>
   </lead>
   <date>2012-09-09</date>
-  <time>13:28:37</time>
+  <time>14:01:05</time>
   <version>
     <release>0.9.3</release>
     <api>0.0.1</api>
@@ -102,7 +102,7 @@
           <file name="Base.php" role="php" md5sum="7f1a8d1f0c68d615672835331ee66749"/>
           <dir name="Db">
             <file name="AMigration.php" role="php" md5sum="35c4d60c7216b7ac7cf6cf6721ac2f46"/>
-            <file name="Export.php" role="php" md5sum="99d6f0ddeca96a942bba4ff32f5d7edf"/>
+            <file name="Export.php" role="php" md5sum="be612697ee2b316a90decab9f6af71c8"/>
             <file name="Migrate.php" role="php" md5sum="0bd40757247e0d590a618990a4134037"/>
             <file name="Schema.php" role="php" md5sum="cc7832819f2bfa7e6d3184ec304a7985"/>
             <file name="Setup.php" role="php" md5sum="31670c549a37d384e06d2c021608f76b"/>

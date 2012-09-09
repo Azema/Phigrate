@@ -63,7 +63,7 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $regexp = '/^--\012+--\tExport SQL by Ruckusing\012+'
             . '--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:migrate\]:\012+\tSchema version table does not exist\.\012+'
+            . '-- \[db:export\]:\012+\tSchema version table does not exist\.\012+'
             . '-- Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);
@@ -76,7 +76,7 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array('VERSION'=>'-1'));
         $regexp = '/^--\012+--\tExport SQL by Ruckusing\012+--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:migrate\]:\012+--\tMigrating DOWN to: 20120112064438\012+'
+            . '-- \[db:export\]:\012+--\tMigrating DOWN to: 20120112064438\012+'
             . '--\012+-- No relevant migrations to run\. Exiting\.\.\.\012+'
             . '-- Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
@@ -95,7 +95,7 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array('VERSION'=>'-1'));
         $regexp = '/^--\012+--\tExport SQL by Ruckusing\012+--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:migrate\]:\012+--\tMigrating DOWN to: 20120110064438\012+'
+            . '-- \[db:export\]:\012+--\tMigrating DOWN to: 20120110064438\012+'
             . '-- ========= CreateAddresses ======== \(\d+.\d{2}\)\012+'
             . 'DROP INDEX `idx_addresses_user_id` ON `addresses`;\012+'
             . 'DROP TABLE IF EXISTS `addresses`;\012+'
@@ -113,7 +113,7 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array('VERSION'=>'+1'));
         $regexp = '/^--\012+--\tExport SQL by Ruckusing\012+--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:migrate\]:\012+--\tMigrating UP to: 20120109064438\012+'
+            . '-- \[db:export\]:\012+--\tMigrating UP to: 20120109064438\012+'
             . '-- ========= CreateUsers ======== \(\d+.\d{2}\)\012+'
             . 'CREATE TABLE `users` \(\012+`id` int\(11\) UNSIGNED auto_increment NOT NULL,\012'
             . '`name` text NULL DEFAULT NULL,\012+ PRIMARY KEY \(`id`\)\);\012+'
@@ -136,7 +136,7 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array('VERSION'=>'+1'));
         $regexp = '/^--\012+--\tExport SQL by Ruckusing\012+--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:migrate\]:\012+--\tMigrating UP to: 20120110064438\012+'
+            . '-- \[db:export\]:\012+--\tMigrating UP to: 20120110064438\012+'
             . '-- ========= AddIndexToUsers ======== \(\d+.\d{2}\)\012+'
             . 'CREATE INDEX idx_users_name ON `users`\(`name`\);\012+'
             . '-- Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
@@ -160,8 +160,8 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array('VERSION' => '+' . $offset));
         $regexp = '/^--\012+--\tExport SQL by Ruckusing\012+--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:migrate\]:\012+'
-            . '--\tCannot migrate UP via offset "\+'.$offset.'": not enough migrations '
+            . '-- \[db:export\]:\012+'
+            . '--\tCannot export UP via offset "\+'.$offset.'": not enough migrations '
             . 'exist to execute\.\012+'
             . '--\tYou asked for \('.$offset.'\) but only available are \(0\): \012+'
             . '-- Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
@@ -181,8 +181,8 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array('VERSION' => '+' . $offset));
         $regexp = '/^--\012+--\tExport SQL by Ruckusing\012+--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:migrate\]:\012+'
-            . '--\tCannot migrate UP via offset "\+'.$offset.'": not enough migrations '
+            . '-- \[db:export\]:\012+'
+            . '--\tCannot export UP via offset "\+'.$offset.'": not enough migrations '
             . 'exist to execute\.\012+'
             . '--\tYou asked for \('.$offset.'\) but only available are \(3\): '
             . '20120110064438_AddIndexToUsers\.php, 20120111064438_CreateAddresses\.php'
@@ -203,7 +203,7 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array('VERSION' => '20120110064438'));
         $regexp = '/^--\012+--\tExport SQL by Ruckusing\012+--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:migrate\]:\012+--\tMigrating UP to: 20120110064438\012+'
+            . '-- \[db:export\]:\012+--\tMigrating UP to: 20120110064438\012+'
             . '-- ========= AddIndexToUsers ======== \(\d+.\d{2}\)\012+'
             . 'CREATE INDEX idx_users_name ON `users`\(`name`\);\012+'
             . '-- Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
@@ -225,7 +225,7 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array('VERSION' => '20120110064438'));
         $regexp = '/^--\012+--\tExport SQL by Ruckusing\012+--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:migrate\]:\012+--\tMigrating DOWN to: 20120110064438\012+'
+            . '-- \[db:export\]:\012+--\tMigrating DOWN to: 20120110064438\012+'
             . '-- ========= CreateAddresses ======== \(\d+.\d{2}\)\012+'
             . 'DROP INDEX `idx_addresses_user_id` ON `addresses`;\012+'
             . 'DROP TABLE IF EXISTS `addresses`;\012+'
@@ -249,7 +249,7 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array('VERSION' => '20120110064438'));
         $regexp = '/^--\012+--\tExport SQL by Ruckusing\012+--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:migrate\]:\012+--\tMigrating DOWN to: 20120110064438\012+'
+            . '-- \[db:export\]:\012+--\tMigrating DOWN to: 20120110064438\012+'
             . 'Ruckusing_Util_Migrator - \(\/tmp\/migrate\) is not a directory\.\012+'
             . '-- Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
@@ -270,7 +270,7 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array('VERSION' => '20120110064438'));
         $regexp = '/^--\012+--\tExport SQL by Ruckusing\012+--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:migrate\]:\012+--\tMigrating DOWN to: 20120110064438\012+'
+            . '-- \[db:export\]:\012+--\tMigrating DOWN to: 20120110064438\012+'
             . 'Ruckusing_Util_Migrator - \(\) is not a directory\.\012+'
             . '-- Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
@@ -290,7 +290,7 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array());
         $regexp = '/^--\012+--\tExport SQL by Ruckusing\012+--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:migrate\]:\012+--\tMigrating UP:\012+'
+            . '-- \[db:export\]:\012+--\tMigrating UP:\012+'
             . 'MissingMethodUp does not have \(up\) method defined\!\012+'
             . '-- Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
@@ -311,7 +311,7 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array('VERSION' => '20120111064438'));
         $regexp = '/^--\012+--\tExport SQL by Ruckusing\012+--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:migrate\]:\012+--\tMigrating DOWN to: 20120111064438\012+'
+            . '-- \[db:export\]:\012+--\tMigrating DOWN to: 20120111064438\012+'
             . 'MissingMethodUp - Query for selectOne\(\) is not one of SELECT'
             . ' or SHOW: UPDATE `users` SET `login` `login` VARCHAR\(20\);\012+'
             . '-- Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
