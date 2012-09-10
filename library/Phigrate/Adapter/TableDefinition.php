@@ -56,6 +56,13 @@ abstract class Phigrate_Adapter_TableDefinition
      * @var mixed
      */
     protected $_options;
+    
+    /**
+     * Prefix
+     *
+     * @var string
+     */
+    protected $_prefix = '';
 
     /**
      * __construct
@@ -83,6 +90,9 @@ abstract class Phigrate_Adapter_TableDefinition
         $this->_adapter = $adapter;
         $this->_name = $name;
         $this->_options = $options;
+        if (array_key_exists('prefix', $options)) {
+            $this->setPrefix($options['prefix']);
+        }
     }
 
     /**
@@ -142,6 +152,29 @@ abstract class Phigrate_Adapter_TableDefinition
                 . $backtrace[0]['file'] . ':' . $backtrace[0]['line'] . ')'
             );
         }
+    }
+    
+    /**
+     * Define prefix of table
+     * 
+     * @param string $prefix Prefix of table
+     * 
+     * @return \Phigrate_Adapter_TableDefinition
+     */
+    public function setPrefix($prefix)
+    {
+        $this->_prefix = str_replace('_', '', $prefix) . '_';
+        return $this;
+    }
+    
+    /**
+     * Return the prefix of table
+     * 
+     * @return string
+     */
+    public function getPrefix()
+    {
+        return $this->_prefix;
     }
 
     /**

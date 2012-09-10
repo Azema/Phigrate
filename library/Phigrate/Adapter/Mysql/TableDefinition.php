@@ -133,7 +133,7 @@ class Phigrate_Adapter_Mysql_TableDefinition extends Phigrate_Adapter_TableDefin
         $column_options = array_merge($column_options, $options);
         $column = new Phigrate_Adapter_Mysql_ColumnDefinition(
             $this->_adapter,
-            $column_name,
+            $this->_prefix . $column_name,
             $type,
             $column_options
         );
@@ -195,7 +195,7 @@ class Phigrate_Adapter_Mysql_TableDefinition extends Phigrate_Adapter_TableDefin
             $this->_primaryKeys[] = 'id';
             $primary_id = new Phigrate_Adapter_Mysql_ColumnDefinition(
                 $this->_adapter,
-                'id',
+                $this->_prefix . 'id',
                 'integer',
                 array(
                     'unsigned' => true,

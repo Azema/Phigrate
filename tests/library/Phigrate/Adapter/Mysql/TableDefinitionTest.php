@@ -272,6 +272,37 @@ class Phigrate_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_TestC
             $this->assertEquals($msg, $e->getMessage());
         }
     }
+    
+    public function testPrefixTable()
+    {
+        $table = new Phigrate_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users',
+            array('prefix' => 'usr')
+        );
+        $table->column('name', 'string');
+        $expected = '`usr_name` varchar(255) NULL DEFAULT NULL';
+        $sql = $table->toSql();
+        $this->assertEquals($expected, $sql);
+        $table = new Phigrate_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users',
+            array('prefix' => 'usr_')
+        );
+        $table->column('name', 'string');
+        $expected = '`usr_name` varchar(255) NULL DEFAULT NULL';
+        $sql = $table->toSql();
+        $this->assertEquals($expected, $sql);
+        $table = new Phigrate_Adapter_Mysql_TableDefinition(
+            $this->_adapter,
+            'users',
+            array('prefix' => 'usr__')
+        );
+        $table->column('name', 'string');
+        $expected = '`usr_name` varchar(255) NULL DEFAULT NULL';
+        $sql = $table->toSql();
+        $this->assertEquals($expected, $sql);
+    }
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */
