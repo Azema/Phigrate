@@ -43,6 +43,17 @@ if (strpos('@pear_directory@', '@pear_directory') === 0) {  // not a pear instal
 } else {
     define('PHIGRATE_BASE', '@pear_directory@/Phigrate');
 }
+if (strpos('@package_version@', '@package_version') === 0) {  // not a pear install
+    define('PHIGRATE_VERSION', '0.9.4');
+} else {
+    define('PHIGRATE_VERSION', '@package_version@');
+}
+if (strpos('@package_date@', '@package_date') === 0) {
+    define('PHIGRATE_DATE', date('c', mktime(22,10,0,9,9,2012)));
+} else {
+    define('PHIGRATE_DATE', '@package_date@');
+}
+
 set_include_path(
     implode(PATH_SEPARATOR, array(
         PHIGRATE_BASE . '/library',
@@ -218,8 +229,8 @@ function getConfig($options, $env)
  */
 function printHelp($scriptName = 'phigrate-generate')
 {
-    $version = '0.9.4-alpha';
-    $dateVersion = date('c', mktime(22,10,0,6,25,2012));
+    $version = PHIGRATE_VERSION;
+    $dateVersion = PHIGRATE_DATE;
     $usage =<<<USAGE
 Phigrate v{$version} at {$dateVersion}
 

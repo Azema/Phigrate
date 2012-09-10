@@ -4,18 +4,18 @@
   <channel>Quazar.pearfarm.org</channel>
   <summary>Migrations SQL with PHP as ActiveRecord Migrations</summary>
   <description>Phigrate is a framework written in PHP5 for generating and managing a set of &amp;quot;database
-             migrations&amp;quot;. Database migrations are declarative files which represent the state of a DB (its tables,
-             columns, indexes, etc) at a particular state of time. By using database migrations, multiple developers can
-             work on the same application and be guaranteed that the application is in a consistent state across all
-             remote developer machines.</description>
+    migrations&amp;quot;. Database migrations are declarative files which represent the state of a DB (its tables,
+    columns, indexes, etc) at a particular state of time. By using database migrations, multiple developers can
+    work on the same application and be guaranteed that the application is in a consistent state across all
+    remote developer machines.</description>
   <lead>
     <name>Manuel HERVO</name>
     <user>Quazar</user>
     <email>manuel.hervo@gmail.com</email>
     <active>yes</active>
   </lead>
-  <date>2012-09-09</date>
-  <time>15:56:36</time>
+  <date>2012-09-10</date>
+  <time>17:49:32</time>
   <version>
     <release>0.9.4</release>
     <api>0.0.1</api>
@@ -29,42 +29,46 @@
   <contents>
     <dir name="/" baseinstalldir="Phigrate">
       <dir name="bin">
-        <file name="generate.php" role="script" baseinstalldir="/" md5sum="989f2c59bd43e549f2a54675c739ca34">
+        <file name="phigrate" role="script" baseinstalldir="/" md5sum="cd884360bdcafd0e16c5a2582f0201d2">
           <tasks:replace type="pear-config" from="/usr/bin/env php" to="php_bin"/>
           <tasks:replace type="pear-config" from="@php_bin@" to="php_bin"/>
           <tasks:replace type="pear-config" from="@bin_dir@" to="bin_dir"/>
           <tasks:replace type="pear-config" from="@pear_directory@" to="php_dir"/>
+          <tasks:replace from="@package_version@" to="version" type="package-info"/>
+          <tasks:replace from="@package_date@" to="date" type="package-info"/>
         </file>
-        <file name="main.php" role="script" baseinstalldir="/" md5sum="900223f0630802c5d0bf590dfe1841d6">
+        <file name="phigrate-generate" role="script" baseinstalldir="/" md5sum="700e65093acddf8a0b91fd1680c489e2">
           <tasks:replace type="pear-config" from="/usr/bin/env php" to="php_bin"/>
           <tasks:replace type="pear-config" from="@php_bin@" to="php_bin"/>
           <tasks:replace type="pear-config" from="@bin_dir@" to="bin_dir"/>
           <tasks:replace type="pear-config" from="@pear_directory@" to="php_dir"/>
+          <tasks:replace from="@package_version@" to="version" type="package-info"/>
+          <tasks:replace from="@package_date@" to="date" type="package-info"/>
         </file>
       </dir>
       <dir name="library">
         <dir name="Phigrate">
           <dir name="Adapter">
-            <file name="Base.php" role="php" md5sum="dedd8ce029aee81bf43735655c7aacc8"/>
-            <file name="ColumnDefinition.php" role="php" md5sum="501879353ec500247be7e5e2a78dbee9"/>
-            <file name="IAdapter.php" role="php" md5sum="535288c8d4a4afbf9f58d66dddfc7593"/>
+            <file name="Base.php" role="php" md5sum="d89bd839720f96e43e53efd020df5eee"/>
+            <file name="ColumnDefinition.php" role="php" md5sum="bbb2d51799bdd7d774ef5b07475b1d99"/>
+            <file name="IAdapter.php" role="php" md5sum="948ba415bc715d00cf5bda82c174bd4b"/>
             <dir name="Mysql">
-              <file name="Adapter.php" role="php" md5sum="6b1c37c1d87620a25c19fe2752b95b11"/>
-              <file name="ColumnDefinition.php" role="php" md5sum="b378ed55caab686d3b0c1e8b911b7e0e"/>
-              <file name="TableDefinition.php" role="php" md5sum="6e00b5e7fd74cd640f6c736ea83fec11"/>
+              <file name="Adapter.php" role="php" md5sum="0aa5c7a1338c54729d05410c99ac6c82"/>
+              <file name="ColumnDefinition.php" role="php" md5sum="0c09db24366e0659c438aee209abc759"/>
+              <file name="TableDefinition.php" role="php" md5sum="33422123754ed326770cc75d40736266"/>
             </dir>
-            <file name="TableDefinition.php" role="php" md5sum="34abf6205163d7749673153db343ce94"/>
+            <file name="TableDefinition.php" role="php" md5sum="c40e0e249881d388b93a51d6602da8f5"/>
           </dir>
           <file name="Config.php" role="php" md5sum="faa22ece575d13955693cff5ae246877"/>
           <dir name="Config">
-            <file name="Ini.php" role="php" md5sum="e1d565691e5815c12e6d93ae2a8b1eb5"/>
+            <file name="Ini.php" role="php" md5sum="f0d93ee5de14d9754d5f91e33c2d35ae"/>
           </dir>
           <file name="Exception.php" role="php" md5sum="cce984939c92a6bd18d2be1394481d35"/>
           <dir name="Exception">
-            <file name="AdapterConnexion.php" role="php" md5sum="22f4a02d4bb46b7274a9c46ba53f00b4"/>
-            <file name="AdapterQuery.php" role="php" md5sum="6c0fb59a9af8d008d693f54ca0cb5f2d"/>
-            <file name="Argument.php" role="php" md5sum="120454b510a93e7cd56137d0b3d94656"/>
-            <file name="Config.php" role="php" md5sum="402f2f0a758c8c993319a9998d5f1402"/>
+            <file name="AdapterConnexion.php" role="php" md5sum="32040716e9a6be925ca2a231e6054fe8"/>
+            <file name="AdapterQuery.php" role="php" md5sum="cf81b3573bc974ed4d1e02f2837a6ee2"/>
+            <file name="Argument.php" role="php" md5sum="18b50f0708898563d5e377179df69065"/>
+            <file name="Config.php" role="php" md5sum="6b3b6c1e0cc4863adb8d801c8e76daee"/>
             <file name="InvalidAdapterType.php" role="php" md5sum="3d1e121f8a5deb066a2d2653bab5968f"/>
             <file name="InvalidIndexName.php" role="php" md5sum="b9213997b35df40b6556a6b92c36b248"/>
             <file name="InvalidLog.php" role="php" md5sum="feb821cbf282abecdc218e5885c99f4b"/>
@@ -83,7 +87,7 @@
             <file name="Sql.php" role="php" md5sum="00a76224031b5255ae2e052b6132ac19"/>
             <file name="Task.php" role="php" md5sum="bbfadcc0479bc5092d0c35263a76be1c"/>
           </dir>
-          <file name="FrameworkRunner.php" role="php" md5sum="c651d568d34f8da05f93a6b81f508d61"/>
+          <file name="FrameworkRunner.php" role="php" md5sum="d8b08e0cbcf243b3d755253a5281cb04"/>
           <file name="Logger.php" role="php" md5sum="fe7a06eebfeb64eb4973ec896d06b35f"/>
           <dir name="Migration">
             <file name="Base.php" role="php" md5sum="f5bfd646269cdad1392d2a2157fdbe4d"/>
@@ -115,17 +119,17 @@
   <dependencies>
     <required>
       <php>
-        <min>5.0.0</min>
+        <min>5.3.2</min>
       </php>
       <pearinstaller>
-        <min>1.4.0</min>
+        <min>1.9.4</min>
       </pearinstaller>
     </required>
   </dependencies>
   <phprelease>
     <filelist>
-      <install as="phigrate" name="bin/main.php"/>
-      <install as="phigrate-generate" name="bin/generate.php"/>
+      <install as="phigrate" name="bin/phigrate"/>
+      <install as="phigrate-generate" name="bin/phigrate-generate"/>
     </filelist>
   </phprelease>
 </package>
