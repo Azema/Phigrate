@@ -548,12 +548,27 @@ class Phigrate_FrameworkRunner
             if (isset($this->getConfig()->database)
                 && isset($this->getConfig()->database->config))
             {
-                $this->_configDbFile = $this->getConfig()->database->config;
+                $this->_configDbFile = $this->_fileWithRealPath($this->getConfig()->database->config);
             }
         }
         $this->getLogger()->info('configDbFile: ' . $this->_configDbFile);
         $this->getLogger()->debug(__METHOD__ . ' End');
         return $this->_configDbFile;
+    }
+    
+    /**
+     * Return path file absolute
+     * 
+     * @param string $file The file path
+     * 
+     * @return string
+     */
+    private function _fileWithRealPath($file)
+    {
+        if (substr($file, 0, 1) === '/') {
+            return $file;
+        }
+        return dirname($this->_getConfigFile()) . '/' . $file;
     }
 
     /**
@@ -600,6 +615,7 @@ class Phigrate_FrameworkRunner
             // Second in config file
             $logDir = $config->log->dir;
         }
+        $logDir = $this->_fileWithRealPath($logDir);
         if (! is_dir($logDir)) {
             require_once 'Phigrate/Exception/InvalidLog.php';
             throw new Phigrate_Exception_InvalidLog(
