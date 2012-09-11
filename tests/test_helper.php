@@ -44,12 +44,12 @@ if (!defined('PHIGRATE_MIGRATION_DIR')) {
 
 // User MySQL by default
 if (!defined('USER_MYSQL_DEFAULT')) {
-    define('USER_MYSQL_DEFAULT', 'root');
+    define('USER_MYSQL_DEFAULT', 'phigrate');
 }
 
 // User MySQL by default
 if (!defined('PASSWORD_MYSQL_DEFAULT')) {
-    define('PASSWORD_MYSQL_DEFAULT', '');
+    define('PASSWORD_MYSQL_DEFAULT', 'phigrate');
 }
 
 spl_autoload_register('loader', true, true);
