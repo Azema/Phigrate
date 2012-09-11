@@ -1,31 +1,31 @@
 <?xml version="1.0"?>
 <package xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0         http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd" version="2.0">
   <name>Phigrate</name>
-  <channel>Quazar.pearfarm.org</channel>
+  <channel>pear.phigrate.org</channel>
   <summary>Migrations SQL with PHP as ActiveRecord Migrations</summary>
-  <description>Phigrate is a framework written in PHP5 for generating and managing a set of &amp;quot;database
-    migrations&amp;quot;. Database migrations are declarative files which represent the state of a DB (its tables,
+  <description>Phigrate is a framework written in PHP5 for generating and managing a set of database
+    migrations. Database migrations are declarative files which represent the state of a DB (its tables,
     columns, indexes, etc) at a particular state of time. By using database migrations, multiple developers can
     work on the same application and be guaranteed that the application is in a consistent state across all
     remote developer machines.</description>
   <lead>
     <name>Manuel HERVO</name>
-    <user>Quazar</user>
+    <user>quazar</user>
     <email>manuel.hervo@gmail.com</email>
     <active>yes</active>
   </lead>
-  <date>2012-09-10</date>
-  <time>17:49:32</time>
+  <date>2012-09-11</date>
+  <time>10:10:00</time>
   <version>
-    <release>0.9.4</release>
-    <api>0.0.1</api>
+    <release>0.9.4a2</release>
+    <api>0.9.4a2</api>
   </version>
   <stability>
     <release>alpha</release>
     <api>alpha</api>
   </stability>
   <license uri="http://www.gnu.org/licenses/gpl-2.0.html">GPLv2</license>
-  <notes>Initial release.</notes>
+  <notes>Correction of package.xml for pear.</notes>
   <contents>
     <dir name="/" baseinstalldir="Phigrate">
       <dir name="bin">
