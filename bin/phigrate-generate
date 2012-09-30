@@ -78,7 +78,7 @@ function iterateDir($dir) {
     while(false !== ($entry = readdir($fp))) {
         if ($entry == '.rucku') {
             closedir($fp);
-            return $dir . '/.rucku';
+            return realpath($dir . '/.rucku');
         }
     }
     if (is_dir($dir . '/..') && $dir != '/') {
@@ -103,8 +103,9 @@ if (! in_array('-c', $argv)) {
 }
 $args = parseArgs($argv);
 $env = getEnvironment($args);
-$config = getConfig($args, $env);
-main($args, $config);
+$configFile = getConfigFile($args);
+$config = getConfig($configFile, $env);
+main($args, $config, dirname($configFile));
 
 
 //-------------------
@@ -195,16 +196,15 @@ function getEnvironment($options)
 }
 
 /**
- * getConfig
+ * getConfigFile
  *
- * @param array  $options
- * @param string $env
+ * @param array $options
  *
- * @return Phigrate_Config
+ * @return string
  */
-function getConfig($options, $env)
+function getConfigFile($options)
 {
-    $configFile = realpath(dirname(__FILE__) . '../config/application.ini');
+    $configFile = false;
     if (array_key_exists('configFile', $options)) {
         $configFile = $options['configFile'];
     }
@@ -215,6 +215,19 @@ function getConfig($options, $env)
             . '" does not exists or is not a file.'
         );
     }
+    return $configFile;
+}
+
+/**
+ * getConfig
+ *
+ * @param array  $options
+ * @param string $env
+ *
+ * @return Phigrate_Config
+ */
+function getConfig($configFile, $env)
+{
     require_once 'Phigrate/Config/Ini.php';
     return new Phigrate_Config_Ini($configFile, $env);
 }
@@ -266,13 +279,17 @@ USAGE;
  *
  * @return void
  */
-function main($args, $config)
+function main($args, $config, $configPath)
 {
     $migrationName = $args['name'];
     if (array_key_exists('migration.dir', $args)) {
         $migrationDir = $args['migration.dir'];
     } elseif (isset($config->migration) && isset($config->migration->dir)) {
-        $migrationDir = $config->migration->dir;
+        if (substr($config->migration->dir, 0, 1) != '/') {
+            $migrationDir = realpath($configPath . '/' . $config->migration->dir);
+        } else {
+            $migrationDir = $config->migration->dir;
+        }
     } else {
         require_once 'Phigrate/Exception/MissingMigrationDir.php';
         throw new Phigrate_Exception_MissingMigrationDir(

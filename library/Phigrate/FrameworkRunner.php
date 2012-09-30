@@ -277,6 +277,8 @@ class Phigrate_FrameworkRunner
         $this->getLogger()->debug(__METHOD__ . ' Start');
         if (! isset($this->_migrationDir)) {
             $this->_migrationDir = $this->_initMigrationDir();
+        } elseif (substr($this->_migrationDir, 0, 1) != '/') {
+            $this->_migrationDir = $this->_initMigrationDir($this->_migrationDir);
         }
         $this->getLogger()->debug('migrationDir: ' . $this->_migrationDir);
         $this->getLogger()->debug(__METHOD__ . ' End');
@@ -356,17 +358,21 @@ class Phigrate_FrameworkRunner
      *
      * @return string
      */
-    protected function _initMigrationDir()
+    protected function _initMigrationDir($migrationDir = null)
     {
         $config = $this->getConfig();
-        if (! isset($config->migration) || ! isset($config->migration->dir)) {
+        if (null === $migrationDir 
+            && (! isset($config->migration) || ! isset($config->migration->dir)))
+        {
             require_once 'Phigrate/Exception/MissingMigrationDir.php';
             throw new Phigrate_Exception_MissingMigrationDir(
                 'Please, inform the variable "migration.dir" '
                 . 'in the configuration file'
             );
+        } elseif (null === $migrationDir) {
+            $migrationDir = $config->migration->dir;
         }
-        return $config->migration->dir;
+        return $this->_fileWithRealPath($migrationDir);
     }
 
     /**
@@ -537,18 +543,15 @@ class Phigrate_FrameworkRunner
     {
         $this->getLogger()->debug(__METHOD__ . ' Start');
         if (! isset($this->_configDbFile)) {
-            if (! isset($this->getConfig()->database)
-                || ! isset($this->getConfig()->database->config))
-            {
-                require_once 'Phigrate/Exception/Config.php';
-                throw new Phigrate_Exception_Config(
-                    'Config file for DB not found! Please, create config file'
-                );
-            }
             if (isset($this->getConfig()->database)
                 && isset($this->getConfig()->database->config))
             {
                 $this->_configDbFile = $this->_fileWithRealPath($this->getConfig()->database->config);
+            } else {
+                require_once 'Phigrate/Exception/Config.php';
+                throw new Phigrate_Exception_Config(
+                    'Config file for DB not found! Please, create config file'
+                );
             }
         }
         $this->getLogger()->info('configDbFile: ' . $this->_configDbFile);
@@ -568,7 +571,7 @@ class Phigrate_FrameworkRunner
         if (substr($file, 0, 1) === '/') {
             return $file;
         }
-        return dirname($this->_getConfigFile()) . '/' . $file;
+        return realpath(dirname($this->_getConfigFile()) . '/' . $file);
     }
 
     /**

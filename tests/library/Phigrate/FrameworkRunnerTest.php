@@ -582,6 +582,23 @@ USAGE;
         }
     }
     
+    public function testParseArgumentMigrationWithRelatifDirectory()
+    {
+        $parameters = array(
+            'monScript.php',
+            '-c',
+            PHIGRATE_BASE . '/tests/fixtures/config/application.ini',
+            '-d',
+            PHIGRATE_BASE . '/tests/fixtures/config/database.ini',
+            'db:version',
+            '-m',
+            '../../dummy/db/migrate',
+        );
+        $actual = new Phigrate_FrameworkRunner($parameters);
+        $this->assertInstanceOf('Phigrate_FrameworkRunner', $actual);
+        $this->assertEquals(PHIGRATE_BASE . '/tests/dummy/db/migrate', $actual->getMigrationDir());
+    }
+    
     public function testParseArgumentTasksWithoutDirectory()
     {
         $parameters = array(

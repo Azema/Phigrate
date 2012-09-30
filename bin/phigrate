@@ -115,7 +115,7 @@ function iterateDir($dir) {
     while(false !== ($entry = readdir($fp))) {
         if ($entry == '.rucku') {
             closedir($fp);
-            return $dir . '/.rucku';
+            return realpath($dir . '/.rucku');
         }
     }
     if (is_dir($dir . '/..') && $dir != '/') {
