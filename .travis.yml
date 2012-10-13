@@ -11,9 +11,9 @@ mysql:
   encoding: utf8
 
 before_script:
-  - mysql -e 'create database phigrate_test;'
-  - mysql -e "CREATE USER 'phigrate'@'localhost' IDENTIFIED BY 'phigrate';"
-  - mysql -e "GRANT ALL PRIVILEGES ON * . * TO  'phigrate'@'localhost';"
+  - mysql -u root -e 'create database phigrate_test;'
+  - mysql -u root -e "CREATE USER 'phigrate'@'localhost' IDENTIFIED BY 'phigrate';"
+  - mysql -u root -e "GRANT ALL PRIVILEGES ON * . * TO  'phigrate'@'localhost';"
   - cp config/application.model config/application.ini
   - cp config/database.model config/database.ini
 
