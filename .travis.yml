@@ -11,11 +11,11 @@ mysql:
   encoding: utf8
 
 before_script:
-  - "mysql -e 'create database phigrate_test;'"
-  - "mysql -e \"CREATE USER 'phigrate'@'localhost' IDENTIFIED BY 'phigrate';\""
-  - "mysql -e \"GRANT ALL PRIVILEGES ON * . * TO  'phigrate'@'localhost';\""
-  - "cp config/application.model config/application.ini"
-  - "cp config/database.model config/database.ini"
+  - mysql -e 'create database phigrate_test;'
+  - mysql -e "CREATE USER 'phigrate'@'localhost' IDENTIFIED BY 'phigrate';"
+  - mysql -e "GRANT ALL PRIVILEGES ON * . * TO  'phigrate'@'localhost';"
+  - cp config/application.model config/application.ini
+  - cp config/database.model config/database.ini
 
 script: 
   - phpunit --configuration tests/phpunit-travis.xml --coverage-text
