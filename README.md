@@ -8,6 +8,8 @@ The idea of the framework was borrowed from the migration system built into Ruby
 
 The project is built on a continuous integration Jenkins (http://www.sourceslist.org:8080/)
 
+The documentation (http://blog.phigrate.org/doc/home)
+
 ## Features
 
 
