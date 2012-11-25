@@ -769,7 +769,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      * @return boolean
      * @throws Phigrate_Exception_Argument
      */
-    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
     {
         if (empty($tableName)) {
             throw new Phigrate_Exception_Argument(
@@ -809,10 +809,34 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         $update = 'NO ACTION';
         if (array_key_exists('update', $options) && in_array($options['update'], $actionsAllowed)) {
             $update = $options['update'];
+        } elseif (array_key_exists('update', $options)) {
+            throw new Phigrate_Exception_Argument(
+                'Action (' . $options['update'] . ') for UPDATE not allowed. Actions allowed: '
+                . implode(', ', $actionsAllowed)
+            );
         }
         $delete = 'NO ACTION';
         if (array_key_exists('delete', $options) && in_array($options['delete'], $actionsAllowed)) {
             $delete = $options['delete'];
+        } elseif (array_key_exists('delete', $options)) {
+            throw new Phigrate_Exception_Argument(
+                'Action (' . $options['delete'] . ') for DELETE not allowed. Actions allowed: '
+                . implode(', ', $actionsAllowed)
+            );
+        }
+        // Vérifier la presence de l'index si pas en mode export
+        if (! $this->hasExport()) {
+            // Check if constrainte exists
+            if ($this->hasIndex($tableName, $columnName, array('name' => $constrainteName))) {
+                throw new Phigrate_Exception_Argument(
+                    'Constrainte already exists.'
+                );
+            }
+            // Check if ref is primary or index
+            if (! $this->isPrimaryKey($tableRef, $columnRef) && ! $this->hasIndex($tableRef, $columnRef)) {
+                // Create index for ref
+                $this->addIndex($tableRef, $columnRef);
+            }
         }
         $sql = sprintf(
             'ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s) ON DELETE %s ON UPDATE %s;',
@@ -840,7 +864,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      * @return boolean
      * @throws Phigrate_Exception_Argument
      */
-    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
     {
         if (empty($tableName)) {
             throw new Phigrate_Exception_Argument(
@@ -862,13 +886,33 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         }
         
         $constrainteName = $this->_getConstrainteName($tableName, $columnName, $tableRef, $columnRef, $options);
+        if (! $this->hasExport()) {
+            // Check if constrainte exists
+            if (! $this->hasIndex($tableName, $columnName, array('name' => $constrainteName))) {
+                throw new Phigrate_Exception_Argument(
+                    'Constrainte not exists.'
+                );
+            }
+        }
         $sql = sprintf(
             'ALTER TABLE %s DROP FOREIGN KEY %s;',
             $this->identifier($tableName),
             $constrainteName
         );
+        $result = false;
+        if ($this->executeDdl($sql)) {
+            $result = $this->removeIndex($tableName, $columnName, array('name' => $constrainteName));
+            // Vérifier la presence de l'index si pas en mode export
+            if (! $this->hasExport()) {
+                // Check if ref is not primary key and is an index
+                if (! $this->isPrimaryKey($tableRef, $columnRef) && $this->hasIndex($tableRef, $columnRef)) {
+                    // Remove index for ref
+                    $result = $this->removeIndex($tableRef, $columnRef);
+                }
+            }
+        }
 
-        return $this->executeDdl($sql);
+        return $result;
     }
 
     /**
@@ -893,6 +937,21 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             throw new Phigrate_Exception_Argument(
                 'Missing column name parameter'
             );
+        }
+        if (is_array($options) && array_key_exists('foreignKey', $options)
+            && $options['foreignKey'] == true)
+        {
+            // Recuperer la table de reference
+            $tableRef = null;
+            if (array_key_exists('tableRef', $options)) {
+                $tableRef = $options['tableRef'];
+            }
+            // Recuperer la colonne de reference
+            $columnRef = null;
+            if (array_key_exists('columnRef', $options)) {
+                $columnRef = $options['columnRef'];
+            }
+            return $this->addForeignKey($tableName, $columnName, $tableRef, $columnRef, $options);
         }
         //unique index?
         $unique = false;
@@ -953,6 +1012,21 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
                 'Missing column name parameter'
             );
         }
+        if (is_array($options) && array_key_exists('foreignKey', $options)
+            && $options['foreignKey'] == true)
+        {
+            // Recuperer la table de reference
+            $tableRef = null;
+            if (array_key_exists('tableRef', $options)) {
+                $tableRef = $options['tableRef'];
+            }
+            // Recuperer la colonne de reference
+            $columnRef = null;
+            if (array_key_exists('columnRef', $options)) {
+                $columnRef = $options['columnRef'];
+            }
+            return $this->removeForeignKey($tableName, $columnName, $tableRef, $columnRef, $options);
+        }
         $indexName = $this->_getIndexName($tableName, $columnName, $options);
         $sql = sprintf(
             'DROP INDEX %s ON %s;',
@@ -1010,8 +1084,9 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
                 'Missing table name parameter'
             );
         }
-        $sql = sprintf('SHOW KEYS FROM %s', $this->identifier($tableName));
+        $sql = sprintf('SHOW KEYS FROM %s;', $this->identifier($tableName));
         $result = $this->selectAll($sql);
+        $this->_logger->debug('indexes result: '.var_export($result, true));
         $indexes = array();
         foreach ($result as $row) {
             //skip primary
@@ -1024,6 +1099,38 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             );
         }
         return $indexes;
+    }
+
+    /**
+     * Indique si la colonne est une clef primaire
+     *
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     *
+     * @return boolean
+     * @throws Phigrate_Exception_Argument
+     */
+    public function isPrimaryKey($tableName, $columnName)
+    {
+        if (empty($tableName)) {
+            throw new Phigrate_Exception_Argument(
+                'Missing table name parameter'
+            );
+        }
+        if (empty($columnName)) {
+            throw new Phigrate_Exception_Argument(
+                'Missing column name parameter'
+            );
+        }
+        $sql = sprintf('SHOW KEYS FROM %s;', $this->identifier($tableName));
+        $result = $this->selectAll($sql);
+        foreach ($result as $row) {
+            if ($row['Key_name'] == 'PRIMARY' && $row['Column_name'] == $columnName) {
+                return true;
+            }
+        }
+        return false;
+        
     }
 
     /**

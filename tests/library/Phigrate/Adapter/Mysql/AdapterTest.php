@@ -82,6 +82,10 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             $this->object->executeDdl("DROP VIEW `v_users`;");
         }
 
+        if ($this->object->hasTable('addresses')) {
+            $this->object->dropTable('addresses');
+        }
+
         $this->object = null;
         parent::tearDown();
     }
@@ -602,7 +606,7 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
   `name` varchar(20) default NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`phigrate`@`localhost` SQL SECURITY DEFINER VIEW `v_users` AS select `users`.`name` AS `name` from `users`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECURITY DEFINER VIEW `v_users` AS select `users`.`name` AS `name` from `users`;
 
 ";
         } else {
@@ -610,7 +614,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`phigrate`@`localhost` SQL SECURITY DEFINER V
   `name` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`phigrate`@`localhost` SQL SECURITY DEFINER VIEW `v_users` AS select `users`.`name` AS `name` from `users`;
+CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECURITY DEFINER VIEW `v_users` AS select `users`.`name` AS `name` from `users`;
 
 ";
         }
@@ -1267,6 +1271,388 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`phigrate`@`localhost` SQL SECURITY DEFINER V
                 . 'in a drop_index() - if you have one.';
             $this->assertEquals($msg, $ex->getMessage());
         }
+    }
+
+    public function testAddForeignKeyOnPrimaryKey()
+    {
+        try {
+            $this->object->addForeignKey('', '', '', '');
+            $this->fail('addForeignKey does not accept empty string for table name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing table name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->addIndex('users', '', '', '');
+            $this->fail('addForeignKey does not accept empty string for column name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing column name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->addForeignKey('users', 'address', '', '');
+            $this->fail('addForeignKey does not accept empty string for table ref name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing table ref name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        //create it
+        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id));";
+        $this->object->executeDdl($sql);
+        $this->object->addForeignKey('users', 'address', 'addresses');
+        
+        $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'id'));
+        $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        
+        try {
+            $this->object->addForeignKey(
+                'users',
+                'address',
+                'addresses',
+                'id',
+                array('name' => 'constrainte_on_super_super_very_maxi_mega_giga_long_title_aaaaaaaahhhhh')
+            );
+            $this->fail('Max identifier length');
+        } catch (Phigrate_Exception_InvalidIndexName $ex) {
+            $msg = 'The auto-generated constrainte name is too long for '
+                . 'MySQL (max is 64 chars). Considering using \'name\' option '
+                . 'parameter to specify a custom name for this index. '
+                . 'Note: you will also need to specify this custom name '
+                . 'in a drop_index() - if you have one.';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+    }
+
+    public function testAddForeignKeyWithoutIndex()
+    {
+        try {
+            $this->object->addForeignKey('', '', '', '');
+            $this->fail('addForeignKey does not accept empty string for table name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing table name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->addIndex('users', '', '', '');
+            $this->fail('addForeignKey does not accept empty string for column name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing column name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->addForeignKey('users', 'address', '', '');
+            $this->fail('addForeignKey does not accept empty string for table ref name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing table ref name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        //create it
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $this->object->executeDdl($sql);
+        $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        $this->object->addForeignKey('users', 'address', 'addresses', 'name');
+        
+        $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        $this->assertTrue($this->object->hasIndex('addresses', 'name'));
+    }
+
+    public function testAddForeignKeyWithActionOnDelete()
+    {
+        //create it
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $this->object->executeDdl($sql);
+        $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+
+        $options = array(
+            'delete' => 'CASCADE',
+        );
+        $this->object->addForeignKey('users', 'address', 'addresses', 'name', $options);
+        
+        $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        $this->assertTrue($this->object->hasIndex('addresses', 'name'));
+    }
+
+    public function testAddForeignKeyWithWrongAction()
+    {
+        //create it
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $this->object->executeDdl($sql);
+        $actionsAllowed = array(
+            'CASCADE',
+            'SET NULL',
+            'NO ACTION',
+            'RESTRICT',
+        );
+
+        $options = array(
+            'delete' => 'WRONG',
+        );
+        try {
+            $this->object->addForeignKey('users', 'address', 'addresses', 'name', $options);
+            $this->fail('Action for DELETE is invalid');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = 'Action (' . $options['delete'] . ') for DELETE not allowed. Actions allowed: '
+                . implode(', ', $actionsAllowed);
+            $this->assertEquals($msg, $e->getMessage());
+        }
+
+        $options = array(
+            'update' => 'WRONG',
+        );
+        try {
+            $this->object->addForeignKey('users', 'address', 'addresses', 'name', $options);
+            $this->fail('Action for UPDATE is invalid');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = 'Action (' . $options['update'] . ') for UPDATE not allowed. Actions allowed: '
+                . implode(', ', $actionsAllowed);
+            $this->assertEquals($msg, $e->getMessage());
+        }
+    }
+
+    public function testAddForeignKeyAlreadyExists()
+    {
+        //create it
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $this->object->executeDdl($sql);
+        $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+
+        $this->object->addForeignKey('users', 'address', 'addresses', 'name');
+        
+        $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        $this->assertTrue($this->object->hasIndex('addresses', 'name'));
+
+        try {
+            $this->object->addForeignKey('users', 'address', 'addresses', 'name');
+            $this->fail('Constrainte already exists.');
+        } catch (Phigrate_Exception_Argument $e) {
+            $this->assertEquals('Constrainte already exists.', $e->getMessage());
+        }
+    }
+
+    public function testRemoveForeignKeyOnPrimaryKey()
+    {
+        try {
+            $this->object->removeForeignKey('', '', '', '');
+            $this->fail('removeForeignKey does not accept empty string for table name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing table name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->removeIndex('users', '', '', '');
+            $this->fail('removeForeignKey does not accept empty string for column name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing column name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->removeForeignKey('users', 'address', '', '');
+            $this->fail('removeForeignKey does not accept empty string for table ref name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing table ref name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        //create it
+        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id));";
+        $this->object->executeDdl($sql);
+        $this->object->addForeignKey('users', 'address', 'addresses');
+        $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'id'));
+        $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+
+        $this->object->removeForeignKey('users', 'address', 'addresses');
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+    }
+
+    public function testRemoveForeignKeyWithoutIndex()
+    {
+        try {
+            $this->object->removeForeignKey('', '', '', '');
+            $this->fail('removeForeignKey does not accept empty string for table name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing table name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->removeIndex('users', '', '', '');
+            $this->fail('removeForeignKey does not accept empty string for column name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing column name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->removeForeignKey('users', 'address', '', '');
+            $this->fail('removeForeignKey does not accept empty string for table ref name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing table ref name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        //create it
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $this->object->executeDdl($sql);
+        $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        $this->object->addForeignKey('users', 'address', 'addresses', 'name');
+        
+        $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        $this->assertTrue($this->object->hasIndex('addresses', 'name'));
+
+        $this->object->removeForeignKey('users', 'address', 'addresses', 'name');
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        $this->assertFalse($this->object->hasIndex('addresses', 'name'));
+    }
+
+    public function testRemoveForeignKeyNotExists()
+    {
+        //create it
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $this->object->executeDdl($sql);
+        $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        
+        try {
+            $this->object->removeForeignKey('users', 'address', 'addresses', 'name');
+            $this->fail('constrainte does not exists!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Constrainte not exists.';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+    }
+
+    public function testAddForeignKeyOnPrimaryKeyByAddIndex()
+    {
+        //create it
+        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id));";
+        $this->object->executeDdl($sql);
+
+        $this->object->addIndex('users', 'address', array(
+            'foreignKey' => true,
+            'tableRef' => 'addresses',
+        ));
+        
+        $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'id'));
+        $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        
+        try {
+            $this->object->addIndex('users', 'address', array(
+                'foreignKey' => true,
+                'tableRef' => 'addresses',
+                'name' => 'constrainte_on_super_super_very_maxi_mega_giga_long_title_aaaaaaaahhhhh'
+            ));
+            $this->fail('Max identifier length');
+        } catch (Phigrate_Exception_InvalidIndexName $ex) {
+            $msg = 'The auto-generated constrainte name is too long for '
+                . 'MySQL (max is 64 chars). Considering using \'name\' option '
+                . 'parameter to specify a custom name for this index. '
+                . 'Note: you will also need to specify this custom name '
+                . 'in a drop_index() - if you have one.';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+    }
+
+    public function testAddForeignKeyWithoutIndexByAddIndex()
+    {
+        //create it
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $this->object->executeDdl($sql);
+        $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        $this->object->addIndex('users', 'address', array(
+            'foreignKey' => true,
+            'tableRef' => 'addresses',
+            'columnRef' => 'name'
+        ));
+        
+        $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        $this->assertTrue($this->object->hasIndex('addresses', 'name'));
+    }
+
+    public function testRemoveForeignKeyOnPrimaryKeyByRemoveIndex()
+    {
+        try {
+            $this->object->removeIndex('users', 'address', array('foreignKey' => true));
+            $this->fail('removeForeignKey does not accept empty string for table ref name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing table ref name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        //create it
+        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id));";
+        $this->object->executeDdl($sql);
+        $this->object->addForeignKey('users', 'address', 'addresses');
+        $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'id'));
+        $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+
+        $this->object->removeIndex('users', 'address', array(
+            'foreignKey' => true,
+            'tableRef' => 'addresses',
+        ));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+    }
+
+    public function testRemoveForeignKeyWithoutIndexByRemoveIndex()
+    {
+        try {
+            $this->object->removeIndex('users', 'address', array('foreignKey' => true));
+            $this->fail('removeForeignKey does not accept empty string for table ref name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing table ref name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        //create it
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $this->object->executeDdl($sql);
+        $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        $this->object->addForeignKey('users', 'address', 'addresses', 'name');
+        
+        $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        $this->assertTrue($this->object->hasIndex('addresses', 'name'));
+
+        $this->object->removeIndex('users', 'address', array(
+            'foreignKey' => true,
+            'tableRef' => 'addresses',
+            'columnRef' => 'name',
+        ));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        $this->assertFalse($this->object->hasIndex('addresses', 'name'));
     }
 
     public function testMultiColumnIndex()

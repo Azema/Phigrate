@@ -121,6 +121,16 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
 
     public function addIndex($tableName, $columnName, $options = array())
     {
+        if (array_key_exists('foreignKey', $options)) {
+            $this->datas['addForeignKey'] = array(
+                'tableName' => $tableName,
+                'columnName' => $columnName,
+                'tableRef' => $options['tableRef'],
+                'columnRef' => $options['columnRef'],
+                'options' => $options,
+            );
+            return true;
+        }
         $this->datas['addIndex'] = array(
             'tableName' => $tableName,
             'columnName' => $columnName,
@@ -131,6 +141,16 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
 
     public function removeIndex($tableName, $columnName, $options = array())
     {
+        if (array_key_exists('foreignKey', $options)) {
+            $this->datas['removeForeignKey'] = array(
+                'tableName' => $tableName,
+                'columnName' => $columnName,
+                'tableRef' => $options['tableRef'],
+                'columnRef' => $options['columnRef'],
+                'options' => $options,
+            );
+            return true;
+        }
         $this->datas['removeIndex'] = array(
             'tableName' => $tableName,
             'columnName' => $columnName,
