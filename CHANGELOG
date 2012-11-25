@@ -1,0 +1,11 @@
+Author: Manuel HERVO <manuel.hervo % gmail .com>
+
+Version 0.9.5 (2012-25-11)
+    Add foreignKey in adapter MySQL
+    Add foreignKey by addIndex and removeIndex on Migration_Base class
+
+Version 0.9.4
+    Initial version after rename tool (Ruckusing => Phigrate)
+
+Before
+    Project forked from https://github.com/ruckus/ruckusing-migrations
