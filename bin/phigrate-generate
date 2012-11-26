@@ -44,12 +44,12 @@ if (strpos('@pear_directory@', '@pear_directory') === 0) {  // not a pear instal
     define('PHIGRATE_BASE', '@pear_directory@/Phigrate');
 }
 if (strpos('@package_version@', '@package_version') === 0) {  // not a pear install
-    define('PHIGRATE_VERSION', '0.9.4');
+    define('PHIGRATE_VERSION', '0.9.5');
 } else {
     define('PHIGRATE_VERSION', '@package_version@');
 }
 if (strpos('@package_date@', '@package_date') === 0) {
-    define('PHIGRATE_DATE', date('c', mktime(22,10,0,9,9,2012)));
+    define('PHIGRATE_DATE', date('c', mktime(20,10,0,26,11,2012)));
 } else {
     define('PHIGRATE_DATE', '@package_date@');
 }
@@ -398,12 +398,13 @@ function getTemplate($klass)
  *
  * PHP Version 5
  *
- * @category   Phigrate
- * @package    Migrations
- * @author
- * @copyright
- * @license
- * @link
+ * @category  Phigrate
+ * @package   Migrations
+ * @author    Manuel HERVO <manuel.hervo % gmail . com>
+ * @author    Cody Caughlan <codycaughlan % gmail . com>
+ * @copyright 2007 Cody Caughlan (codycaughlan % gmail . com)
+ * @license   GPLv2 http://www.gnu.org/licenses/gpl-2.0.html
+ * @link      https://github.com/Azema/Phigrate
  */
 
 /**
@@ -411,10 +412,10 @@ function getTemplate($klass)
  *
  * For documentation on the methods of migration
  *
- * @see https://github.com/Azema/Phigrate/wiki/Migration-Methods
+ * @see http://blog.phigrate.org/doc/methodsMigrations
  *
- * @category   Phigrate
- * @package    Migrations
+ * @category
+ * @package
  * @author
  * @copyright
  * @license
