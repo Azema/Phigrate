@@ -1853,6 +1853,26 @@ Valid types are:
         );
         $this->assertNull($actual);
     }
+
+    /**
+     */
+    public function testComment()
+    {
+        $comment = 'This is a comment to add on SQL code';
+
+        // Fonctionne seulement en mode export, mais renvoie toujours true
+        $this->object->setExport(false);
+        $return = $this->object->comment($comment);
+        $this->assertTrue($return);
+
+        $this->object->setExport(true);
+        $comment = 'This is a comment to add on SQL code';
+        $expected = "\n-- " . $comment . "\n\n";
+        $return = $this->object->comment($comment);
+        $this->assertTrue($return);
+        $this->assertEquals($expected, $this->object->getSql());
+
+    }
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */

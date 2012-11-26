@@ -326,6 +326,13 @@ class Phigrate_Migration_BaseTest extends PHPUnit_Framework_TestCase
             $this->assertEquals($msg, $e->getMessage());
         }
     }
+
+    public function testComment()
+    {
+        $comment = 'Ceci est un commentaire a ajouter au code SQL';
+        $this->object->comment($comment);
+        $this->assertContains($comment, $this->_adapter->datas['comments']);
+    }
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */

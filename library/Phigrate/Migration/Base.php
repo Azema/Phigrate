@@ -310,6 +310,19 @@ abstract class Phigrate_Migration_Base
     {
         return $this->_adapter->quote($value);
     }
+
+    /**
+     * Add comment in code SQL
+     *
+     * @param string $comment Comment to SQL
+     *
+     * @return Phigrate_Migration_Base
+     */
+    public function comment($comment)
+    {
+        $this->_adapter->comment($comment);
+        return $this;
+    }
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */

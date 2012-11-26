@@ -281,9 +281,7 @@ abstract class Phigrate_Adapter_Base
     public function setExport($export = false)
     {
         $this->_export = (boolean)$export;
-        if ($this->hasExport()) {
-            $this->initSql();
-        }
+        $this->initSql();
         return $this;
     }
     

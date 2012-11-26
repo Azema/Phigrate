@@ -38,6 +38,7 @@ class CreateUsers extends Phigrate_Migration_Base
     public function up()
     {
         // Add your code here
+        $this->comment('Add table users');
         $table = $this->createTable('users');
         $table->column('name', 'text', array('length' => 50));
         $table->finish();

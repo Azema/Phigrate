@@ -197,6 +197,12 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
         );
         return parent::quote($value);
     }
+
+    public function comment($comment)
+    {
+        $this->datas['comments'][] = $comment;
+        return true;
+    }
 }
 
 

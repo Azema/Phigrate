@@ -837,6 +837,8 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
                 // Create index for ref
                 $this->addIndex($tableRef, $columnRef);
             }
+        } else {
+            $this->addIndex($tableRef, $columnRef);
         }
         $sql = sprintf(
             'ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s) ON DELETE %s ON UPDATE %s;',
@@ -1086,7 +1088,6 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         }
         $sql = sprintf('SHOW KEYS FROM %s;', $this->identifier($tableName));
         $result = $this->selectAll($sql);
-        $this->_logger->debug('indexes result: '.var_export($result, true));
         $indexes = array();
         foreach ($result as $row) {
             //skip primary
@@ -1130,7 +1131,6 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             }
         }
         return false;
-        
     }
 
     /**
@@ -1349,6 +1349,21 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     {
         $version = $this->_conn->getAttribute(PDO::ATTR_SERVER_VERSION);
         return $version;
+    }
+
+    /**
+     * Add comment to code SQL
+     *
+     * @param string $comment The comment
+     *
+     * @return boolean
+     */
+    public function comment($comment)
+    {
+        if ($this->hasExport()) {
+            $this->_sql .= "\n-- " . (string)$comment . "\n\n";
+        }
+        return true;
     }
 
 
