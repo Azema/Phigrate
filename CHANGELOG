@@ -1,5 +1,8 @@
 Author: Manuel HERVO <manuel.hervo % gmail .com>
 
+Version 0.9.6 (2012-XX-XX)
+    Adding a new feature to display comments in SQL exports
+
 Version 0.9.5 (2012-25-11)
     Add foreignKey in adapter MySQL
     Add foreignKey by addIndex and removeIndex on Migration_Base class
