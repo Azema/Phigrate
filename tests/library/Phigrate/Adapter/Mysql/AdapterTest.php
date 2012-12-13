@@ -66,6 +66,7 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             $this->object->dropTable(PHIGRATE_TS_SCHEMA_TBL_NAME);
         }
 
+        $this->object->query('SET FOREIGN_KEY_CHECKS=0;');
         if ($this->object->hasTable('users')) {
             $this->object->dropTable('users');
         }
@@ -85,6 +86,11 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         if ($this->object->hasTable('addresses')) {
             $this->object->dropTable('addresses');
         }
+
+        if ($this->object->hasTable('users_addresses')) {
+            $this->object->dropTable('users_addresses');
+        }
+        $this->object->query('SET FOREIGN_KEY_CHECKS=1;');
 
         $this->object = null;
         parent::tearDown();
@@ -300,7 +306,7 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     {
         $dbConfig = array(
             'database' => 'phigrate_test',
-            'socket' => '/var/run/mysqld/mysqld.sock',
+            'socket' => SOCKET_MYSQL_DEFAULT,
             'user' => USER_MYSQL_DEFAULT,
             'password' => PASSWORD_MYSQL_DEFAULT,
             'options' => array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"),
@@ -1302,11 +1308,11 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
         $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id));";
         $this->object->executeDdl($sql);
         $this->object->addForeignKey('users', 'address', 'addresses');
-        
+
         $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
         $this->assertFalse($this->object->hasIndex('addresses', 'id'));
         $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
-        
+
         try {
             $this->object->addForeignKey(
                 'users',
@@ -1434,7 +1440,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
         $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
 
         $this->object->addForeignKey('users', 'address', 'addresses', 'name');
-        
+
         $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
         $this->assertTrue($this->object->hasIndex('addresses', 'name'));
 
@@ -1444,6 +1450,29 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
         } catch (Phigrate_Exception_Argument $e) {
             $this->assertEquals('Constrainte already exists.', $e->getMessage());
         }
+    }
+
+    public function testAddForeignKeyOnPrimaryKeysOnJointPrimaryKey()
+    {
+        //create it
+        $sql = "CREATE TABLE `users` (id integer(11), name varchar(20), title varchar(20), other tinyint(1), PRIMARY KEY(id));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (id integer(11), name varchar(25), street varchar(20), PRIMARY KEY(id));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `users_addresses` (usr_id integer(11), adr_id integer(11), PRIMARY KEY(usr_id, adr_id));";
+        $this->object->executeDdl($sql);
+        $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
+        $this->assertTrue($this->object->isPrimaryKey('users', 'id'));
+        $this->assertTrue($this->object->isPrimaryKey('users_addresses', array('usr_id', 'adr_id')));
+        $this->assertFalse($this->object->hasIndex('addresses', 'id'));
+        $this->assertFalse($this->object->hasIndex('users', 'id'));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+
+        $this->object->addForeignKey('users_addresses', 'usr_id', 'users', 'id');
+        $this->object->addForeignKey('users_addresses', 'adr_id', 'addresses', 'id');
+
+        $this->assertFalse($this->object->hasIndex('users_addresses', 'usr_id', array('name' => 'users_addresses_ibfk_usr_id')));
+        $this->assertTrue($this->object->hasIndex('users_addresses', 'adr_id', array('name' => 'users_addresses_ibfk_adr_id')));
     }
 
     public function testRemoveForeignKeyOnPrimaryKey()
@@ -1483,6 +1512,29 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
         $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
     }
 
+    public function testRemoveForeignKeyOnPrimaryKeysOnJointPrimaryKey()
+    {
+        //create it
+        $sql = "CREATE TABLE `users` (id integer(11), name varchar(20), title varchar(20), other tinyint(1), PRIMARY KEY(id));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (id integer(11), name varchar(25), street varchar(20), PRIMARY KEY(id));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `users_addresses` (usr_id integer(11), adr_id integer(11), PRIMARY KEY(usr_id, adr_id));";
+        $this->object->executeDdl($sql);
+        $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
+        $this->assertTrue($this->object->isPrimaryKey('users', 'id'));
+        $this->assertTrue($this->object->isPrimaryKey('users_addresses', array('usr_id', 'adr_id')));
+
+        $this->object->addForeignKey('users_addresses', 'usr_id', 'users', 'id');
+        $this->object->addForeignKey('users_addresses', 'adr_id', 'addresses', 'id');
+
+        $this->assertFalse($this->object->hasIndex('users_addresses', 'usr_id', array('name' => 'users_addresses_ibfk_usr_id')));
+        $this->assertTrue($this->object->hasIndex('users_addresses', 'adr_id', array('name' => 'users_addresses_ibfk_adr_id')));
+
+        $this->assertTrue($this->object->removeForeignKey('users_addresses', 'usr_id', 'users', 'id'));
+        $this->assertTrue($this->object->removeForeignKey('users_addresses', 'adr_id', 'addresses', 'id'));
+    }
+
     public function testRemoveForeignKeyWithoutIndex()
     {
         try {
@@ -1515,7 +1567,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
         $this->object->addForeignKey('users', 'address', 'addresses', 'name');
-        
+
         $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
         $this->assertTrue($this->object->hasIndex('addresses', 'name'));
 
@@ -1534,12 +1586,12 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
-        
+
         try {
-            $this->object->removeForeignKey('users', 'address', 'addresses', 'name');
+            var_dump($this->object->removeForeignKey('users', 'address', 'addresses', 'name'));
             $this->fail('constrainte does not exists!');
-        } catch (Phigrate_Exception_Argument $ex) {
-            $msg = 'Constrainte not exists.';
+        } catch (Phigrate_Exception_AdapterQuery $ex) {
+            $msg = 'Constrainte does not exists.';
             $this->assertEquals($msg, $ex->getMessage());
         }
     }
@@ -1556,11 +1608,11 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             'foreignKey' => true,
             'tableRef' => 'addresses',
         ));
-        
+
         $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
         $this->assertFalse($this->object->hasIndex('addresses', 'id'));
         $this->assertTrue($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
-        
+
         try {
             $this->object->addIndex('users', 'address', array(
                 'foreignKey' => true,

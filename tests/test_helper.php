@@ -47,9 +47,14 @@ if (!defined('USER_MYSQL_DEFAULT')) {
     define('USER_MYSQL_DEFAULT', 'phigrate');
 }
 
-// User MySQL by default
+// Password MySQL by default
 if (!defined('PASSWORD_MYSQL_DEFAULT')) {
     define('PASSWORD_MYSQL_DEFAULT', 'phigrate');
+}
+
+// Socket MySQL by default ('/var/run/mysqld/mysqld.sock')
+if (!defined('SOCKET_MYSQL_DEFAULT')) {
+    define('SOCKET_MYSQL_DEFAULT', '/opt/local/var/run/mysql5/mysqld.sock');
 }
 
 spl_autoload_register('loader', true, true);
