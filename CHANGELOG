@@ -1,6 +1,9 @@
 Author: Manuel HERVO <manuel.hervo % gmail .com>
 
-Version 0.9.5 (2012-25-11)
+Version 1.1.1 (2012-13-12)
+    Change remove foreignKey in adapter MySQL
+
+Version 1.1.0 (2012-25-11)
     Add foreignKey in adapter MySQL
     Add foreignKey by addIndex and removeIndex on Migration_Base class
 

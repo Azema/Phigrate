@@ -54,7 +54,7 @@ if (!defined('PASSWORD_MYSQL_DEFAULT')) {
 
 // Socket MySQL by default ('/var/run/mysqld/mysqld.sock')
 if (!defined('SOCKET_MYSQL_DEFAULT')) {
-    define('SOCKET_MYSQL_DEFAULT', '/opt/local/var/run/mysql5/mysqld.sock');
+    define('SOCKET_MYSQL_DEFAULT', '/var/run/mysqld/mysqld.sock');
 }
 
 spl_autoload_register('loader', true, true);
