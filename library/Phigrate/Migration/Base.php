@@ -89,14 +89,12 @@ abstract class Phigrate_Migration_Base
      */
     public function __call($name, $args)
     {
-        if (!method_exists($this, $name)) {
-            $backtrace = debug_backtrace();
-            require_once 'Phigrate/Exception/MissingMigrationMethod.php';
-            throw new Phigrate_Exception_MissingMigrationMethod(
-                'Method unknown (' . $name . ' in file '
-                . $backtrace[0]['file'] . ':' . $backtrace[0]['line'] . ')'
-            );
-        }
+        $backtrace = debug_backtrace();
+        require_once 'Phigrate/Exception/MissingMigrationMethod.php';
+        throw new Phigrate_Exception_MissingMigrationMethod(
+            'Method unknown (' . $name . ' in file '
+            . $backtrace[0]['file'] . ':' . $backtrace[0]['line'] . ')'
+        );
     }
 
     /**
@@ -172,8 +170,7 @@ abstract class Phigrate_Migration_Base
      *
      * @return boolean
      */
-    public function addColumn($tableName, $columnName, $type,
-        $options = array())
+    public function addColumn($tableName, $columnName, $type, $options = array())
     {
         return $this->_adapter
             ->addColumn($tableName, $columnName, $type, $options);
@@ -202,8 +199,7 @@ abstract class Phigrate_Migration_Base
      *
      * @return boolean
      */
-    public function changeColumn($tableName, $columnName, $type,
-        $options = array())
+    public function changeColumn($tableName, $columnName, $type, $options = array())
     {
         return $this->_adapter
             ->changeColumn($tableName, $columnName, $type, $options);
@@ -249,6 +245,38 @@ abstract class Phigrate_Migration_Base
     public function removeIndex($tableName, $columnName, $options = array())
     {
         return $this->_adapter->removeIndex($tableName, $columnName, $options);
+    }
+
+    /**
+     * Add foreignKey
+     *
+     * @param string $tableName  The table name to create foreign key
+     * @param string $columnName The column name to create foreign key
+     * @param string $tableRef   The table name of constrainte
+     * @param string $columnRef  The column name of constrainte
+     * @param array  $options    The options definition of the foreign key
+     *
+     * @return boolean
+     */
+    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    {
+        return $this->_adapter->addForeignKey($tableName, $columnName, $tableRef, $columnRef, $options);
+    }
+
+    /**
+    * Remove foreignKey
+     *
+     * @param string $tableName  The table name to create foreign key
+     * @param string $columnName The column name to create foreign key
+     * @param string $tableRef   The table name of constrainte
+     * @param string $columnRef  The column name of constrainte
+     * @param array  $options    The options definition of the foreign key
+     *
+     * @return boolean
+     */
+    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    {
+        return $this->_adapter->removeForeignKey($tableName, $columnName, $tableRef, $columnRef, $options);
     }
 
     /**
@@ -325,4 +353,4 @@ abstract class Phigrate_Migration_Base
     }
 }
 
-/* vim: set expandtab tabstop=4 shiftwidth=4: */
+/* vim: set expandtab sw=4: */

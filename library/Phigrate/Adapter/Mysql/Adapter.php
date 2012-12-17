@@ -179,8 +179,8 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
                 'version',
                 array('unique' => true)
             );
-            return true;
         }
+        return true;
     }
 
     /**
@@ -191,7 +191,8 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function startTransaction()
     {
         if ($this->hasExport()) {
-            return 'SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";' . "\nSET AUTOCOMMIT=0;\nSTART TRANSACTION;";
+            return 'SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";'
+                . "\nSET AUTOCOMMIT=0;\nSTART TRANSACTION;";
         }
         try {
             $this->_beginTransaction();

@@ -122,14 +122,9 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
     public function addIndex($tableName, $columnName, $options = array())
     {
         if (array_key_exists('foreignKey', $options)) {
-            $this->datas['addForeignKey'] = array(
-                'tableName' => $tableName,
-                'columnName' => $columnName,
-                'tableRef' => $options['tableRef'],
-                'columnRef' => $options['columnRef'],
-                'options' => $options,
+            return $this->addForeignKey(
+                $tableName, $columnName, $options['tableRef'], $options['columnRef'], $options
             );
-            return true;
         }
         $this->datas['addIndex'] = array(
             'tableName' => $tableName,
@@ -142,18 +137,37 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
     public function removeIndex($tableName, $columnName, $options = array())
     {
         if (array_key_exists('foreignKey', $options)) {
-            $this->datas['removeForeignKey'] = array(
-                'tableName' => $tableName,
-                'columnName' => $columnName,
-                'tableRef' => $options['tableRef'],
-                'columnRef' => $options['columnRef'],
-                'options' => $options,
+            return $this->removeForeignKey(
+                $tableName, $columnName, $options['tableRef'], $options['columnRef'], $options
             );
-            return true;
         }
         $this->datas['removeIndex'] = array(
             'tableName' => $tableName,
             'columnName' => $columnName,
+            'options' => $options,
+        );
+        return true;
+    }
+
+    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    {
+        $this->datas['addForeignKey'] = array(
+            'tableName' => $tableName,
+            'columnName' => $columnName,
+            'tableRef' => $tableRef,
+            'columnRef' => $columnRef,
+            'options' => $options,
+        );
+        return true;
+    }
+
+    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    {
+        $this->datas['removeForeignKey'] = array(
+            'tableName' => $tableName,
+            'columnName' => $columnName,
+            'tableRef' => $tableRef,
+            'columnRef' => $columnRef,
             'options' => $options,
         );
         return true;
@@ -206,4 +220,4 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
 }
 
 
-/* vim: set expandtab tabstop=4 shiftwidth=4: */
+/* vim: set expandtab sw=4: */

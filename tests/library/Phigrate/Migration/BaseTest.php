@@ -241,6 +241,25 @@ class Phigrate_Migration_BaseTest extends PHPUnit_Framework_TestCase
 
     /**
      */
+    public function testAddForeignKey()
+    {
+        $tableName = 'users';
+        $columnName = 'address';
+        $tableRef = 'addresses';
+        $columnRef = 'name';
+        $options = array();
+
+        $return = $this->object->addForeignKey($tableName, $columnName, $tableRef, $columnRef, $options);
+        $this->assertTrue($return);
+        $this->assertEquals($tableName, $this->_adapter->datas['addForeignKey']['tableName']);
+        $this->assertEquals($columnName, $this->_adapter->datas['addForeignKey']['columnName']);
+        $this->assertEquals($tableRef, $this->_adapter->datas['addForeignKey']['tableRef']);
+        $this->assertEquals($columnRef, $this->_adapter->datas['addForeignKey']['columnRef']);
+        $this->assertEquals($options, $this->_adapter->datas['addForeignKey']['options']);
+    }
+
+    /**
+     */
     public function testRemoveForeignKeyByRemoveIndex()
     {
         $tableName = 'users';
@@ -256,6 +275,25 @@ class Phigrate_Migration_BaseTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($columnName, $this->_adapter->datas['removeForeignKey']['columnName']);
         $this->assertEquals($options['tableRef'], $this->_adapter->datas['removeForeignKey']['tableRef']);
         $this->assertEquals($options['columnRef'], $this->_adapter->datas['removeForeignKey']['columnRef']);
+        $this->assertEquals($options, $this->_adapter->datas['removeForeignKey']['options']);
+    }
+
+    /**
+     */
+    public function testRemoveForeignKey()
+    {
+        $tableName = 'users';
+        $columnName = 'address';
+        $tableRef = 'addresses';
+        $columnRef = 'name';
+        $options = array();
+
+        $return = $this->object->removeForeignKey($tableName, $columnName, $tableRef, $columnRef, $options);
+        $this->assertTrue($return);
+        $this->assertEquals($tableName, $this->_adapter->datas['removeForeignKey']['tableName']);
+        $this->assertEquals($columnName, $this->_adapter->datas['removeForeignKey']['columnName']);
+        $this->assertEquals($tableRef, $this->_adapter->datas['removeForeignKey']['tableRef']);
+        $this->assertEquals($columnRef, $this->_adapter->datas['removeForeignKey']['columnRef']);
         $this->assertEquals($options, $this->_adapter->datas['removeForeignKey']['options']);
     }
 
@@ -335,4 +373,4 @@ class Phigrate_Migration_BaseTest extends PHPUnit_Framework_TestCase
     }
 }
 
-/* vim: set expandtab tabstop=4 shiftwidth=4: */
+/* vim: set expandtab sw=4: */
