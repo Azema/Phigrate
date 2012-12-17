@@ -1356,7 +1356,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function getVersionServer()
     {
-        $version = $this->_conn->getAttribute(PDO::ATTR_SERVER_VERSION);
+        $version = $this->getConnexion()->getAttribute(PDO::ATTR_SERVER_VERSION);
         return $version;
     }
 
@@ -1375,10 +1375,197 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         return true;
     }
 
+    /**
+     * Add view
+     *
+     * @param string $viewName The view name
+     * @param string $select   The select statement
+     * @param array  $options  The options
+     *
+     * @return boolean
+     */
+    public function createView($viewName, $select, $options = array())
+    {
+        $create = 'CREATE';
+        if (array_key_exists('replace', $options) && $options['replace'] === true) {
+            $create .= ' OR REPLACE';
+        }
+        $query = $create . ' %s %s VIEW %s%s AS %s%s;';
+        return $this->_createOrAlterView($viewName, $select, $query, 'create', $options);
+    }
+
+    /**
+     * Change view
+     *
+     * @param string $viewName The view name
+     * @param string $select   The select statement
+     * @param array  $options  The options
+     *
+     * @return boolean
+     */
+    public function changeView($viewName, $select, $options = array())
+    {
+        $query = 'ALTER %s %s VIEW %s%s AS %s%s;';
+        return $this->_createOrAlterView($viewName, $select, $query, 'change', $options);
+    }
+
+    /**
+     * Drop view
+     *
+     * @param string $viewName The view name
+     *
+     * @return boolean
+     */
+    public function dropView($viewName)
+    {
+        if (empty($viewName)) {
+            throw new Phigrate_Exception_Argument(
+                'Missing view name parameter'
+            );
+        }
+        $ddl = sprintf('DROP VIEW IF EXISTS %s;', $this->identifier($viewName));
+        return $this->executeDdl($ddl);
+    }
 
     //-----------------------------------
     // PRIVATE METHODS
     //-----------------------------------
+
+    /**
+     * Create or Alter view
+     *
+     * @param string $viewName The view name
+     * @param string $select   The select statement
+     * @param string $query    The query for view
+     * @param string $funcName The function name
+     * @param array  $options  The options
+     *
+     * @return boolean
+     */
+    protected function _createOrAlterView($viewName, $select, $query, $funcName,  $options = array())
+    {
+        if (empty($viewName)) {
+            throw new Phigrate_Exception_Argument(
+                'Missing view name parameter'
+            );
+        }
+        $query_type = $this->_determineQueryType($select);
+        if ($query_type != self::SQL_SELECT) {
+            require_once 'Phigrate/Exception/AdapterQuery.php';
+            throw new Phigrate_Exception_AdapterQuery(
+                'Sql for ' . $funcName . 'View() is not a SELECT : ' . $select
+            );
+        }
+        $algorithm = $this->_getAlgorithm($options, $funcName);
+        $definer = $this->_getDefiner($options);
+        $columnList = $this->_getColumnList($options);
+        $check = $this->_getCheckOption($options, $funcName);
+        $ddl = sprintf(
+            $query,
+            $algorithm,
+            $definer,
+            $this->identifier($viewName),
+            $columnList,
+            $select,
+            $check
+        );
+        return $this->executeDdl($ddl);
+    }
+
+    /**
+     * Return algorithm for create and alter view
+     *
+     * @param array  $options  Array of options containing algorithm key
+     * @param string $funcName The fonction name
+     *
+     * @return string
+     */
+    protected function _getAlgorithm($options, $funcName)
+    {
+        $algorithm = 'ALGORITHM=UNDEFINED';
+        $allowedAlgos = array('UNDEFINED', 'MERGE', 'TEMPTABLE');
+        if (array_key_exists('algorithm', $options) && !empty($options['algorithm'])) {
+            if (!in_array($options['algorithm'], $allowedAlgos)) {
+                throw new Phigrate_Exception_Argument(
+                    'algorithm allowed for ' . $funcName . ' view : ' . implode(', ', $allowedAlgos)
+                );
+            }
+            $algorithm = 'ALGORITHM=' . $options['algorithm'];
+        }
+        return $algorithm;
+    }
+
+    /**
+     * Return definer for create and alter view
+     *
+     * @param array $options Array of options containing definer key
+     *
+     * @return string
+     */
+    protected function _getDefiner($options)
+    {
+        $definer = 'DEFINER=CURRENT_USER';
+        // Get definer
+        if (array_key_exists('definer', $options) && !empty($options['definer'])) {
+            // check definer format
+            if (preg_match("/'\w*'@'\w*'/", $options['definer']) == false) {
+                throw new Phigrate_Exception_Argument(
+                    "The definer should be specified as 'user'@'host'."
+                );
+            }
+            $definer = 'DEFINER=' . $options['definer'];
+        }
+        return $definer;
+    }
+
+    /**
+     * Return list of column for create and alter view
+     *
+     * @param array $options Array of options containing columnList key
+     *
+     * @return string
+     */
+    protected function _getColumnList($options)
+    {
+        $columnList = '';
+        if (array_key_exists('columnList', $options) && is_array($options['columnList'])
+            && !empty($options['columnList']))
+        {
+            $columns = array_map(array($this, 'identifier'), $options['columnList']);
+            $columnList = ' (' . implode(',', $columns) . ')';
+        }
+        return $columnList;
+    }
+
+    /**
+     * Return check option for create and alter view
+     *
+     * @param array  $options  Array of options containing check key
+     * @param string $funcName The fonction name
+     *
+     * @return string
+     */
+    protected function _getCheckOption($options, $funcName)
+    {
+        $check = '';
+        $allowedCheck = array('LOCAL', 'CASCADED');
+        if (array_key_exists('check', $options) && !empty($options['check'])) {
+            $versionServer = preg_replace('/[^\.\d]/', '', $this->getVersionServer());
+            if (!$this->hasExport() && version_compare($versionServer, '5.0.2') < 0) {
+                throw new Phigrate_Exception_AdapterQuery(
+                    'The WITH CHECK OPTION clause was implemented in MySQL 5.0.2.'
+                );
+            } elseif (!is_bool($options['check']) && !in_array($options['check'], $allowedCheck)) {
+                throw new Phigrate_Exception_Argument(
+                    'check option allowed for ' . $funcName . ' view : ' . implode(', ', $allowedCheck)
+                );
+            } elseif ($options['check'] === true) {
+                $options['check'] = 'CASCADED';
+            }
+            $check = ' WITH ' . $options['check'] . ' CHECK OPTION';
+        }
+        return $check;
+    }
 
     /**
      * initialize DSN MySQL with URI or array config

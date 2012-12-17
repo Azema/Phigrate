@@ -149,7 +149,7 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
         return true;
     }
 
-    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
     {
         $this->datas['addForeignKey'] = array(
             'tableName' => $tableName,
@@ -161,7 +161,7 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
         return true;
     }
 
-    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
     {
         $this->datas['removeForeignKey'] = array(
             'tableName' => $tableName,

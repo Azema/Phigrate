@@ -217,6 +217,34 @@ interface Phigrate_Adapter_IAdapter
     public function addIndex($tableName, $columnName, $options = array());
 
     /**
+     * Add foreign key
+     *
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     * @param string $tableRef   The table ref name
+     * @param string $columnRef  The column ref name
+     * @param array  $options    The options array
+     *
+     * @return boolean
+     * @throws Phigrate_Exception_Argument
+     */
+     public function addForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array());
+
+    /**
+     * Remove foreign key
+     *
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     * @param string $tableRef   The table ref name
+     * @param string $columnRef  The column ref name
+     * @param array  $options    The options array
+     *
+     * @return boolean
+     * @throws Phigrate_Exception_Argument
+     */
+    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array());
+
+    /**
      * Add comment to code SQL
      *
      * @param string $comment The comment
