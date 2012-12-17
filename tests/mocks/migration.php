@@ -217,6 +217,34 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
         $this->datas['comments'][] = $comment;
         return true;
     }
+
+    public function createView($viewName, $select, $options = array())
+    {
+        $this->datas['createView'] = array(
+            'name' => $viewName,
+            'select'   => $select,
+            'options'  => $options,
+        );
+        return true;
+    }
+
+    public function changeView($viewName, $select, $options = array())
+    {
+        $this->datas['changeView'] = array(
+            'name' => $viewName,
+            'select'   => $select,
+            'options'  => $options,
+        );
+        return true;
+    }
+
+    public function dropView($viewName)
+    {
+        $this->datas['dropView'] = array(
+            'name' => $viewName,
+        );
+        return true;
+    }
 }
 
 

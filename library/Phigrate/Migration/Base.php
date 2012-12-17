@@ -363,7 +363,21 @@ abstract class Phigrate_Migration_Base
      */
     public function createView($viewName, $sql, $options = array())
     {
-        return $this->_adapter->createView($tableName, $sql, $options);
+        return $this->_adapter->createView($viewName, $sql, $options);
+    }
+
+    /**
+     * change view
+     *
+     * @param string $viewName The view name
+     * @param string $sql      The request SQL of view
+     * @param array  $options   Options definition table
+     *
+     * @return boolean
+     */
+    public function changeView($viewName, $sql, $options = array())
+    {
+        return $this->_adapter->changeView($viewName, $sql, $options);
     }
 
     /**

@@ -252,6 +252,37 @@ interface Phigrate_Adapter_IAdapter
      * @return boolean
      */
     public function comment($comment);
+    
+    /**
+     * Create view
+     *
+     * @param string $viewName The view name
+     * @param string $select   The select statement
+     * @param array  $options  The options
+     *
+     * @return boolean
+     */
+    public function createView($viewName, $select, $options = array());
+
+    /**
+     * Change view
+     *
+     * @param string $viewName The view name
+     * @param string $select   The select statement
+     * @param array  $options  The options
+     *
+     * @return boolean
+     */
+    public function changeView($viewName, $select, $options = array());
+
+    /**
+     * Drop view
+     *
+     * @param string $viewName The view name
+     *
+     * @return boolean
+     */
+    public function dropView($viewName);
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */
