@@ -19,12 +19,12 @@
     ],
     "support": {
         "issues": "https://github.com/Azema/Phigrate/issues",
-        "wiki" : "https://github.com/Azema/Phigrate/wiki",
+        "wiki" : "http://blog.phigrate.org/doc/home",
         "source" : "https://github.com/Azema/Phigrate"
     },
     "require": {
         "php": ">=5.3.2",
-        "ext-pdo_mysql": "*"
+        "ext-pdo": "*"
     },
     "autoload": {
         "psr-0": { "Phigrate": "library" }
