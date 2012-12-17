@@ -399,6 +399,15 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
 
     /**
      */
+    public function testStartTransactionOnExport()
+    {
+        $actual = $this->object->setExport(true)->startTransaction();
+        $expected = 'SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";' . "\nSET AUTOCOMMIT=0;\nSTART TRANSACTION;";
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     */
     public function testStartTransactionException()
     {
         $this->setExpectedException(
@@ -419,6 +428,15 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
 
     /**
      */
+    public function testCommitTransactionOnExport()
+    {
+        $actual = $this->object->setExport(true)->commitTransaction();
+        $expected = 'COMMIT;';
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     */
     public function testCommitTransactionException()
     {
         $this->setExpectedException(
@@ -434,6 +452,14 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     {
         $this->object->startTransaction();
         $this->object->rollbackTransaction();
+    }
+
+    /**
+     */
+    public function testRollbackTransactionOnExport()
+    {
+        $actual = $this->object->setExport(true)->rollbackTransaction();
+        $this->assertEmpty($actual);
     }
 
     /**
@@ -1289,7 +1315,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         try {
-            $this->object->addIndex('users', '', '', '');
+            $this->object->addForeignKey('users', '', '', '');
             $this->fail('addForeignKey does not accept empty string for column name!');
         } catch (Phigrate_Exception_Argument $ex) {
             $msg = 'Missing column name parameter';
@@ -1342,7 +1368,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         try {
-            $this->object->addIndex('users', '', '', '');
+            $this->object->addForeignKey('users', '', '', '');
             $this->fail('addForeignKey does not accept empty string for column name!');
         } catch (Phigrate_Exception_Argument $ex) {
             $msg = 'Missing column name parameter';
@@ -1428,6 +1454,26 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
         }
     }
 
+    public function testAddForeignKeyWithAction()
+    {
+        //create it
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $this->object->executeDdl($sql);
+
+        $this->object->setExport(true);
+        $options = array(
+            'delete' => 'CASCADE',
+            'update' => 'SET NULL',
+        );
+        $this->object->addForeignKey('users', 'address', 'addresses', 'name', $options);
+        $actual = $this->object->getSql();
+        $this->assertRegExp('/ON DELETE CASCADE/', $actual);
+        $this->assertRegExp('/ON UPDATE SET NULL/', $actual);
+        $this->object->setExport(false);
+    }
+
     public function testAddForeignKeyAlreadyExists()
     {
         //create it
@@ -1485,7 +1531,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         try {
-            $this->object->removeIndex('users', '', '', '');
+            $this->object->removeForeignKey('users', '', '', '');
             $this->fail('removeForeignKey does not accept empty string for column name!');
         } catch (Phigrate_Exception_Argument $ex) {
             $msg = 'Missing column name parameter';
@@ -1545,7 +1591,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         try {
-            $this->object->removeIndex('users', '', '', '');
+            $this->object->removeForeignKey('users', '', '', '');
             $this->fail('removeForeignKey does not accept empty string for column name!');
         } catch (Phigrate_Exception_Argument $ex) {
             $msg = 'Missing column name parameter';
