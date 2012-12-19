@@ -39,7 +39,7 @@ class adapterTaskMock extends adapterMock
         }
         $schema = '';
         if ($this->_conn->tableSchemaExist) {
-            $schema = file_get_contents(FIXTURES_PATH . '/tasks/Db/schema.txt');
+            $schema = file_get_contents(FIXTURES_PATH . '/db/schema.txt');
         }
         return $schema;
     }

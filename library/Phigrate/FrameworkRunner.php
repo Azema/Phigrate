@@ -136,6 +136,7 @@ class Phigrate_FrameworkRunner
      */
     function __construct($argv)
     {
+        $this->_taskDir = array(PHIGRATE_BASE . '/library/Task');
         try {
             //parse arguments
             $this->_parseArgs($argv);
@@ -252,16 +253,14 @@ class Phigrate_FrameworkRunner
     /**
      * getTaskDir : Return the directory of tasks
      *
-     * @return string
+     * @return array
      */
     public function getTaskDir()
     {
-        if (! isset($this->_taskDir)) {
+        if (count($this->_taskDir) == 1) {
             $config = $this->getConfig();
             if (isset($config->task) && isset($config->task->dir)) {
-                $this->_taskDir = $config->task->dir;
-            } else {
-                $this->_taskDir = PHIGRATE_BASE . '/library/Task';
+                $this->_taskDir[] = $config->task->dir;
             }
         }
         return $this->_taskDir;
@@ -462,7 +461,7 @@ class Phigrate_FrameworkRunner
                                 . ' if you use the argument -t or --taskdir'
                             );
                         }
-                        $this->_taskDir = $argv[$i];
+                        $this->_taskDir[] = $argv[$i];
                         break;
                     // migration directory
                     case '-m':

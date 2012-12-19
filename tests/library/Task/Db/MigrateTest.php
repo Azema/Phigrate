@@ -31,7 +31,7 @@ class Task_Db_MigrateTest extends PHPUnit_Framework_TestCase
         parent::setUp();
         $this->object = new Task_Db_Migrate($this->_adapter);
         $this->object->setDirectoryOfMigrations(
-            FIXTURES_PATH . '/tasks/Db/migrate'
+            FIXTURES_PATH . '/db/migrate'
         );
     }
 

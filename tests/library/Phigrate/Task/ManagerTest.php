@@ -66,6 +66,20 @@ class Phigrate_Task_ManagerTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($actual->hasTask('db:migrate'));
     }
 
+    public function testSetDirectoryOfTasksWithManyDirectories()
+    {
+        $this->assertFalse($this->object->hasTask('fs:hello'));
+        $paths = array(
+            PHIGRATE_BASE . '/library/Task',
+            FIXTURES_PATH . '/tasks',
+        );
+        $actual = $this->object->setDirectoryOfTasks($paths, false);
+        $this->assertFalse($this->object->hasTask('fs:hello'));
+        $actual = $this->object->setDirectoryOfTasks($paths, true);
+        $this->assertInstanceOf('Phigrate_Task_Manager', $actual);
+        $this->assertTrue($actual->hasTask('fs:hello'));
+    }
+
     public function testSetDirectoryOfMigrations()
     {
         try {

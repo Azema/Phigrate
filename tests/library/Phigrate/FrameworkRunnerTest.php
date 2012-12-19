@@ -271,7 +271,9 @@ class Phigrate_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
         );
         $framework = new Phigrate_FrameworkRunner($parameters);
         $tasksDir = $framework->getTaskDir();
-        $this->assertEquals(PHIGRATE_BASE . '/library/Task', $tasksDir);
+        $this->assertInternalType('array', $tasksDir);
+        $this->assertEquals(1, count($tasksDir));
+        $this->assertContains(PHIGRATE_BASE . '/library/Task', $tasksDir);
 
         $addParams = array(
             '-t',
@@ -280,12 +282,16 @@ class Phigrate_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
         $parameters = array_merge($parameters, $addParams);
         $actual = new Phigrate_FrameworkRunner($parameters);
         $this->assertInstanceOf('Phigrate_FrameworkRunner', $actual);
-        $this->assertEquals(PHIGRATE_BASE . '/tests/fixtures/tasks', $actual->getTaskDir());
+        $tasksDir = $actual->getTaskDir();
+        $this->assertInternalType('array', $tasksDir);
+        $this->assertEquals(2, count($tasksDir));
+        $this->assertContains(PHIGRATE_BASE . '/tests/fixtures/tasks', $tasksDir);
         $parameters[2] = PHIGRATE_BASE . '/tests/fixtures/config/application.ini';
         array_splice($parameters, 6);
         $actual = new Phigrate_FrameworkRunner($parameters);
         $this->assertInstanceOf('Phigrate_FrameworkRunner', $actual);
-        $this->assertEquals(PHIGRATE_BASE . '/library/Task', $actual->getTaskDir());
+        $this->assertInternalType('array', $actual->getTaskDir());
+        $this->assertContains(PHIGRATE_BASE . '/library/Task', $actual->getTaskDir());
         $addParams = array(
             '--taskdir',
             PHIGRATE_BASE . '/tests/fixtures/tasks',
@@ -293,7 +299,9 @@ class Phigrate_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
         $parameters = array_merge($parameters, $addParams);
         $actual = new Phigrate_FrameworkRunner($parameters);
         $this->assertInstanceOf('Phigrate_FrameworkRunner', $actual);
-        $this->assertEquals(PHIGRATE_BASE . '/tests/fixtures/tasks', $actual->getTaskDir());
+        $tasksDir = $actual->getTaskDir();
+        $this->assertInternalType('array', $tasksDir);
+        $this->assertContains(PHIGRATE_BASE . '/tests/fixtures/tasks', $tasksDir);
     }
 
     public function testConstructorWithParameterMigrationDir()

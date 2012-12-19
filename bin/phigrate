@@ -159,7 +159,7 @@ function parseArgs($argv)
     if ($nbArgs < 2) {
         printHelp($argv[0]);
     } elseif ($nbArgs == 2) {
-        if ($argv[1] == 'help') {
+        if ($argv[1] == '-h' || $argv[1] == '--help') {
             printHelp($argv[0]);
         }
     }
@@ -181,18 +181,20 @@ function printHelp($scriptName)
     $usage =<<<USAGE
 Phigrate v{$version} at {$dateVersion}
 
-Usage: {$scriptName} [options] [help] [ENV=environment] <task> [task parameters]
+Usage: {$scriptName} [options] [ENV=environment] <task> [task parameters]
 
 Options:
     -c, --configuration  Path to the configuration file (INI) of application.
 
     -d, --database       Path to the configuration file (INI) of databases.
 
-    -t, --taskdir        Path of the directory of the tasks.
+    -h, --help           Display this message
 
     -l, --logdir         Path of the directory of logs.
 
     -m, --migrationdir   Path of the directory of the migrations.
+
+    -t, --taskdir        Path of the directory of the tasks.
 
 ###########
 
