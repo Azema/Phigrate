@@ -54,6 +54,7 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
         $this->object = new Phigrate_Adapter_Mysql_Adapter(self::$_dsn, self::$_logger);
+        $this->object->setExport(false);
     }
 
     /**
@@ -1971,6 +1972,293 @@ Valid types are:
         $this->assertEquals($expected, $this->object->getSql());
 
     }
+
+    /**
+     * @group view
+     */
+    public function testParametersOfCreateView()
+    {
+        try {
+            $this->object->createView('', '');
+            $this->fail('createView does not accept empty string for view name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing view name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->createView('v_test', '');
+            $this->fail('createView does not accept empty string for select statement!');
+        } catch (Phigrate_Exception_AdapterQuery $ex) {
+            $msg = 'Sql for createView() is not a SELECT : ';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->createView('v_test', 'DELETE users');
+            $this->fail('createView does not accept delete request for select statement!');
+        } catch (Phigrate_Exception_AdapterQuery $ex) {
+            $msg = 'Sql for createView() is not a SELECT : DELETE users';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+    }
+
+    /**
+     * @group view
+     */
+    public function testCreateViewSimple()
+    {
+        $expected = 'CREATE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users;';
+        $this->object->setExport('true');
+        $select = 'select usr_id from users';
+        $this->object->createView('v_users', $select, array());
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testCreateViewReplace()
+    {
+        $expected = 'CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users;';
+        $this->object->setExport('true');
+        $select = 'select usr_id from users';
+        $options = array('replace' => true);
+        $this->object->createView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testCreateViewWithAlgorithm()
+    {
+        $select = 'select usr_id from users';
+        $options = array('algorithm' => 'WRONG');
+        try {
+            $this->object->createView('v_users', $select, $options);
+            $this->fail('Algorithm for create view is wrong');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = 'algorithm allowed for create view : UNDEFINED, MERGE, TEMPTABLE';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $expected = 'CREATE ALGORITHM=MERGE DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users;';
+        $this->object->setExport('true');
+        $options = array('algorithm' => 'MERGE');
+        $this->object->createView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testCreateViewWithDefiner()
+    {
+        $select = 'select usr_id from users';
+        $options = array('definer' => "toto");
+        try {
+            $this->object->createView('v_users', $select, $options);
+            $this->fail('The format of definer is wrong');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = "The definer should be specified as 'user'@'host'.";
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $expected = "CREATE ALGORITHM=UNDEFINED DEFINER='root'@'localhost' VIEW `v_users` AS select usr_id from users;";
+        $this->object->setExport('true');
+        $options = array('definer' => "'root'@'localhost'");
+        $this->object->createView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testCreateViewWithColumnList()
+    {
+        $expected = 'CREATE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` (`usr_id`,`usr_name`) AS select usr_id from users;';
+        $this->object->setExport('true');
+        $select = 'select usr_id from users';
+        $options = array('columnList' => array('usr_id', 'usr_name'));
+        $this->object->createView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testCreateViewWithCheckOption()
+    {
+        $select = 'select usr_id from users';
+        $options = array('check' => 'wrong');
+        try {
+            $this->object->createView('v_users', $select, $options);
+            $this->fail('the check option of createView is wrong');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = 'check option allowed for create view : LOCAL, CASCADED';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $this->object->setExport('true');
+        $expected = 'CREATE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users WITH CASCADED CHECK OPTION;';
+        $options = array('check' => true);
+        $this->object->createView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+        $this->object->setExport('true');
+        $expected = 'CREATE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users WITH LOCAL CHECK OPTION;';
+        $options = array('check' => 'LOCAL');
+        $this->object->createView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testParametersOfChangeView()
+    {
+        try {
+            $this->object->changeView('', '');
+            $this->fail('changeView does not accept empty string for view name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing view name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->changeView('v_test', '');
+            $this->fail('changeView does not accept empty string for select statement!');
+        } catch (Phigrate_Exception_AdapterQuery $ex) {
+            $msg = 'Sql for changeView() is not a SELECT : ';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->changeView('v_test', 'DELETE users');
+            $this->fail('changeView does not accept delete request for select statement!');
+        } catch (Phigrate_Exception_AdapterQuery $ex) {
+            $msg = 'Sql for changeView() is not a SELECT : DELETE users';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+    }
+
+    /**
+     * @group view
+     */
+    public function testChangeViewSimple()
+    {
+        $expected = 'ALTER ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users;';
+        $this->object->setExport('true');
+        $select = 'select usr_id from users';
+        $this->object->changeView('v_users', $select, array());
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testChangeViewWithAlgorithm()
+    {
+        $select = 'select usr_id from users';
+        $options = array('algorithm' => 'WRONG');
+        try {
+            $this->object->changeView('v_users', $select, $options);
+            $this->fail('Algorithm for change view is wrong');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = 'algorithm allowed for change view : UNDEFINED, MERGE, TEMPTABLE';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $expected = 'ALTER ALGORITHM=MERGE DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users;';
+        $this->object->setExport('true');
+        $options = array('algorithm' => 'MERGE');
+        $this->object->changeView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testChangeViewWithDefiner()
+    {
+        $select = 'select usr_id from users';
+        $options = array('definer' => "toto");
+        try {
+            $this->object->changeView('v_users', $select, $options);
+            $this->fail('The format of definer is wrong');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = "The definer should be specified as 'user'@'host'.";
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $expected = "ALTER ALGORITHM=UNDEFINED DEFINER='root'@'localhost' VIEW `v_users` AS select usr_id from users;";
+        $this->object->setExport('true');
+        $options = array('definer' => "'root'@'localhost'");
+        $this->object->changeView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testChangeViewWithColumnList()
+    {
+        $expected = 'ALTER ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` (`usr_id`,`usr_name`) AS select usr_id from users;';
+        $this->object->setExport('true');
+        $select = 'select usr_id from users';
+        $options = array('columnList' => array('usr_id', 'usr_name'));
+        $this->object->changeView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testChangeViewWithCheckOption()
+    {
+        $select = 'select usr_id from users';
+        $options = array('check' => 'wrong');
+        try {
+            $this->object->changeView('v_users', $select, $options);
+            $this->fail('the check option of changeView is wrong');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = 'check option allowed for change view : LOCAL, CASCADED';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $this->object->setExport('true');
+        $expected = 'ALTER ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users WITH CASCADED CHECK OPTION;';
+        $options = array('check' => true);
+        $this->object->changeView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+        $this->object->setExport('true');
+        $expected = 'ALTER ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users WITH LOCAL CHECK OPTION;';
+        $options = array('check' => 'LOCAL');
+        $this->object->changeView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testDropView()
+    {
+        try {
+            $this->object->dropView('');
+            $this->fail('dropView does not accept empty string for view name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing view name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        $this->object->setExport(true);
+        $expected = 'DROP VIEW IF EXISTS `v_users`;';
+        $this->object->dropView('v_users');
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
 }
 
-/* vim: set expandtab tabstop=4 shiftwidth=4: */
+/* vim: set expandtab sw=4: */

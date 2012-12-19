@@ -371,6 +371,36 @@ class Phigrate_Migration_BaseTest extends PHPUnit_Framework_TestCase
         $this->object->comment($comment);
         $this->assertContains($comment, $this->_adapter->datas['comments']);
     }
+
+    public function testCreateView()
+    {
+        $name = 'users';
+        $select = 'select usr_id from users';
+        $return = $this->object->createView($name, $select);
+        $this->assertTrue($return);
+        $this->assertEquals($name, $this->_adapter->datas['createView']['name']);
+        $this->assertEquals($select, $this->_adapter->datas['createView']['select']);
+    }
+
+    public function testChangeView()
+    {
+        $name = 'users';
+        $select = 'select usr_id from users';
+        $return = $this->object->changeView($name, $select);
+        $this->assertTrue($return);
+        $this->assertEquals($name, $this->_adapter->datas['changeView']['name']);
+        $this->assertEquals($select, $this->_adapter->datas['changeView']['select']);
+    }
+
+    /**
+     */
+    public function testDropView()
+    {
+        $name = 'users';
+        $return = $this->object->dropView($name);
+        $this->assertTrue($return);
+        $this->assertEquals($name, $this->_adapter->datas['dropView']['name']);
+    }
 }
 
 /* vim: set expandtab sw=4: */

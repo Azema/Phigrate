@@ -217,6 +217,34 @@ interface Phigrate_Adapter_IAdapter
     public function addIndex($tableName, $columnName, $options = array());
 
     /**
+     * Add foreign key
+     *
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     * @param string $tableRef   The table ref name
+     * @param string $columnRef  The column ref name
+     * @param array  $options    The options array
+     *
+     * @return boolean
+     * @throws Phigrate_Exception_Argument
+     */
+     public function addForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array());
+
+    /**
+     * Remove foreign key
+     *
+     * @param string $tableName  The table name
+     * @param string $columnName The column name
+     * @param string $tableRef   The table ref name
+     * @param string $columnRef  The column ref name
+     * @param array  $options    The options array
+     *
+     * @return boolean
+     * @throws Phigrate_Exception_Argument
+     */
+    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array());
+
+    /**
      * Add comment to code SQL
      *
      * @param string $comment The comment
@@ -224,6 +252,37 @@ interface Phigrate_Adapter_IAdapter
      * @return boolean
      */
     public function comment($comment);
+    
+    /**
+     * Create view
+     *
+     * @param string $viewName The view name
+     * @param string $select   The select statement
+     * @param array  $options  The options
+     *
+     * @return boolean
+     */
+    public function createView($viewName, $select, $options = array());
+
+    /**
+     * Change view
+     *
+     * @param string $viewName The view name
+     * @param string $select   The select statement
+     * @param array  $options  The options
+     *
+     * @return boolean
+     */
+    public function changeView($viewName, $select, $options = array());
+
+    /**
+     * Drop view
+     *
+     * @param string $viewName The view name
+     *
+     * @return boolean
+     */
+    public function dropView($viewName);
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */

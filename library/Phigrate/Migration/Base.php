@@ -351,6 +351,46 @@ abstract class Phigrate_Migration_Base
         $this->_adapter->comment($comment);
         return $this;
     }
+
+    /**
+     * create view
+     *
+     * @param string $viewName The view name
+     * @param string $sql      The request SQL of view
+     * @param array  $options   Options definition table
+     *
+     * @return boolean
+     */
+    public function createView($viewName, $sql, $options = array())
+    {
+        return $this->_adapter->createView($viewName, $sql, $options);
+    }
+
+    /**
+     * change view
+     *
+     * @param string $viewName The view name
+     * @param string $sql      The request SQL of view
+     * @param array  $options   Options definition table
+     *
+     * @return boolean
+     */
+    public function changeView($viewName, $sql, $options = array())
+    {
+        return $this->_adapter->changeView($viewName, $sql, $options);
+    }
+
+    /**
+     * drop view
+     *
+     * @param string $viewName The view name
+     *
+     * @return boolean
+     */
+    public function dropView($viewName)
+    {
+        return $this->_adapter->dropView($viewName);
+    }
 }
 
 /* vim: set expandtab sw=4: */

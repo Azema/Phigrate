@@ -149,7 +149,7 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
         return true;
     }
 
-    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
     {
         $this->datas['addForeignKey'] = array(
             'tableName' => $tableName,
@@ -161,7 +161,7 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
         return true;
     }
 
-    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
+    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
     {
         $this->datas['removeForeignKey'] = array(
             'tableName' => $tableName,
@@ -215,6 +215,34 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
     public function comment($comment)
     {
         $this->datas['comments'][] = $comment;
+        return true;
+    }
+
+    public function createView($viewName, $select, $options = array())
+    {
+        $this->datas['createView'] = array(
+            'name' => $viewName,
+            'select'   => $select,
+            'options'  => $options,
+        );
+        return true;
+    }
+
+    public function changeView($viewName, $select, $options = array())
+    {
+        $this->datas['changeView'] = array(
+            'name' => $viewName,
+            'select'   => $select,
+            'options'  => $options,
+        );
+        return true;
+    }
+
+    public function dropView($viewName)
+    {
+        $this->datas['dropView'] = array(
+            'name' => $viewName,
+        );
         return true;
     }
 }
