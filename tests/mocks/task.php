@@ -120,14 +120,11 @@ class pdoTaskMock
 
     public function query($query)
     {
-        if (preg_match('/^SHOW TABLES/', $query)) {
-            if ($this->tableSchemaExist) {
-                $return = array(
-                    array(PHIGRATE_TS_SCHEMA_TBL_NAME),
-                );
-            } else {
-                $return = array();
-            }
+        $return = array();
+        if (preg_match('/^SHOW TABLES/', $query) && $this->tableSchemaExist) {
+            $return = array(
+                array(PHIGRATE_TS_SCHEMA_TBL_NAME),
+            );
         } elseif (preg_match('/^SHOW CREATE TABLE `(.*)`$/', $query, $matches)) {
             if (count($matches) > 1 && $matches[1] == PHIGRATE_TS_SCHEMA_TBL_NAME) {
                 return array(
@@ -137,8 +134,6 @@ class pdoTaskMock
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8'),
                 );
             }
-        } else {
-            $return = array();
         }
         return $return;
     }

@@ -577,8 +577,11 @@ USAGE;
             PHIGRATE_BASE . '/tests/fixtures/config/database.ini',
             '-c',
             PHIGRATE_BASE . '/tests/fixtures/config/application.ini',
+            '-m',
+            PHIGRATE_BASE . '/tests/fixtures/db/migrate',
             '--force',
             'db:migrate',
+            'VERSION=20120111064438',
         );
         $actual = new Phigrate_FrameworkRunner($parameters);
         $adapter = new adapterTaskMock(array(), '');
@@ -589,11 +592,9 @@ USAGE;
         $actual->setAdapter($adapter);
         $task = $actual->execute();
         $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-        . '\[db:migrate\]:\012+\t+Migrating UP:\012+'
-        . '========= CreateCucumber ======== \(\d+.\d{2}\)\012+'
-        . '========= TestFirst ======== \(\d+.\d{2}\)\012+\\033\[1;31mError:\\033\[0m test force\012+'
-        . '========= TestSecond ======== \(\d+.\d{2}\)\012+'
-        . '========= TestThird ======== \(\d+.\d{2}\)\012+'
+        . '\[db:migrate\]:\012+\t+Migrating UP to: 20120111064438\012+'
+        . '========= AddIndexToUsers ======== \(\d+.\d{2}\)\012+\\033\[1;31mError:\\033\[0m test force\012+'
+        . '========= CreateAddresses ======== \(\d+.\d{2}\)\012+\\033\[1;31mError:\\033\[0m test force\012+'
         . 'Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($task);
         $this->assertRegExp($regexp, $task);
