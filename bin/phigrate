@@ -159,7 +159,7 @@ function parseArgs($argv)
     if ($nbArgs < 2) {
         printHelp($argv[0]);
     } elseif ($nbArgs == 2) {
-        if ($argv[1] == '-h' || $argv[1] == '--help') {
+        if ($argv[1] == '-h' || $argv[1] == '--help' || $argv[1] == 'help') {
             printHelp($argv[0]);
         }
     }
@@ -187,6 +187,8 @@ Options:
     -c, --configuration  Path to the configuration file (INI) of application.
 
     -d, --database       Path to the configuration file (INI) of databases.
+
+    --force              Force the migration
 
     -h, --help           Display this message
 
@@ -226,7 +228,7 @@ All tasks available actually :
      - db:schema : It can be beneficial to get a dump of the DB in raw SQL
      format which represents the current version.
 
-For more documentation on the tasks
+For more documentation on the tasks, call task with help parameter.
 @see http://blog.phigrate.org/doc/task
 
 Call with no arguments to see usage info.

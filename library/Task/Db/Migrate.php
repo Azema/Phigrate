@@ -36,6 +36,13 @@ require_once 'Task/Db/AMigration.php';
 class Task_Db_Migrate extends Task_Db_AMigration
 {
     /**
+     * Flag to force migration
+     *
+     * @var boolean
+     */
+    protected $_force = false;
+
+    /**
      * Primary task entry point
      *
      * @param array $args Arguments of task
@@ -51,12 +58,17 @@ class Task_Db_Migrate extends Task_Db_AMigration
             require_once 'Phigrate/Exception/Task.php';
             throw new Phigrate_Exception_Task($msg);
         }
-        
+
         $this->_return = 'Started: ' . date('Y-m-d g:ia T') . PHP_EOL . PHP_EOL
             . '[db:migrate]:' . PHP_EOL;
-        
+
+        // Recuperation du flag pour forcer les migrations
+        if (array_key_exists('--force', $args)) {
+            $this->_force = true;
+            unset($args['--force']);
+        }
         $this->_execute($args);
-        
+
         $this->_return .= "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";
         $this->_logger->debug(__METHOD__ . ' End');
         return $this->_return;
@@ -75,6 +87,9 @@ Task: \033[36mdb:migrate\033[0m [\033[33mVERSION\033[0m]
 
 The primary purpose of the framework is to run migrations, and the
 execution of migrations is all handled by just a regular ol' task.
+
+To force the execution of migrations on existing database, you can use
+the flag --force, \033[1;31mbut it is your own risk\033[0m.
 
 \t\033[33mVERSION\033[0m can be specified to go up (or down) to a specific
 \tversion, based on the current version. If not specified,
@@ -279,7 +294,11 @@ USAGE;
         } catch (\Exception $e) {
             $this->_adapter->rollbackTransaction();
             $this->_logger->info('Rollback transaction called');
-            throw $e;
+            // Migrations forcée ?
+            if ($this->_force !== true) {
+                throw $e;
+            }
+            $this->_return .= "\n{$e->getMessage()}\n";
         }
         //update the schema info
         $this->_logger->debug(__METHOD__ . ' End');

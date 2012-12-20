@@ -1,8 +1,11 @@
 Author: Manuel HERVO <manuel.hervo % gmail .com>
 
-Version 1.2.0 (2012-XX-XX)
+Version 1.2 (2012-XX-XX)
     Adding a new feature to display comments in SQL exports
 	Adding getter/setter of delimiter on adapter MySQL
+    Adding methods to create, change and drop views
+    Adding another tasks directory in config
+    Adding parameter force for the task db:migrate
 
 Version 1.1.1 (2012-13-12)
     Change remove foreignKey in adapter MySQL

@@ -504,6 +504,8 @@ class Phigrate_FrameworkRunner
                                 $this->_env = $value;
                             }
                             $options[$key] = $value;
+                        } else {
+                            $options[(string)$arg] = true;
                         }
                         break;
                 }
