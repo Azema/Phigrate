@@ -112,6 +112,13 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     protected $_inTrx = false;
 
     /**
+     * The delimiter of requests
+     *
+     * @var string
+     */
+    protected $_delimiter = ';';
+
+    /**
      * supports migrations ?
      *
      * @return boolean
@@ -119,6 +126,29 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function supportsMigrations()
     {
         return true;
+    }
+
+    /**
+     * Return the delimiter of requests
+     *
+     * @return string
+     */
+    public function getDelimiter()
+    {
+        return $this->_delimiter;
+    }
+
+    /**
+     * Define the delimiter of requests
+     *
+     * @param string $delimiter The delimiter of requests
+     *
+     * @return Phigrate_Adapter_Mysql_Adapter
+     */
+    public function setDelimiter($delimiter)
+    {
+        $this->_delimiter = (string)$delimiter;
+        return $this;
     }
 
     /**
@@ -191,8 +221,9 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function startTransaction()
     {
         if ($this->hasExport()) {
-            return 'SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";'
-                . "\nSET AUTOCOMMIT=0;\nSTART TRANSACTION;";
+            return 'SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO"' . $this->_delimiter
+                . "\nSET AUTOCOMMIT=0" . $this->_delimiter
+                . "\nSTART TRANSACTION" . $this->_delimiter;
         }
         try {
             $this->_beginTransaction();
@@ -209,7 +240,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function commitTransaction()
     {
         if ($this->hasExport()) {
-            return "COMMIT;";
+            return 'COMMIT' . $this->_delimiter;
         }
         try {
             $this->_commit();
@@ -226,7 +257,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function rollbackTransaction()
     {
         if ($this->hasExport()) {
-            return "";
+            return '';
         }
         try {
             $this->_rollback();
@@ -277,7 +308,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function databaseExists($db)
     {
-        $ddl = 'SHOW DATABASES';
+        $ddl = 'SHOW DATABASES' . $this->_delimiter;
         $result = $this->selectAll($ddl);
         foreach ($result as $dbrow) {
             if ($dbrow['Database'] == $db) {
@@ -299,7 +330,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         if ($this->databaseExists($db)) {
             return false;
         }
-        $ddl = sprintf('CREATE DATABASE %s;', $this->identifier($db));
+        $ddl = sprintf('CREATE DATABASE %s%s', $this->identifier($db), $this->_delimiter);
         return $this->executeDdl($ddl);
     }
 
@@ -315,7 +346,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         if (!$this->databaseExists($db)) {
             return false;
         }
-        $ddl = sprintf('DROP DATABASE IF EXISTS %s', $this->identifier($db));
+        $ddl = sprintf('DROP DATABASE IF EXISTS %s%s', $this->identifier($db), $this->_delimiter);
         return $this->executeDdl($ddl);
     }
 
@@ -338,15 +369,15 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
                 continue;
             }
 
-            $stmt = sprintf('SHOW CREATE TABLE %s;', $this->identifier($tbl));
+            $stmt = sprintf('SHOW CREATE TABLE %s%s', $this->identifier($tbl), $this->_delimiter);
             $result = $this->execute($stmt);
 
             if (is_array($result) && count($result) == 1) {
                 $row = $result[0];
                 if (array_key_exists('Create Table', $row)) {
-                    $final .= $row['Create Table'] . ";\n\n";
+                    $final .= $row['Create Table'] . $this->_delimiter . "\n\n";
                 } else if (array_key_exists('Create View', $row)) {
-                    $views .= $row['Create View'] . ";\n\n";
+                    $views .= $row['Create View'] . $this->_delimiter . "\n\n";
                 }
             }
         }
@@ -388,6 +419,9 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function execute($query)
     {
+        if (substr($query, -1) != $this->_delimiter) {
+            $query .= $this->_delimiter;
+        }
         if ($this->hasExport()) {
             $this->_logger->debug('Query hasExport true');
             $this->_sql .= $query . "\n\n";
@@ -406,6 +440,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function query($query)
     {
         $this->getLogger()->log($query);
+        // Add semicolon on query if not exists
+        if (substr($query, -1) != $this->_delimiter) {
+            $query .= $this->_delimiter;
+        }
         $queryType = $this->_determineQueryType($query);
         if ($queryType == self::SQL_UNKNOWN_QUERY_TYPE) {
             return false;
@@ -497,7 +535,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function dropTable($tbl)
     {
-        $ddl = sprintf('DROP TABLE IF EXISTS %s;', $this->identifier($tbl));
+        $ddl = sprintf('DROP TABLE IF EXISTS %s%s', $this->identifier($tbl), $this->_delimiter);
         $result = $this->executeDdl($ddl);
         return $result;
     }
@@ -549,9 +587,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             );
         }
         $sql = sprintf(
-            'RENAME TABLE %s TO %s;',
+            'RENAME TABLE %s TO %s%s',
             $this->identifier($name),
-            $this->identifier($newName)
+            $this->identifier($newName),
+            $this->_delimiter
         );
         return $this->executeDdl($sql);
     }
@@ -598,7 +637,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             $this->identifier($columnName),
             $this->typeToSql($type, $options)
         );
-        $sql .= $this->addColumnOptions($type, $options) . ';';
+        $sql .= $this->addColumnOptions($type, $options) . $this->_delimiter;
 
         return $this->executeDdl($sql);
     }
@@ -625,9 +664,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             );
         }
         $sql = sprintf(
-            'ALTER TABLE %s DROP COLUMN %s;',
+            'ALTER TABLE %s DROP COLUMN %s%s',
             $this->identifier($tableName),
-            $this->identifier($columnName)
+            $this->identifier($columnName),
+            $this->_delimiter
         );
 
         return $this->executeDdl($sql);
@@ -679,7 +719,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             $this->identifier($options['new_name']),
             $this->typeToSql($type, $options)
         );
-        $sql .= $this->addColumnOptions($type, $options) . ';';
+        $sql .= $this->addColumnOptions($type, $options) . $this->_delimiter;
 
         return $this->executeDdl($sql);
     }
@@ -714,11 +754,12 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         $columnInfo = $this->columnInfo($tableName, $columnName);
         $current_type = $columnInfo['type'];
         $sql = sprintf(
-            'ALTER TABLE %s CHANGE %s %s %s;',
+            'ALTER TABLE %s CHANGE %s %s %s%s',
             $this->identifier($tableName),
             $this->identifier($columnName),
             $this->identifier($newColumnName),
-            $current_type
+            $current_type,
+            $this->_delimiter
         );
 
         return $this->executeDdl($sql);
@@ -746,9 +787,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             );
         }
         $sql = sprintf(
-            'SHOW COLUMNS FROM %s LIKE \'%s\'',
+            'SHOW COLUMNS FROM %s LIKE \'%s\'%s',
             $this->identifier($table),
-            $column
+            $column,
+            $this->_delimiter
         );
         $result = $this->selectOne($sql);
         if (is_array($result)) {
@@ -842,14 +884,15 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             $this->addIndex($tableRef, $columnRef);
         }
         $sql = sprintf(
-            'ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s) ON DELETE %s ON UPDATE %s;',
+            'ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s) ON DELETE %s ON UPDATE %s%s',
             $this->identifier($tableName),
             $constrainteName,
             $this->identifier($columnName),
             $this->identifier($tableRef),
             $this->identifier($columnRef),
             $delete,
-            $update
+            $update,
+            $this->_delimiter
         );
 
         return $this->executeDdl($sql);
@@ -890,9 +933,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
 
         $constrainteName = $this->_getConstrainteName($tableName, $columnName, $tableRef, $columnRef, $options);
         $sql = sprintf(
-            'ALTER TABLE %s DROP FOREIGN KEY %s;',
+            'ALTER TABLE %s DROP FOREIGN KEY %s%s',
             $this->identifier($tableName),
-            $constrainteName
+            $constrainteName,
+            $this->_delimiter
         );
         $result = false;
         try {
@@ -982,11 +1026,12 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             $cols[] = $this->identifier($name);
         }
         $sql = sprintf(
-            'CREATE %sINDEX %s ON %s(%s);',
+            'CREATE %sINDEX %s ON %s(%s)%s',
             ($unique === true) ? 'UNIQUE ' : '',
             $indexName,
             $this->identifier($tableName),
-            join(', ', $cols)
+            join(', ', $cols),
+            $this->_delimiter
         );
 
         return $this->executeDdl($sql);
@@ -1031,9 +1076,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         }
         $indexName = $this->_getIndexName($tableName, $columnName, $options);
         $sql = sprintf(
-            'DROP INDEX %s ON %s;',
+            'DROP INDEX %s ON %s%s',
             $this->identifier($indexName),
-            $this->identifier($tableName)
+            $this->identifier($tableName),
+            $this->_delimiter
         );
 
         return $this->executeDdl($sql);
@@ -1086,7 +1132,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
                 'Missing table name parameter'
             );
         }
-        $sql = sprintf('SHOW KEYS FROM %s;', $this->identifier($tableName));
+        $sql = sprintf('SHOW KEYS FROM %s%s', $this->identifier($tableName), $this->_delimiter);
         $result = $this->selectAll($sql);
         $indexes = array();
         foreach ($result as $row) {
@@ -1126,7 +1172,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         if (!is_array($columnName)) {
             $columnName = array($columnName);
         }
-        $sql = sprintf('SHOW KEYS FROM %s;', $this->identifier($tableName));
+        $sql = sprintf('SHOW KEYS FROM %s%s', $this->identifier($tableName), $this->_delimiter);
         $result = $this->selectAll($sql);
         $primary = array_fill_keys($columnName, false);
         foreach ($result as $row) {
@@ -1315,9 +1361,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function setCurrentVersion($version)
     {
         $sql = sprintf(
-            "INSERT INTO %s (version) VALUES ('%s');",
+            "INSERT INTO %s (version) VALUES ('%s')%s",
             PHIGRATE_TS_SCHEMA_TBL_NAME,
-            $version
+            $version,
+            $this->_delimiter
         );
         return $this->executeDdl($sql);
     }
@@ -1332,9 +1379,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function removeVersion($version)
     {
         $sql = sprintf(
-            "DELETE FROM %s WHERE version = '%s';",
+            "DELETE FROM %s WHERE version = '%s'%s",
             PHIGRATE_TS_SCHEMA_TBL_NAME,
-            $version
+            $version,
+            $this->_delimiter
         );
         return $this->executeDdl($sql);
     }
@@ -1617,8 +1665,9 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     {
         if ($this->_tablesLoaded == false || $reload) {
             $this->_tables = array(); //clear existing structure
-            $qry = 'SHOW TABLES';
+            $qry = 'SHOW TABLES' . $this->_delimiter;
             $results = $this->getConnexion()->query($qry);
+
             foreach ($results as $row) {
                 $table = $row[0];
                 $this->_tables[$table] = true;

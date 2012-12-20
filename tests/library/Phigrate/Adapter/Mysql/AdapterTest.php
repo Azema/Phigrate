@@ -63,35 +63,37 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
-        if ($this->object->hasTable(PHIGRATE_TS_SCHEMA_TBL_NAME)) {
-            $this->object->dropTable(PHIGRATE_TS_SCHEMA_TBL_NAME);
-        }
+        if (!$this->object->hasExport()) {
+            if ($this->object->hasTable(PHIGRATE_TS_SCHEMA_TBL_NAME)) {
+                $this->object->dropTable(PHIGRATE_TS_SCHEMA_TBL_NAME);
+            }
 
-        $this->object->query('SET FOREIGN_KEY_CHECKS=0;');
-        if ($this->object->hasTable('users')) {
-            $this->object->dropTable('users');
-        }
+            $this->object->query('SET FOREIGN_KEY_CHECKS=0;');
+            if ($this->object->hasTable('users')) {
+                $this->object->dropTable('users');
+            }
 
-        if ($this->object->hasTable('new_users')) {
-            $this->object->dropTable('new_users');
-        }
+            if ($this->object->hasTable('new_users')) {
+                $this->object->dropTable('new_users');
+            }
 
-        if ($this->object->hasTable('contacts')) {
-            $this->object->dropTable('contacts');
-        }
+            if ($this->object->hasTable('contacts')) {
+                $this->object->dropTable('contacts');
+            }
 
-        if ($this->object->hasTable('v_users')) {
-            $this->object->executeDdl("DROP VIEW `v_users`;");
-        }
+            if ($this->object->hasTable('v_users')) {
+                $this->object->executeDdl("DROP VIEW `v_users`;");
+            }
 
-        if ($this->object->hasTable('addresses')) {
-            $this->object->dropTable('addresses');
-        }
+            if ($this->object->hasTable('addresses')) {
+                $this->object->dropTable('addresses');
+            }
 
-        if ($this->object->hasTable('users_addresses')) {
-            $this->object->dropTable('users_addresses');
+            if ($this->object->hasTable('users_addresses')) {
+                $this->object->dropTable('users_addresses');
+            }
+            $this->object->query('SET FOREIGN_KEY_CHECKS=1;');
         }
-        $this->object->query('SET FOREIGN_KEY_CHECKS=1;');
 
         $this->object = null;
         parent::tearDown();
@@ -2256,6 +2258,23 @@ Valid types are:
         $this->object->setExport(true);
         $expected = 'DROP VIEW IF EXISTS `v_users`;';
         $this->object->dropView('v_users');
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    public function testDelimiterOnExecute()
+    {
+        $this->object->setExport(true);
+        $query = 'SELECT * FROM users';
+        $expected = $query . ';';
+        $this->object->execute($query);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+        $this->object->setExport(true);
+        $delimiter = '|';
+        $this->object->setDelimiter($delimiter);
+        $expected = $query . $delimiter;
+        $this->object->execute($query);
         $actual = $this->object->getSql();
         $this->assertStringStartsWith($expected, $actual);
     }

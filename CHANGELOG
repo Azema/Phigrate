@@ -2,6 +2,7 @@ Author: Manuel HERVO <manuel.hervo % gmail .com>
 
 Version 1.2.0 (2012-XX-XX)
     Adding a new feature to display comments in SQL exports
+	Adding getter/setter of delimiter on adapter MySQL
 
 Version 1.1.1 (2012-13-12)
     Change remove foreignKey in adapter MySQL
