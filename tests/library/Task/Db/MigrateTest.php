@@ -19,6 +19,7 @@ class Task_Db_MigrateTest extends PHPUnit_Framework_TestCase
 
     public function __construct()
     {
+        parent::__construct();
         $this->_adapter = new adapterTaskMock(array(), '');
     }
 
@@ -199,6 +200,60 @@ class Task_Db_MigrateTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($versions, $this->_adapter->versions);
     }
 
+    public function testExecuteWithForceOnVersionMigration()
+    {
+        $this->_adapter->setTableSchemaExist(true);
+        $versions = array(
+            array('version' => '20120109064438'),
+            array('version' => '20120110064438'),
+            array('version' => '20120111064438'),
+        );
+        $this->_adapter->versions = $versions;
+        $e = new Phigrate_Exception('test force');
+        $this->_adapter->throwException($e);
+        $actual = $this->object->execute(array(
+            'VERSION' => '20120109064438',
+            '--force' => true,
+        ));
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+            . '\[db:migrate\]:\012+\tMigrating DOWN to: 20120109064438\012+'
+            . '========= CreateAddresses ======== \(\d+.\d{2}\)\012+\\033\[1;31mError:\\033\[0m test force\012+'
+            . '========= AddIndexToUsers ======== \(\d+.\d{2}\)\012+\\033\[1;31mError:\\033\[0m test force\012+'
+            . 'Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
+        $this->assertNotEmpty($actual);
+        $this->assertRegExp($regexp, $actual);
+        $versions = array(array('version' => '20120109064438'));
+        $this->assertEquals($versions, $this->_adapter->versions);
+        $this->_adapter->throwException(null);
+    }
+
+    public function testExecuteWithForceOnOffsetMigration()
+    {
+        $this->_adapter->setTableSchemaExist(true);
+        $versions = array(
+            array('version' => '20120109064438'),
+            array('version' => '20120110064438'),
+            array('version' => '20120111064438'),
+        );
+        $this->_adapter->versions = $versions;
+        $e = new Phigrate_Exception('test force');
+        $this->_adapter->throwException($e);
+        $actual = $this->object->execute(array(
+            'VERSION' => '-2',
+            '--force' => true,
+        ));
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+            . '\[db:migrate\]:\012+\tMigrating DOWN to: 20120109064438\012+'
+            . '========= CreateAddresses ======== \(\d+.\d{2}\)\012+\\033\[1;31mError:\\033\[0m test force\012+'
+            . '========= AddIndexToUsers ======== \(\d+.\d{2}\)\012+\\033\[1;31mError:\\033\[0m test force\012+'
+            . 'Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
+        $this->assertNotEmpty($actual);
+        $this->assertRegExp($regexp, $actual);
+        $versions = array(array('version' => '20120109064438'));
+        $this->assertEquals($versions, $this->_adapter->versions);
+        $this->_adapter->throwException(null);
+    }
+
     public function testExecuteWithPreviousVersion()
     {
         $this->_adapter->setTableSchemaExist(true);
@@ -306,6 +361,9 @@ Task: \033[36mdb:migrate\033[0m [\033[33mVERSION\033[0m]
 
 The primary purpose of the framework is to run migrations, and the
 execution of migrations is all handled by just a regular ol' task.
+
+To force the execution of migrations on existing database, you can use
+the flag --force, \033[1;31mbut it is your own risk\033[0m.
 
 \t\033[33mVERSION\033[0m can be specified to go up (or down) to a specific
 \tversion, based on the current version. If not specified,

@@ -274,7 +274,12 @@ USAGE;
                     //wrap the caught exception in our own
                     $msg = $migration['file']['class'] . ' - ' . $e->getMessage();
                     $this->_logger->err($msg);
-                    throw new Phigrate_Exception($msg, $e->getCode(), $e);
+                    $this->_logger->debug('force: ' . var_export($this->_force, true));
+                    // Migrations forcée ?
+                    if ($this->_force !== true) {
+                        throw new Phigrate_Exception($msg, $e->getCode(), $e);
+                    }
+                    $msgForce = $e->getMessage();
                 }
                 $end = microtime(true);
                 $diff = $this->_diffTimer($start, $end);
@@ -283,6 +288,11 @@ USAGE;
                     $migration['file']['class'],
                     $diff
                 );
+                // Ajout du message d'erreur en cas de forçage
+                if ($this->_force && isset($msgForce)) {
+                    $this->_return .= "\033[1;31mError:\033[0m {$msgForce}\n\n";
+                    unset($msgForce);
+                }
                 //successfully ran migration, update our version and commit
                 $this->_migratorUtil
                     ->resolveCurrentVersion($migration['file']['version'], $targetMethod);
@@ -294,11 +304,7 @@ USAGE;
         } catch (\Exception $e) {
             $this->_adapter->rollbackTransaction();
             $this->_logger->info('Rollback transaction called');
-            // Migrations forcée ?
-            if ($this->_force !== true) {
-                throw $e;
-            }
-            $this->_return .= "\n{$e->getMessage()}\n";
+            throw $e;
         }
         //update the schema info
         $this->_logger->debug(__METHOD__ . ' End');

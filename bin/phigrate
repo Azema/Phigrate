@@ -188,7 +188,7 @@ Options:
 
     -d, --database       Path to the configuration file (INI) of databases.
 
-    --force              Force the migration
+    --force              Force the migration (only for task db:migrate)
 
     -h, --help           Display this message
 

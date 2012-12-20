@@ -8,6 +8,8 @@ class adapterTaskMock extends adapterMock
 
     public $supportMigration = true;
 
+    public $exception;
+
     public function __construct($dbConfig, $logger)
     {
         require_once 'Phigrate/Logger.php';
@@ -19,6 +21,27 @@ class adapterTaskMock extends adapterMock
     public function supportsMigrations()
     {
         return $this->supportMigration;
+    }
+
+    public function addIndex($table, $column, $options = array())
+    {
+        if (isset($this->exception)) {
+            throw $this->exception;
+        }
+        parent::addIndex($table, $column, $options);
+    }
+
+    public function removeIndex($table, $column)
+    {
+        if (isset($this->exception)) {
+            throw $this->exception;
+        }
+        parent::removeIndex($table, $column);
+    }
+
+    public function throwException($e)
+    {
+        $this->exception = $e;
     }
 
     public function setTableSchemaExist($exist)
