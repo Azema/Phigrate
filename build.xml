@@ -135,8 +135,7 @@
 
  <target name="phpunit" description="Run unit tests with PHPUnit">
   <exec dir="${basedir}/tests" executable="phpunit" failonerror="false">
-   <arg value="--configuration phpunit-jenkins.xml" />
-   <arg value="--coverage-text" />
+   <arg line="-c ${basedir}/phpunit-jenkins.xml --coverage-text" />
   </exec>
  </target>
 
