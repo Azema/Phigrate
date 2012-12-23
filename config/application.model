@@ -1,8 +1,7 @@
 [default]
-database.config = "/etc/phigrate/database.ini"
-task.dir = "/usr/share/pear/Phigrate/library/Task"
-migration.dir = "/home/user/projects/MyProject/db/migrate"
-log.dir = "/tmp/"
+database.config = "./database.model"
+migration.dir = "../db/migrate"
+log.dir = "../logs/"
 debug = 0
 
 [development : default]
