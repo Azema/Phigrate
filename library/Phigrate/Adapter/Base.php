@@ -63,6 +63,13 @@ abstract class Phigrate_Adapter_Base
     protected $_sql;
 
     /**
+     * The delimiter of requests
+     *
+     * @var string
+     */
+    protected $_delimiter = ';';
+
+    /**
      * __construct 
      * 
      * @param array            $dbConfig    Config DB for connect it
@@ -227,49 +234,6 @@ abstract class Phigrate_Adapter_Base
         }
         return "'" . addcslashes($value, "\000\n\r\\'\"\032") . "'";
     }
-
-    /**
-     * Creates a PDO instance to represent a connection
-     * to the requested database.
-     * 
-     * @return PDO
-     * @throws Phigrate_Exception_AdapterConnexion
-     */
-    protected function _createPdo()
-    {
-        $user = '';
-        if (array_key_exists('user', $this->_dbConfig)) {
-            $user = $this->_dbConfig['user'];
-        }
-        $password = '';
-        if (array_key_exists('password', $this->_dbConfig)) {
-            $password = $this->_dbConfig['password'];
-        }
-        $options = array();
-        if (array_key_exists('options', $this->_dbConfig)
-            && is_array($this->_dbConfig['options'])
-        ) {
-            $options = $this->_dbConfig['options'];
-        }
-        try {
-            $pdo = new PDO($this->getDsn(), $user, $password, $options);
-        } catch (PDOException $e) {
-            if (PHP_VERSION_ID >= 50300) {
-                throw new Phigrate_Exception_AdapterConnexion(
-                    $e->getMessage(),
-                    $e->getCode(),
-                    $e->getPrevious()
-                );
-            } else {
-                throw new Phigrate_Exception_AdapterConnexion(
-                    $e->getMessage(),
-                    $e->getCode()
-                );
-            }
-        }
-
-        return $pdo;
-    }
     
     /**
      * Define flag export SQL
@@ -313,6 +277,76 @@ abstract class Phigrate_Adapter_Base
     public function initSql()
     {
         $this->_sql = '';
+    }
+
+    /**
+     * Return the delimiter of requests
+     *
+     * @return string
+     */
+    public function getDelimiter()
+    {
+        return $this->_delimiter;
+    }
+
+    /**
+     * Define the delimiter of requests
+     *
+     * @param string $delimiter The delimiter of requests
+     *
+     * @return Phigrate_Adapter_Mysql_Adapter
+     */
+    public function setDelimiter($delimiter)
+    {
+        $this->_delimiter = (string)$delimiter;
+        return $this;
+    }
+
+    // *******************
+    // PROTECTED METHODS
+    // *******************
+
+    /**
+     * Creates a PDO instance to represent a connection
+     * to the requested database.
+     *
+     * @return PDO
+     * @throws Phigrate_Exception_AdapterConnexion
+     */
+    protected function _createPdo()
+    {
+        $user = '';
+        if (array_key_exists('user', $this->_dbConfig)) {
+            $user = $this->_dbConfig['user'];
+        }
+        $password = '';
+        if (array_key_exists('password', $this->_dbConfig)) {
+            $password = $this->_dbConfig['password'];
+        }
+        $options = array();
+        if (array_key_exists('options', $this->_dbConfig)
+            && is_array($this->_dbConfig['options'])
+        ) {
+            $options = $this->_dbConfig['options'];
+        }
+        try {
+            $pdo = new PDO($this->getDsn(), $user, $password, $options);
+        } catch (PDOException $e) {
+            if (PHP_VERSION_ID >= 50300) {
+                throw new Phigrate_Exception_AdapterConnexion(
+                    $e->getMessage(),
+                    $e->getCode(),
+                    $e->getPrevious()
+                );
+            } else {
+                throw new Phigrate_Exception_AdapterConnexion(
+                    $e->getMessage(),
+                    $e->getCode()
+                );
+            }
+        }
+
+        return $pdo;
     }
 }
 

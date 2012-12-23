@@ -112,13 +112,6 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     protected $_inTrx = false;
 
     /**
-     * The delimiter of requests
-     *
-     * @var string
-     */
-    protected $_delimiter = ';';
-
-    /**
      * supports migrations ?
      *
      * @return boolean
@@ -126,29 +119,6 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function supportsMigrations()
     {
         return true;
-    }
-
-    /**
-     * Return the delimiter of requests
-     *
-     * @return string
-     */
-    public function getDelimiter()
-    {
-        return $this->_delimiter;
-    }
-
-    /**
-     * Define the delimiter of requests
-     *
-     * @param string $delimiter The delimiter of requests
-     *
-     * @return Phigrate_Adapter_Mysql_Adapter
-     */
-    public function setDelimiter($delimiter)
-    {
-        $this->_delimiter = (string)$delimiter;
-        return $this;
     }
 
     /**
