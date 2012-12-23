@@ -245,6 +245,13 @@ function printHelp($scriptName = 'phigrate-generate')
     $version = PHIGRATE_VERSION;
     $dateVersion = PHIGRATE_DATE;
     $usage =<<<USAGE
+ ____  _     _                 _
+|  _ \| |__ (_) __ _ _ __ __ _| |_ ___
+| |_) | '_ \| |/ _` | '__/ _` | __/ _ \
+|  __/| | | | | (_| | | | (_| | ||  __/
+|_|   |_| |_|_|\__, |_|  \__,_|\__\___|
+               |___/
+
 Phigrate v{$version} at {$dateVersion}
 
 Usage: {$scriptName} [options] [help] [ENV=environment] <migration name>

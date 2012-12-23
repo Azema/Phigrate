@@ -6,6 +6,7 @@ Version 1.2 (2012-XX-XX)
     Adding methods to create, change and drop views
     Adding another tasks directory in config
     Adding parameter force for the task db:migrate
+    Add header Phigrate in output of scripts
 
 Version 1.1.1 (2012-13-12)
     Change remove foreignKey in adapter MySQL

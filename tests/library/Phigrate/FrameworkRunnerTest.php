@@ -405,6 +405,13 @@ class Phigrate_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
         $actual = new Phigrate_FrameworkRunner($parameters);
         $this->assertInstanceOf('Phigrate_FrameworkRunner', $actual);
         $expected =<<<USAGE
+ ____  _     _                 _
+|  _ \| |__ (_) __ _ _ __ __ _| |_ ___
+| |_) | '_ \| |/ _` | '__/ _` | __/ _ \
+|  __/| | | | | (_| | | | (_| | ||  __/
+|_|   |_| |_|_|\__, |_|  \__,_|\__\___|
+               |___/
+
 Task: \033[36mdb:version\033[0m
 
 It is always possible to ask the framework (really the DB) what version it is
@@ -591,7 +598,7 @@ USAGE;
         $adapter->throwException($e);
         $actual->setAdapter($adapter);
         $task = $actual->execute();
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+        $regexp = '/Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
         . '\[db:migrate\]:\012+\t+Migrating UP to: 20120111064438\012+'
         . '========= AddIndexToUsers ======== \(\d+.\d{2}\)\012+\\033\[1;31mError:\\033\[0m test force\012+'
         . '========= CreateAddresses ======== \(\d+.\d{2}\)\012+\\033\[1;31mError:\\033\[0m test force\012+'
@@ -616,7 +623,7 @@ USAGE;
         $adapter->versions = array(array('version' => '20120110064438'));
         $actual->setAdapter($adapter);
         $task = $actual->execute();
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+        $regexp = '/Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
         . '\[db:version\]:\012+\t+Current version: \d+\012+Finished: '
         . '\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($task);
@@ -638,7 +645,7 @@ USAGE;
         $adapter->setTableSchemaExist(false);
         $actual->setAdapter($adapter);
         $task = $actual->execute(array());
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+        $regexp = '/Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:version\]:\012+\t+Schema version table \(schema_migrations\) '
             . "does not exist\. Do you need to run 'db:setup'\?"
             . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
@@ -741,17 +748,6 @@ USAGE;
                 . 'use the argument -t or --taskdir';
             $this->assertEquals($msg, $e->getMessage());
         }
-    }
-    
-    /**
-     * @todo   Implement testUpdateSchemaForTimestamps().
-     */
-    public function testUpdateSchemaForTimestamps()
-    {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
-        );
     }
 }
 

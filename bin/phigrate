@@ -142,7 +142,7 @@ if (! in_array('-c', $args)) {
 }
 $main = new Phigrate_FrameworkRunner($args);
 $output = $main->execute();
-echo "\n", $output, "\n";
+echo $output, "\n";
 // It's good
 exit(0);
 
@@ -179,7 +179,15 @@ function printHelp($scriptName)
     $version = PHIGRATE_VERSION;
     $dateVersion = PHIGRATE_DATE;
     $usage =<<<USAGE
+ ____  _     _                 _
+|  _ \| |__ (_) __ _ _ __ __ _| |_ ___
+| |_) | '_ \| |/ _` | '__/ _` | __/ _ \
+|  __/| | | | | (_| | | | (_| | ||  __/
+|_|   |_| |_|_|\__, |_|  \__,_|\__\___|
+               |___/
+
 Phigrate v{$version} at {$dateVersion}
+
 
 Usage: {$scriptName} [options] [ENV=environment] <task> [task parameters]
 
@@ -200,7 +208,7 @@ Options:
 
 ###########
 
-    help: Display this message
+    task --help: Display help of task
 
     ENV: The ENV command line parameter can be used to specify a different
 database to run against, as specific in the configuration file (config/database.inc.php).

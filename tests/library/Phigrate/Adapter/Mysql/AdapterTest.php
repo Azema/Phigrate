@@ -1637,7 +1637,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
         $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
 
         try {
-            var_dump($this->object->removeForeignKey('users', 'address', 'addresses', 'name'));
+            $this->object->removeForeignKey('users', 'address', 'addresses', 'name');
             $this->fail('constrainte does not exists!');
         } catch (Phigrate_Exception_AdapterQuery $ex) {
             $msg = 'Constrainte does not exists.';

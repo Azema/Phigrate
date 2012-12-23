@@ -230,12 +230,12 @@ class Phigrate_FrameworkRunner
     public function execute()
     {
         $this->_logger->debug(__METHOD__ . ' Start');
-        $output = '';
+        $output = $this->_getHeaderScript();
         if ($this->_taskMgr->hasTask($this->_curTaskName)) {
             if ($this->_helpTask) {
-                $output = $this->_taskMgr->help($this->_curTaskName);
+                $output .= $this->_taskMgr->help($this->_curTaskName);
             } else {
-                $output = $this->_taskMgr->execute(
+                $output .= $this->_taskMgr->execute(
                     $this->_curTaskName,
                     $this->_taskOptions
                 );
@@ -284,59 +284,9 @@ class Phigrate_FrameworkRunner
         return $this->_migrationDir;
     }
 
-    /**
-     * Update the local schema to handle multiple records versus the prior architecture
-     * of storing a single version. In addition take all existing migration files
-     * and register them in our new table, as they have already been executed.
-     *
-     * @return void
-     */
-    public function updateSchemaForTimestamps()
-    {
-        //only create the table if it doesnt already exist
-        $this->_adapter->createSchemaVersionTable();
-        //insert all existing records into our new table
-        $migratorUtil = new Phigrate_Util_Migrator($this->_adapter);
-        $files = $migratorUtil->getMigrationFiles(
-            $this->getMigrationDir(), 'up'
-        );
-        foreach ($files as $file) {
-            if ((int)$file['version'] >= PHP_INT_MAX) {
-                //its new style like '20081010170207' so its not a candidate
-                continue;
-            }
-            // query old table, if it less than or equal to our max version,
-            // then its a candidate for insertion
-            $querySql = sprintf(
-                'SELECT version FROM %s WHERE version >= %d',
-                PHIGRATE_SCHEMA_TBL_NAME,
-                $file['version']
-            );
-            $existingVersionOldStyle = $this->_adapter->selectOne($querySql);
-            if (count($existingVersionOldStyle) > 0) {
-                // make sure it doesnt exist in our new table,
-                // who knows how it got inserted?
-                $newVersSql = sprintf(
-                    'SELECT version FROM %s WHERE version = %d',
-                    PHIGRATE_TS_SCHEMA_TBL_NAME,
-                    $file['version']
-                );
-                $existingVersionNewStyle = $this->_adapter
-                    ->selectOne($newVersSql);
-                if (empty($existingVersionNewStyle)) {
-                    // use printf & %d to force it to be stripped of any
-                    // leading zeros, we *know* this represents an old version style
-                    // so we dont have to worry about PHP and integer overflow
-                    $insertSql = sprintf(
-                        'INSERT INTO %s (version) VALUES (%d)',
-                        PHIGRATE_TS_SCHEMA_TBL_NAME,
-                        $file['version']
-                    );
-                    $this->_adapter->query($insertSql);
-                }
-            }
-        }
-    }
+    //-------------------------
+    // PROTECTED METHODS
+    //-------------------------
 
     /**
      * initialize tasks
@@ -495,7 +445,7 @@ class Phigrate_FrameworkRunner
                         if (strpos($arg, ':') !== false) {
                             $this->_curTaskName = $arg;
                             continue;
-                        } elseif ($arg == 'help') {
+                        } elseif ($arg == '-h' || $arg == '--help' || $arg == 'help') {
                             $this->_helpTask = true;
                             continue;
                         } elseif (strpos($arg, '=') !== false) {
@@ -619,11 +569,12 @@ class Phigrate_FrameworkRunner
             // Second in config file
             $logDir = $config->log->dir;
         }
+        $tmp = $logDir;
         $logDir = $this->_fileWithRealPath($logDir);
         if (! is_dir($logDir)) {
             require_once 'Phigrate/Exception/InvalidLog.php';
             throw new Phigrate_Exception_InvalidLog(
-                $logDir . ' does not exists.'
+                $tmp . ' does not exists.'
             );
         }
         if (is_dir($logDir) && ! is_writable($logDir)) {
@@ -672,6 +623,26 @@ class Phigrate_FrameworkRunner
                 );
         }
         return $adapterClass;
+    }
+
+    /**
+     * Retourne l'en tête de presentation de Phigrate
+     *
+     * @return string
+     */
+    private function _getHeaderScript()
+    {
+        $head =<<<HEAD
+ ____  _     _                 _
+|  _ \| |__ (_) __ _ _ __ __ _| |_ ___
+| |_) | '_ \| |/ _` | '__/ _` | __/ _ \
+|  __/| | | | | (_| | | | (_| | ||  __/
+|_|   |_| |_|_|\__, |_|  \__,_|\__\___|
+               |___/
+
+
+HEAD;
+        return $head;
     }
 }
 
