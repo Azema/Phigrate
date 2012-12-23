@@ -169,7 +169,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function createSchemaVersionTable()
     {
         if (! $this->hasTable(PHIGRATE_TS_SCHEMA_TBL_NAME)) {
-            $t = $this->createTable(
+            $this->createTable(
                 PHIGRATE_TS_SCHEMA_TBL_NAME,
                 array('id' => false))
                 ->column('version', 'string')
@@ -546,16 +546,18 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function renameTable($name, $newName)
     {
-        if (empty($name)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing original table name parameter'
-            );
-        }
-        if (empty($newName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing new table name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'original table name',
+                    'arg'  => $name,
+                ),
+                array(
+                    'name' => 'new table name',
+                    'arg'  => $newName,
+                ),
+            )
+        );
         $sql = sprintf(
             'RENAME TABLE %s TO %s%s',
             $this->identifier($name),
@@ -578,19 +580,22 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function addColumn($tableName, $columnName, $type, $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
-        if (empty($type)) {
-            throw new Phigrate_Exception_Argument('Missing type parameter');
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+                array(
+                    'name' => 'type',
+                    'arg'  => $type,
+                ),
+            )
+        );
         //default types
         if (! array_key_exists('limit', $options)) {
             $options['limit'] = null;
@@ -623,16 +628,18 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function removeColumn($tableName, $columnName)
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+            )
+        );
         $sql = sprintf(
             'ALTER TABLE %s DROP COLUMN %s%s',
             $this->identifier($tableName),
@@ -656,19 +663,22 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function changeColumn($tableName, $columnName, $type, $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
-        if (empty($type)) {
-            throw new Phigrate_Exception_Argument('Missing type parameter');
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+                array(
+                    'name' => 'type',
+                    'arg'  => $type,
+                ),
+            )
+        );
         //default types
         if (! array_key_exists('limit', $options)) {
             $options['limit'] = null;
@@ -706,21 +716,22 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function renameColumn($tableName, $columnName, $newColumnName)
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing original column name parameter'
-            );
-        }
-        if (empty($newColumnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing new column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'original column name',
+                    'arg'  => $columnName,
+                ),
+                array(
+                    'name' => 'new column name',
+                    'arg'  => $newColumnName,
+                ),
+            )
+        );
         $columnInfo = $this->columnInfo($tableName, $columnName);
         $current_type = $columnInfo['type'];
         $sql = sprintf(
@@ -746,16 +757,18 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function columnInfo($table, $column)
     {
-        if (empty($table)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($column)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $table,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $column,
+                ),
+            )
+        );
         $sql = sprintf(
             'SHOW COLUMNS FROM %s LIKE \'%s\'%s',
             $this->identifier($table),
@@ -784,21 +797,22 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function addForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
-        if (empty($tableRef)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table ref name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+                array(
+                    'name' => 'table ref name',
+                    'arg'  => $tableRef,
+                ),
+            )
+        );
         if (empty($columnRef)) {
             $columnRef = 'id';
         }
@@ -884,21 +898,22 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
-        if (empty($tableRef)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table ref name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+                array(
+                    'name' => 'table ref name',
+                    'arg'  => $tableRef,
+                ),
+            )
+        );
         if (empty($columnRef)) {
             $columnRef = 'id';
         }
@@ -951,16 +966,18 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function addIndex($tableName, $columnName, $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+            )
+        );
         if (is_array($options) && array_key_exists('foreignKey', $options)
             && $options['foreignKey'] == true)
         {
@@ -1026,16 +1043,18 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function removeIndex($tableName, $columnName, $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+            )
+        );
         if (is_array($options) && array_key_exists('foreignKey', $options)
             && $options['foreignKey'] == true)
         {
@@ -1074,16 +1093,18 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function hasIndex($tableName, $columnName, $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+            )
+        );
         $indexName = $this->_getIndexName($tableName, $columnName, $options);
         $indexes = $this->indexes($tableName);
         foreach ($indexes as $idx) {
@@ -1104,11 +1125,14 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function indexes($tableName)
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+            )
+        );
         $sql = sprintf('SHOW KEYS FROM %s%s', $this->identifier($tableName), $this->_delimiter);
         $result = $this->selectAll($sql);
         $indexes = array();
@@ -1136,16 +1160,18 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function isPrimaryKey($tableName, $columnName)
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+            )
+        );
         if (!is_array($columnName)) {
             $columnName = array($columnName);
         }
@@ -1444,11 +1470,14 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function dropView($viewName)
     {
-        if (empty($viewName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing view name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'view name',
+                    'arg'  => $viewName,
+                ),
+            )
+        );
         $ddl = sprintf('DROP VIEW IF EXISTS %s;', $this->identifier($viewName));
         return $this->executeDdl($ddl);
     }
@@ -1456,6 +1485,25 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     //-----------------------------------
     // PRIVATE METHODS
     //-----------------------------------
+
+    /**
+     * Check missing parameters
+     *
+     * @param array $parameters The array of parameters
+     *
+     * @return void
+     * @throws Phigrate_Exception_Argument
+     */
+    protected function _checkMissingParameters($parameters)
+    {
+        foreach ($parameters as $parameter) {
+            if (empty($parameter['arg'])) {
+                throw new Phigrate_Exception_Argument(
+                    'Missing ' . $parameter['name'] . ' parameter'
+                );
+            }
+        }
+    }
 
     /**
      * Check engine of table for foreign key constraints
@@ -1500,11 +1548,14 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     protected function _createOrAlterView($viewName, $select, $query, $funcName,  $options = array())
     {
-        if (empty($viewName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing view name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'view name',
+                    'arg'  => $viewName,
+                ),
+            )
+        );
         $query_type = $this->_determineQueryType($select);
         if ($query_type != self::SQL_SELECT) {
             require_once 'Phigrate/Exception/AdapterQuery.php';
