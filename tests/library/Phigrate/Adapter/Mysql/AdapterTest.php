@@ -1752,9 +1752,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->object->addForeignKey('users', 'address', 'addresses');
         $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
