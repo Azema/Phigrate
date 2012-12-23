@@ -1243,6 +1243,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     /**
      * add column options
      *
+     * @param string $type    The type of column
      * @param array  $options The options definition
      *
      * @return string

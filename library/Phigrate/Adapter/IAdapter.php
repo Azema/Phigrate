@@ -162,7 +162,7 @@ interface Phigrate_Adapter_IAdapter
      * @return boolean
      */
     public function addColumn($tableName, $columnName, $type, $options = array());
-    
+
     /**
      * add column options
      *
@@ -252,7 +252,7 @@ interface Phigrate_Adapter_IAdapter
      * @return boolean
      */
     public function comment($comment);
-    
+
     /**
      * Create view
      *

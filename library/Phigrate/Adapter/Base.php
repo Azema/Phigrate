@@ -47,7 +47,7 @@ abstract class Phigrate_Adapter_Base
      * @var Phigrate_Logger
      */
     protected $_logger;
-    
+
     /**
      * Export SQL
      *
@@ -234,7 +234,7 @@ abstract class Phigrate_Adapter_Base
         }
         return "'" . addcslashes($value, "\000\n\r\\'\"\032") . "'";
     }
-    
+
     /**
      * Define flag export SQL
      * 
@@ -248,7 +248,7 @@ abstract class Phigrate_Adapter_Base
         $this->initSql();
         return $this;
     }
-    
+
     /**
      * Return the flag export SQL
      * 
@@ -258,7 +258,7 @@ abstract class Phigrate_Adapter_Base
     {
         return $this->_export;
     }
-    
+
     /**
      * Return the SQL
      * 
@@ -268,7 +268,7 @@ abstract class Phigrate_Adapter_Base
     {
         return $this->_sql;
     }
-    
+
     /**
      * Initialize the variable SQL
      * 

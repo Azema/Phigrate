@@ -106,7 +106,7 @@ class Phigrate_FrameworkRunner
 
     /**
      * Directory logs
-     * 
+     *
      * @var string
      */
     protected $_logDir;
@@ -305,12 +305,14 @@ class Phigrate_FrameworkRunner
     /**
      * _initMigrationDir
      *
+     * @param string $migrationDir The directory of migrations files
+     *
      * @return string
      */
     protected function _initMigrationDir($migrationDir = null)
     {
         $config = $this->getConfig();
-        if (null === $migrationDir 
+        if (null === $migrationDir
             && (! isset($config->migration) || ! isset($config->migration->dir)))
         {
             require_once 'Phigrate/Exception/MissingMigrationDir.php';
@@ -509,12 +511,12 @@ class Phigrate_FrameworkRunner
         $this->getLogger()->debug(__METHOD__ . ' End');
         return $this->_configDbFile;
     }
-    
+
     /**
      * Return path file absolute
-     * 
+     *
      * @param string $file The file path
-     * 
+     *
      * @return string
      */
     private function _fileWithRealPath($file)

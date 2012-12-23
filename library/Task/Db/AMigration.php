@@ -70,7 +70,7 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
         $this->_logger->debug(__METHOD__ . ' Start');
         $this->_taskArgs = $args;
         $this->_logger->debug('Args of task: ' . var_export($args, true));
-        
+
         try {
             // Check that the schema_version table exists,
             // and if not, automatically create it
@@ -125,7 +125,7 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
             $this->_logger->err('Exception: ' . $ex->getMessage());
             $this->_return .= "\n" . $ex->getMessage() . "\n";
         }
-        
+
         $this->_logger->debug(__METHOD__ . ' End');
         return $this->_return;
     }

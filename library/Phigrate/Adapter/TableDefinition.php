@@ -56,7 +56,7 @@ abstract class Phigrate_Adapter_TableDefinition
      * @var mixed
      */
     protected $_options;
-    
+
     /**
      * Prefix
      *
@@ -134,8 +134,8 @@ abstract class Phigrate_Adapter_TableDefinition
     }
 
     /**
-     * __call 
-     * 
+     * __call
+     *
      * @param string $name The method name
      * @param array  $args The parameters of method called
      *
@@ -153,12 +153,12 @@ abstract class Phigrate_Adapter_TableDefinition
             );
         }
     }
-    
+
     /**
      * Define prefix of table
-     * 
+     *
      * @param string $prefix Prefix of table
-     * 
+     *
      * @return \Phigrate_Adapter_TableDefinition
      */
     public function setPrefix($prefix)
@@ -166,10 +166,10 @@ abstract class Phigrate_Adapter_TableDefinition
         $this->_prefix = str_replace('_', '', $prefix) . '_';
         return $this;
     }
-    
+
     /**
      * Return the prefix of table
-     * 
+     *
      * @return string
      */
     public function getPrefix()
