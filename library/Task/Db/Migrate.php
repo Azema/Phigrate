@@ -36,6 +36,13 @@ require_once 'Task/Db/AMigration.php';
 class Task_Db_Migrate extends Task_Db_AMigration
 {
     /**
+     * Task name
+     *
+     * @var string
+     */
+    protected $_task = 'migrate';
+
+    /**
      * Flag to force migration
      *
      * @var boolean
@@ -114,114 +121,6 @@ the flag --force, \033[1;31mbut it is your own risk\033[0m.
 USAGE;
         $this->_logger->debug(__METHOD__ . ' End');
         return $output;
-    }
-
-    /**
-     * migrate from offset
-     *
-     * @param int    $offset         The offset
-     * @param int    $currentVersion The current version
-     * @param string $direction      Up or Down
-     *
-     * @return void
-     */
-    protected function _migrateFromOffset($offset, $currentVersion, $direction)
-    {
-        $this->_logger->debug(__METHOD__ . ' Start');
-        $this->_logger->debug(
-            'offset: ' . $offset . ' - currentVersion: ' . $currentVersion
-            . ' - direction: ' . $direction
-        );
-        $migrations = $this->_migratorUtil
-            ->getMigrationFiles($this->_migrationDir, $direction);
-        $versions = array();
-        $currentIndex = -1;
-        $nbMigrations = count($migrations);
-        $this->_logger->debug('Nb migrations: ' . $nbMigrations);
-        for ($i = 0; $i < $nbMigrations; $i++) {
-            $versions[] = $migrations[$i]['version'];
-            if ($migrations[$i]['version'] === $currentVersion) {
-                $currentIndex = $i;
-                break;
-            }
-        }
-        $this->_logger->debug('current index: ' . $currentIndex);
-
-        // If we are not at the bottom then adjust our index (to satisfy array_slice)
-        if ($currentIndex == -1) {
-            $currentIndex = 0;
-        } else {
-            $currentIndex += 1;
-        }
-
-        // check to see if we have enough migrations to run - the user
-        // might have asked to run more than we have available
-        $available = array_slice($migrations, $currentIndex, $offset);
-        $this->_logger->debug('Available: ' . var_export($available, true));
-        if (count($available) != $offset) {
-            $names = array();
-            foreach ($available as $a) {
-                $names[] = $a['file'];
-            }
-            $numAvailable = count($names);
-            $prefix = $direction == 'down' ? '-' : '+';
-            $this->_logger->warn(
-                'Cannot migration ' . $direction . ' via offset '
-                . $prefix . $offset
-            );
-            $this->_return .= "\tCannot migrate " . strtoupper($direction)
-                . " via offset \"{$prefix}{$offset}\": "
-                . "not enough migrations exist to execute.\n"
-                . "\tYou asked for ({$offset}) but only available are "
-                . '(' . $numAvailable . '): ' . implode(', ', $names);
-        } else {
-            // run em
-            $target = end($available);
-            $this->_prepareToMigrate($target['version'], $direction);
-        }
-        $this->_logger->debug(__METHOD__ . ' End');
-    }
-
-    /**
-     * prepare to migrate
-     *
-     * @param string $destination The version desired
-     * @param string $direction   Up or Down
-     *
-     * @return void
-     */
-    protected function _prepareToMigrate($destination, $direction)
-    {
-        $this->_logger->debug(__METHOD__ . ' Start');
-        $this->_logger->debug(
-            'Destination: ' . $destination
-            . ' - direction: ' . $direction
-        );
-        try {
-            $this->_return .= "\tMigrating " . strtoupper($direction);
-            if (! is_null($destination)) {
-                $this->_return .= " to: {$destination}\n";
-            } else {
-                $this->_return .= ":\n";
-            }
-            $migrations = $this->_migratorUtil
-                ->getRunnableMigrations(
-                    $this->_migrationDir,
-                    $direction,
-                    $destination
-                );
-            if (count($migrations) == 0) {
-                $msg = 'No relevant migrations to run. Exiting...';
-                $this->_logger->info($msg);
-                $this->_return .= "\n{$msg}\n";
-                return;
-            }
-            $this->_runMigrations($migrations, $direction);
-        } catch (Exception $ex) {
-            $this->_logger->err('Exception: ' . $ex->getMessage());
-            throw $ex;
-        }
-        $this->_logger->debug(__METHOD__ . ' End');
     }
 
     /**
