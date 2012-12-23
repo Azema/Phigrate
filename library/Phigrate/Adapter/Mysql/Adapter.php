@@ -925,7 +925,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
                 }
             }
         } catch (Exception $e) {
-            throw new Phigrate_Exception_AdapterQuery('Constrainte does not exists.', $e->getCode(), $e);
+            $this->_logger->err('Constrainte ('.$constrainteName.') does not exists.');
+            throw new Phigrate_Exception_AdapterQuery(
+                'Constrainte ('.$constrainteName.') does not exists.', $e->getCode(), $e
+            );
         }
 
         return $result;

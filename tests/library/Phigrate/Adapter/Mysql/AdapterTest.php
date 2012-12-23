@@ -1332,9 +1332,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->object->addForeignKey('users', 'address', 'addresses');
 
@@ -1385,9 +1385,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
@@ -1401,9 +1401,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyWithActionOnDelete()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
@@ -1421,9 +1421,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyWithWrongAction()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $actionsAllowed = array(
             'CASCADE',
@@ -1460,9 +1460,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyWithAction()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
 
         $this->object->setExport(true);
@@ -1480,9 +1480,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyAlreadyExists()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
@@ -1504,11 +1504,11 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyOnPrimaryKeysOnJointPrimaryKey()
     {
         //create it
-        $sql = "CREATE TABLE `users` (id integer(11), name varchar(20), title varchar(20), other tinyint(1), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `users` (id integer(11), name varchar(20), title varchar(20), other tinyint(1), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (id integer(11), name varchar(25), street varchar(20), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `addresses` (id integer(11), name varchar(25), street varchar(20), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `users_addresses` (usr_id integer(11), adr_id integer(11), PRIMARY KEY(usr_id, adr_id));";
+        $sql = "CREATE TABLE `users_addresses` (usr_id integer(11), adr_id integer(11), PRIMARY KEY(usr_id, adr_id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
         $this->assertTrue($this->object->isPrimaryKey('users', 'id'));
@@ -1548,9 +1548,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->object->addForeignKey('users', 'address', 'addresses');
         $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
@@ -1564,11 +1564,11 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testRemoveForeignKeyOnPrimaryKeysOnJointPrimaryKey()
     {
         //create it
-        $sql = "CREATE TABLE `users` (id integer(11), name varchar(20), title varchar(20), other tinyint(1), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `users` (id integer(11), name varchar(20), title varchar(20), other tinyint(1), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (id integer(11), name varchar(25), street varchar(20), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `addresses` (id integer(11), name varchar(25), street varchar(20), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `users_addresses` (usr_id integer(11), adr_id integer(11), PRIMARY KEY(usr_id, adr_id));";
+        $sql = "CREATE TABLE `users_addresses` (usr_id integer(11), adr_id integer(11), PRIMARY KEY(usr_id, adr_id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
         $this->assertTrue($this->object->isPrimaryKey('users', 'id'));
@@ -1608,9 +1608,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
@@ -1628,19 +1628,20 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testRemoveForeignKeyNotExists()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $constrainteName = 'users_ibfk_address';
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
-        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => $constrainteName)));
 
         try {
             $this->object->removeForeignKey('users', 'address', 'addresses', 'name');
             $this->fail('constrainte does not exists!');
         } catch (Phigrate_Exception_AdapterQuery $ex) {
-            $msg = 'Constrainte does not exists.';
+            $msg = 'Constrainte ('.$constrainteName.') does not exists.';
             $this->assertEquals($msg, $ex->getMessage());
         }
     }
@@ -1648,9 +1649,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyOnPrimaryKeyByAddIndex()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
 
         $this->object->addIndex('users', 'address', array(
@@ -1682,9 +1683,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyWithoutIndexByAddIndex()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
@@ -1735,9 +1736,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
