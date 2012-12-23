@@ -13,11 +13,11 @@ class Phigrate_LoggerTest extends PHPUnit_Framework_TestCase
     /**
      * @var string
      */
-    protected $_filename;
+    protected static $_filename;
 
-    public function __construct()
+    public static function setUpBeforeClass()
     {
-        $this->_filename = PHIGRATE_BASE . '/tests/logs/tests.log';
+        self::$_filename = PHIGRATE_BASE . '/tests/logs/tests.log';
     }
 
     /**
@@ -26,7 +26,7 @@ class Phigrate_LoggerTest extends PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $this->object = Phigrate_Logger::instance($this->_filename);
+        $this->object = Phigrate_Logger::instance(self::$_filename);
     }
 
     /**
@@ -39,7 +39,7 @@ class Phigrate_LoggerTest extends PHPUnit_Framework_TestCase
 
     public function testInstance()
     {
-        $logger = Phigrate_Logger::instance($this->_filename);
+        $logger = Phigrate_Logger::instance(self::$_filename);
         $this->assertSame($this->object, $logger);
         $logger = Phigrate_Logger::instance('/tmp/test_logger2.log');
         $this->assertSame($this->object, $logger);
@@ -55,75 +55,75 @@ class Phigrate_LoggerTest extends PHPUnit_Framework_TestCase
         $msg = 'msg de test debug without define priority, by default all';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[DEBUG\] '.$msg.'$/';
         $this->object->debug($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
 
         $this->object->setPriority(Phigrate_Logger::ERROR);
         $msg = 'msg de test warn with priority err';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[WARN\] '.$msg.'$/';
         $this->object->warn($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertNotRegExp($expected, $file[count($file)-1]);
 
         $this->object->setPriority(Phigrate_Logger::WARNING);
         $msg = 'msg de test err with priority warn';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[ERR\] '.$msg.'$/';
         $this->object->err($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
         $msg = 'msg de test warn with priority warn';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[WARN\] '.$msg.'$/';
         $this->object->warn($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
         $msg = 'msg de test info with priority warn';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[INFO\] '.$msg.'$/';
         $this->object->info($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertNotRegExp($expected, $file[count($file)-1]);
 
         $this->object->setPriority(Phigrate_Logger::INFO);
         $msg = 'msg de test err with priority info';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[ERR\] '.$msg.'$/';
         $this->object->err($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
         $msg = 'msg de test warn with priority info';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[WARN\] '.$msg.'$/';
         $this->object->warn($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
         $msg = 'msg de test info with priority info';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[INFO\] '.$msg.'$/';
         $this->object->info($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
         $msg = 'msg de test debug with priority info';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[DEBUG\] '.$msg.'$/';
         $this->object->debug($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertNotRegExp($expected, $file[count($file)-1]);
 
         $this->object->setPriority(Phigrate_Logger::DEBUG);
         $msg = 'msg de test err with priority debug';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[ERR\] '.$msg.'$/';
         $this->object->err($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
         $msg = 'msg de test warn with priority debug';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[WARN\] '.$msg.'$/';
         $this->object->warn($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
         $msg = 'msg de test info with priority debug';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[INFO\] '.$msg.'$/';
         $this->object->info($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
         $msg = 'msg de test debug with priority debug';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[DEBUG\] '.$msg.'$/';
         $this->object->debug($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
 
         $this->object->setPriority(Phigrate_Logger::DEBUG);
@@ -134,7 +134,7 @@ class Phigrate_LoggerTest extends PHPUnit_Framework_TestCase
         $msg = 'msg de test';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[DEBUG\] '.$msg.'$/';
         $this->object->debug($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
     }
 
@@ -143,7 +143,7 @@ class Phigrate_LoggerTest extends PHPUnit_Framework_TestCase
         $msg = 'msg de test';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[INFO\] '.$msg.'$/';
         $this->object->info($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
     }
 
@@ -152,7 +152,7 @@ class Phigrate_LoggerTest extends PHPUnit_Framework_TestCase
         $msg = 'msg de test';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[WARN\] '.$msg.'$/';
         $this->object->warn($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
     }
 
@@ -161,7 +161,7 @@ class Phigrate_LoggerTest extends PHPUnit_Framework_TestCase
         $msg = 'msg de test';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[ERR\] '.$msg.'$/';
         $this->object->err($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
     }
 
@@ -170,27 +170,27 @@ class Phigrate_LoggerTest extends PHPUnit_Framework_TestCase
         $msg = 'msg de test';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[INFO\] '.$msg.'$/';
         $this->object->log($msg);
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
         $msg = 'msg de test 2';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[DEBUG\] '.$msg.'$/';
         $this->object->log($msg, 'debug');
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
         $msg = 'msg de test 3';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[WARN\] '.$msg.'$/';
         $this->object->log($msg, 'warn');
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
         $msg = 'msg de test 4';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[ERR\] '.$msg.'$/';
         $this->object->log($msg, 'err');
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
         $msg = 'msg de test 5';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[UNKNOWN\] '.$msg.'$/';
         $this->object->log($msg, 'unknown');
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertRegExp($expected, $file[count($file)-1]);
     }
 
@@ -200,7 +200,7 @@ class Phigrate_LoggerTest extends PHPUnit_Framework_TestCase
         $msg = 'msg de test 6';
         $expected = '/^\w+ \d+ \d+:\d+:\d+ \[UNKNOWN\] '.$msg.'$/';
         $this->object->log($msg, 'unknown');
-        $file = file($this->_filename);
+        $file = file(self::$_filename);
         $this->assertNotRegExp($expected, $file[count($file)-1]);
     }
 }

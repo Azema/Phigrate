@@ -17,11 +17,6 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
      */
     protected $_adapter;
 
-    public function __construct()
-    {
-        $this->_adapter = new adapterTaskMock(array(), '');
-    }
-
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -29,6 +24,7 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
+        $this->_adapter = new adapterTaskMock(array(), '');
         $this->object = new Task_Db_Version($this->_adapter);
     }
 
@@ -38,6 +34,7 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
+        $this->_adapter = null;
         $this->object = null;
         parent::tearDown();
     }

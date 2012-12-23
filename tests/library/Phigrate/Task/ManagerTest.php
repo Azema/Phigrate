@@ -17,11 +17,6 @@ class Phigrate_Task_ManagerTest extends PHPUnit_Framework_TestCase
      */
     protected $_adapter;
 
-    public function __construct()
-    {
-        $this->_adapter = new adapterMock(array(), '');
-    }
-
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -29,6 +24,7 @@ class Phigrate_Task_ManagerTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
+        $this->_adapter = new adapterMock(array(), '');
         $this->object = new Phigrate_Task_Manager($this->_adapter, null, null);
     }
 
@@ -38,6 +34,7 @@ class Phigrate_Task_ManagerTest extends PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
+        $this->_adapter = null;
         $this->object = null;
         parent::tearDown();
     }

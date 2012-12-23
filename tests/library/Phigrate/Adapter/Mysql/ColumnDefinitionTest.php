@@ -19,11 +19,6 @@ class Phigrate_Adapter_Mysql_ColumnDefinitionTest extends PHPUnit_Framework_Test
      */
     protected $_adapter;
 
-    public function __construct()
-    {
-        $this->_adapter = new adapterMock(array(), '');
-    }
-
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -31,6 +26,7 @@ class Phigrate_Adapter_Mysql_ColumnDefinitionTest extends PHPUnit_Framework_Test
     protected function setUp()
     {
         parent::setUp();
+        $this->_adapter = new adapterMock(array(), '');
     }
 
     /**
@@ -39,6 +35,7 @@ class Phigrate_Adapter_Mysql_ColumnDefinitionTest extends PHPUnit_Framework_Test
      */
     protected function tearDown()
     {
+        $this->_adapter = null;
         $this->object = null;
         parent::tearDown();
     }

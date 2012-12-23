@@ -17,11 +17,6 @@ class Phigrate_Migration_BaseTest extends PHPUnit_Framework_TestCase
      */
     protected $_adapter;
 
-    public function __construct()
-    {
-        $this->_adapter = new migrationAdapterMock(array(), '');
-    }
-
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -29,6 +24,7 @@ class Phigrate_Migration_BaseTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
+        $this->_adapter = new migrationAdapterMock(array(), '');
         $this->object = new migrationMock($this->_adapter);
     }
 
@@ -38,6 +34,7 @@ class Phigrate_Migration_BaseTest extends PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
+        $this->_adapter = null;
         $this->object = null;
         parent::tearDown();
     }
