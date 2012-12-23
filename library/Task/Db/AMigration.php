@@ -276,7 +276,7 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
             if (count($migrations) == 0) {
                 $msg = 'No relevant migrations to run. Exiting...';
                 $this->_logger->info($msg);
-                $this->_return .= $this->_prefixText . "\n" 
+                $this->_return .= $this->_prefixText . "\n"
                     . trim($this->_prefixText . " {$msg}\n");
                 return;
             }

@@ -56,6 +56,13 @@ abstract class Phigrate_Adapter_Base
     protected $_export = false;
 
     /**
+     * tables
+     *
+     * @var array
+     */
+    protected $_tables = array();
+
+    /**
      * SQL to export
      *
      * @var string

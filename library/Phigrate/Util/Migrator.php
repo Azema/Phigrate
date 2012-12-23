@@ -83,7 +83,6 @@ class Phigrate_Util_Migrator
         // We only want one row but we cannot assume that we are using MySQL and use a LIMIT statement
         // as it is not part of the SQL standard. Thus we have to select all rows and use PHP to return
         // the record we need
-        // @TODO: Passer le nom de la table schema par un objet config
         $versions_nested = $this->_adapter->selectAll(
             sprintf(
                 'SELECT version FROM %s',
