@@ -802,6 +802,24 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         if (empty($columnRef)) {
             $columnRef = 'id';
         }
+        // Check if table has engine InnoDB
+        if (!$this->hasExport()) {
+            $stmt = sprintf('SHOW CREATE TABLE %s%s', $this->identifier($tableName), $this->_delimiter);
+            $result = $this->execute($stmt);
+
+            if (is_array($result) && count($result) == 1) {
+                $row = $result[0];
+                if (array_key_exists('Create Table', $row) && false != strstr($row['Create Table'], 'ENGINE')) {
+                    $matches = array();
+                    preg_match('/ENGINE=(\w*)/', $row['Create Table'], $matches);
+                    if (count($matches) > 1 && strtoupper($matches[1]) != 'INNODB') {
+                        throw new Phigrate_Exception_InvalidTableDefinition(
+                            $matches[1] . ' does not supports foreign key constraints.'
+                        );
+                    }
+                }
+            }
+        }
 
         $constrainteName = $this->_getConstrainteName($tableName, $columnName, $tableRef, $columnRef, $options);
         if (strlen($constrainteName) > self::MAX_IDENTIFIER_LENGTH) {
@@ -899,6 +917,24 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         }
         if (empty($columnRef)) {
             $columnRef = 'id';
+        }
+        // Check if table has engine InnoDB
+        if (!$this->hasExport()) {
+            $stmt = sprintf('SHOW CREATE TABLE %s%s', $this->identifier($tableName), $this->_delimiter);
+            $result = $this->execute($stmt);
+
+            if (is_array($result) && count($result) == 1) {
+                $row = $result[0];
+                if (array_key_exists('Create Table', $row) && false != strstr($row['Create Table'], 'ENGINE')) {
+                    $matches = array();
+                    preg_match('/ENGINE=(\w*)/', $row['Create Table'], $matches);
+                    if (count($matches) > 1 && strtoupper($matches[1]) != 'INNODB') {
+                        throw new Phigrate_Exception_InvalidTableDefinition(
+                            $matches[1] . ' does not supports foreign key constraints.'
+                        );
+                    }
+                }
+            }
         }
 
         $constrainteName = $this->_getConstrainteName($tableName, $columnName, $tableRef, $columnRef, $options);

@@ -1524,6 +1524,27 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
         $this->assertTrue($this->object->hasIndex('users_addresses', 'adr_id', array('name' => 'users_addresses_ibfk_adr_id')));
     }
 
+    public function testAddForeignKeyWithEngineMyisam()
+    {
+        //create it
+        $engine = 'MyISAM';
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=$engine;";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=$engine;";
+        $this->object->executeDdl($sql);
+        $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+
+        try {
+            $this->object->addForeignKey('users', 'address', 'addresses', 'name');
+            $this->fail('The engine of tables does not support the foreign key constraints!');
+        } catch (Phigrate_Exception_InvalidTableDefinition $ex) {
+            $msg = $engine . ' does not supports foreign key constraints.';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+    }
+
     public function testRemoveForeignKeyOnPrimaryKey()
     {
         try {
@@ -1642,6 +1663,27 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->fail('constrainte does not exists!');
         } catch (Phigrate_Exception_AdapterQuery $ex) {
             $msg = 'Constrainte ('.$constrainteName.') does not exists.';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+    }
+
+    public function testRemoveForeignKeyWithEngineMyisam()
+    {
+        //create it
+        $engine = 'MyISAM';
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=$engine;";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=$engine;";
+        $this->object->executeDdl($sql);
+        $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+
+        try {
+            $this->object->removeForeignKey('users', 'address', 'addresses', 'name');
+            $this->fail('The engine of tables does not support the foreign key constraints!');
+        } catch (Phigrate_Exception_InvalidTableDefinition $ex) {
+            $msg = $engine . ' does not supports foreign key constraints.';
             $this->assertEquals($msg, $ex->getMessage());
         }
     }
