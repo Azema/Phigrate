@@ -230,7 +230,10 @@ class Phigrate_FrameworkRunner
     public function execute()
     {
         $this->_logger->debug(__METHOD__ . ' Start');
-        $output = $this->_getHeaderScript();
+        $output = '';
+        if ($this->_curTaskName != 'db:export') {
+            $output = $this->_getHeaderScript();
+        }
         if ($this->_taskMgr->hasTask($this->_curTaskName)) {
             if ($this->_helpTask) {
                 $output .= $this->_taskMgr->help($this->_curTaskName);

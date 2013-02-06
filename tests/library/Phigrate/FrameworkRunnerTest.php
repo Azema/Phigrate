@@ -258,7 +258,7 @@ class Phigrate_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
 
         unlink($pathFile);
     }
-    
+
     public function testConstructorWithoutConfigDbFile()
     {
         $parameters = array(
@@ -575,7 +575,7 @@ USAGE;
             $this->assertEquals($msg, $e->getMessage());
         }
     }
-    
+
     public function testExecuteWithVersionTaskWithTableSchemaAndParameterForce()
     {
         $parameters = array(
@@ -606,7 +606,7 @@ USAGE;
         $this->assertNotEmpty($task);
         $this->assertRegExp($regexp, $task);
     }
-    
+
     public function testExecuteWithVersionTaskWithTableSchema()
     {
         $parameters = array(
@@ -671,7 +671,7 @@ USAGE;
             $this->assertEquals($msg, $e->getMessage());
         }
     }
-    
+
     public function testParseArgumentConfigurationDbWithoutConfigDbFile()
     {
         $parameters = array(
@@ -690,7 +690,7 @@ USAGE;
             $this->assertEquals($msg, $e->getMessage());
         }
     }
-    
+
     public function testParseArgumentMigrationWithoutDirectory()
     {
         $parameters = array(
@@ -711,7 +711,7 @@ USAGE;
             $this->assertEquals($msg, $e->getMessage());
         }
     }
-    
+
     public function testParseArgumentMigrationWithRelatifDirectory()
     {
         $parameters = array(
@@ -728,7 +728,7 @@ USAGE;
         $this->assertInstanceOf('Phigrate_FrameworkRunner', $actual);
         $this->assertEquals(PHIGRATE_BASE . '/tests/dummy/db/migrate', $actual->getMigrationDir());
     }
-    
+
     public function testParseArgumentTasksWithoutDirectory()
     {
         $parameters = array(
@@ -748,6 +748,25 @@ USAGE;
                 . 'use the argument -t or --taskdir';
             $this->assertEquals($msg, $e->getMessage());
         }
+    }
+    public function testExecuteExportForTestHeader()
+    {
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            PHIGRATE_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            PHIGRATE_BASE . '/tests/fixtures/config/application.ini',
+            'db:export',
+        );
+        $actual = new Phigrate_FrameworkRunner($parameters);
+        $adapter = new adapterTaskMock(array(), '');
+        $adapter->setTableSchemaExist(true);
+        $adapter->versions = array(array('version' => '20120110064438'));
+        $actual->setAdapter($adapter);
+        $task = $actual->execute();
+        $this->assertNotEmpty($task);
+        $this->assertNotRegExp('/^[\s_|`]+/', $task);
     }
 }
 
