@@ -43,6 +43,21 @@ class pdoMock
     {
         return $this->_queries;
     }
+
+    public function quote($value)
+    {
+        if (is_int($value)) {
+            return $value;
+        } elseif (is_float($value)) {
+            return sprintf('%F', $value);
+        } elseif (is_array($value)) {
+            foreach ($value as &$val) {
+                $val = $this->quote($val);
+            }
+            return implode(', ', $value);
+        }
+        return "'" . addcslashes($value, "\000\n\r\\'\"\032") . "'";
+    }
 }
 
 /**

@@ -239,7 +239,7 @@ abstract class Phigrate_Adapter_Base
             }
             return implode(', ', $value);
         }
-        return "'" . addcslashes($value, "\000\n\r\\'\"\032") . "'";
+        return $this->getConnexion()->quote($value);
     }
 
     /**

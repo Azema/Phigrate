@@ -355,6 +355,7 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
                 'name' => 'int',
                 'limit' => 11,
             ),
+            'tinyinteger'   => array('name' => 'tinyint'),
             'smallinteger'  => array('name' => 'smallint'),
             'mediuminteger' => array('name' => 'mediumint'),
             'biginteger'    => array('name' => 'bigint'),
@@ -559,8 +560,38 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(
             $expected,
             $this->object->columnDefinition('active', 'boolean')
-        );	
-        
+        );
+
+        $expected = '`weight` tinyint(2) NULL DEFAULT NULL';
+        $this->assertEquals(
+            $expected,
+            $this->object->columnDefinition(
+                'weight',
+                'tinyinteger',
+                array('limit' => 2)
+            )
+        );
+
+        $expected = '`weight` smallint(8) NULL DEFAULT NULL';
+        $this->assertEquals(
+            $expected,
+            $this->object->columnDefinition(
+                'weight',
+                'smallinteger',
+                array('limit' => 8)
+            )
+        );
+
+        $expected = '`weight` mediumint(12) NULL DEFAULT NULL';
+        $this->assertEquals(
+            $expected,
+            $this->object->columnDefinition(
+                'weight',
+                'mediuminteger',
+                array('limit' => 12)
+            )
+        );
+
         $expected = '`weight` bigint(20) NULL DEFAULT NULL';
         $this->assertEquals(
             $expected,
@@ -570,7 +601,7 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
                 array('limit' => 20)
             )
         );
-        
+
         $expected = '`age` int(11) NULL DEFAULT NULL AFTER `height`';
         $this->assertEquals(
             $expected,
@@ -1869,7 +1900,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $msg = "Error: I dont know what column type of 'unknown' maps to for MySQL.
 You provided: unknown
 Valid types are: 
-\tstring\n\ttext\n\tmediumtext\n\tinteger\n\tsmallinteger\n\tmediuminteger\n\tbiginteger\n\tfloat
+\tstring\n\ttext\n\tmediumtext\n\tinteger\n\ttinyinteger\n\tsmallinteger\n\tmediuminteger\n\tbiginteger\n\tfloat
 \tdecimal\n\tdatetime\n\ttimestamp\n\ttime\n\tdate\n\tbinary\n\tboolean\n";
             $this->assertEquals($msg, $e->getMessage());
         }
@@ -1882,6 +1913,8 @@ Valid types are:
         }
         $type = $this->object->typeToSql('integer', array('limit' => 12));
         $this->assertEquals('int(12)', $type);
+        $type = $this->object->typeToSql('tinyinteger', array('limit' => 2));
+        $this->assertEquals('tinyint(2)', $type);
         $type = $this->object->typeToSql('smallinteger', array('limit' => 2));
         $this->assertEquals('smallint(2)', $type);
         $type = $this->object->typeToSql('mediuminteger', array('limit' => 4));

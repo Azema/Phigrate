@@ -144,6 +144,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
                 'name' => 'int',
                 'limit' => 11,
             ),
+            'tinyinteger'   => array('name' => 'tinyint'),
             'smallinteger'  => array('name' => 'smallint'),
             'mediuminteger' => array('name' => 'mediumint'),
             'biginteger'    => array('name' => 'bigint'),
@@ -1291,10 +1292,16 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         }
 
         // unsigned
-        if (array_key_exists('unsigned', $options)
-            && $options['unsigned'] === true
-        ) {
+        if (array_key_exists('unsigned', $options) && $options['unsigned'] === true) {
             $sql .= ' UNSIGNED';
+        }
+        // Add character option
+        if (array_key_exists('character', $options)) {
+            $sql .= ' CHARACTER SET ' . $this->identifier($options['character']);
+        }
+        // Add collate option
+        if (array_key_exists('collate', $options)) {
+            $sql .= ' COLLATE ' . $this->identifier($options['collate']);
         }
 
         // auto_increment
@@ -1346,6 +1353,11 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             && array_key_exists('update', $options))
         {
             $sql .= ' ON UPDATE ' . $options['update'];
+        }
+
+        // Add comment column option
+        if (array_key_exists('comment', $options)) {
+            $sql .= sprintf(" COMMENT %s", $this->quote((string)$options['comment']));
         }
 
         // position of column
