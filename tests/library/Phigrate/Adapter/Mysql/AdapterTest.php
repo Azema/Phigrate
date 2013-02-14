@@ -349,8 +349,10 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
                 'name' => 'varchar',
                 'limit' => 255,
             ),
+            'smalltext'     => array('name' => 'tinytext'),
             'text'          => array('name' => 'text'),
             'mediumtext'    => array('name' => 'mediumtext'),
+            'longtext'      => array('name' => 'longtext'),
             'integer'       => array(
                 'name' => 'int',
                 'limit' => 11,
@@ -365,7 +367,10 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'timestamp'     => array('name' => 'timestamp'),
             'time'          => array('name' => 'time'),
             'date'          => array('name' => 'date'),
+            'tinybinary'    => array('name' => 'tinyblob'),
             'binary'        => array('name' => 'blob'),
+            'mediumbinary'  => array('name' => 'mediumblob'),
+            'longbinary'    => array('name' => 'longblob'),
             'boolean'       => array(
                 'name' => 'tinyint',
                 'limit' => 1,
@@ -1900,8 +1905,8 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $msg = "Error: I dont know what column type of 'unknown' maps to for MySQL.
 You provided: unknown
 Valid types are: 
-\tstring\n\ttext\n\tmediumtext\n\tinteger\n\ttinyinteger\n\tsmallinteger\n\tmediuminteger\n\tbiginteger\n\tfloat
-\tdecimal\n\tdatetime\n\ttimestamp\n\ttime\n\tdate\n\tbinary\n\tboolean\n";
+\tstring\n\tsmalltext\n\ttext\n\tmediumtext\n\tlongtext\n\tinteger\n\ttinyinteger\n\tsmallinteger\n\tmediuminteger\n\tbiginteger\n\tfloat
+\tdecimal\n\tdatetime\n\ttimestamp\n\ttime\n\tdate\n\ttinybinary\n\tbinary\n\tmediumbinary\n\tlongbinary\n\tboolean\n";
             $this->assertEquals($msg, $e->getMessage());
         }
         try {

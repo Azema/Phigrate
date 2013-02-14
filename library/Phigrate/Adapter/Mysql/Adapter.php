@@ -138,8 +138,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
                 'name' => 'varchar',
                 'limit' => 255,
             ),
+            'smalltext'     => array('name' => 'tinytext'),
             'text'          => array('name' => 'text'),
             'mediumtext'    => array('name' => 'mediumtext'),
+            'longtext'      => array('name' => 'longtext'),
             'integer'       => array(
                 'name' => 'int',
                 'limit' => 11,
@@ -154,7 +156,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             'timestamp'     => array('name' => 'timestamp'),
             'time'          => array('name' => 'time'),
             'date'          => array('name' => 'date'),
+            'tinybinary'    => array('name' => 'tinyblob'),
             'binary'        => array('name' => 'blob'),
+            'mediumbinary'  => array('name' => 'mediumblob'),
+            'longbinary'    => array('name' => 'longblob'),
             'boolean'       => array(
                 'name' => 'tinyint',
                 'limit' => 1,
@@ -1276,6 +1281,52 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     }
 
     /**
+     * Check the charset
+     *
+     * @param string $character The character
+     *
+     * @return boolean
+     */
+    protected function _checkCaracter($character)
+    {
+        // En mode export, on ne peut pas vérifier le charset
+        if ($this->hasExport()) {
+            return true;
+        }
+        $sql = sprintf('SHOW CHARACTER SET%s', $this->_delimiter);
+        $result = $this->selectAll($sql);
+        foreach ($result as $row) {
+            if ($row['Charset'] == $character) {
+                return true;
+            }
+        }
+    }
+
+    /**
+     * Check the collation
+     *
+     * @param string $collation The collation
+     * @param string $charset   The charset
+     *
+     * @return boolean
+     */
+    protected function _checkCollation($collation, $charset)
+    {
+        // En mode export, on ne peut pas vérifier le charset
+        if ($this->hasExport()) {
+            return true;
+        }
+        $sql = sprintf('SHOW COLLATION LIKE \'%s\%\'%s', $character, $this->_delimiter);
+        $result = $this->selectAll($sql);
+        foreach ($result as $row) {
+            if ($row['Collation'] == $collation) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * add column options
      *
      * @param string $type    The type of column
@@ -1295,13 +1346,20 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         if (array_key_exists('unsigned', $options) && $options['unsigned'] === true) {
             $sql .= ' UNSIGNED';
         }
-        // Add character option
-        if (array_key_exists('character', $options)) {
-            $sql .= ' CHARACTER SET ' . $this->identifier($options['character']);
-        }
-        // Add collate option
-        if (array_key_exists('collate', $options)) {
-            $sql .= ' COLLATE ' . $this->identifier($options['collate']);
+        // Check the type string for options character and collate
+        if ($type == 'string' || $type == 'tinytext' || $type == 'text'
+            || $type == 'mediumtext' || $type == 'longtext')
+        {
+            // Add character option
+            if (array_key_exists('character', $options) && $this->_checkCaracter($options['character'])) {
+                $sql .= ' CHARACTER SET ' . $this->identifier($options['character']);
+                // Add collate option
+                if (array_key_exists('collate', $options)
+                    && $this->_checkCollation($options['collate'], $options['character']))
+                {
+                    $sql .= ' COLLATE ' . $this->identifier($options['collate']);
+                }
+            }
         }
 
         // auto_increment
