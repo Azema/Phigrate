@@ -1,12 +1,16 @@
 Author: Manuel HERVO <manuel.hervo % gmail .com>
 
-Version 1.2 (2012-XX-XX)
+Version 1.2 (2013-02-14)
     Adding a new feature to display comments in SQL exports
 	Adding getter/setter of delimiter on adapter MySQL
     Adding methods to create, change and drop views
     Adding another tasks directory in config
     Adding parameter force for the task db:migrate
     Add header Phigrate in output of scripts
+    Add new types of column (smalltext, mediumtext, longtext, tinybinary,
+    mediumbinary, longbinary, mediumint)
+    Add new options of column (character, collate & comment)
+    Consideration of versions without file migration
 
 Version 1.1.1 (2012-13-12)
     Change remove foreignKey in adapter MySQL
