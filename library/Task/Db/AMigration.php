@@ -90,6 +90,8 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
         $this->_taskArgs = $args;
         $this->_logger->debug('Args of task: ' . var_export($args, true));
 
+        // Flag d'échec de migration
+        $failed = false;
         try {
             // Check that the schema_version table exists,
             // and if not, automatically create it
@@ -125,13 +127,9 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
 
             if ($style == self::STYLE_REGULAR) {
                 $this->_logger->debug('STYLE REGULAR');
-                // Up to max version            // Up to version specified by user
-                if (is_null($targetVersion) || $currentVersion <= $targetVersion) {
-                    $this->_prepareToMigrate($targetVersion, self::DIRECTION_UP);
-                } elseif ($currentVersion > $targetVersion) {
-                    // Down to version specified by user
-                    $this->_prepareToMigrate($targetVersion, self::DIRECTION_DOWN);
-                }
+                $direction = $this->_fetchDirection($targetVersion, $currentVersion);
+                // Up or down to version specified by user or up to max if version not specified
+                $this->_prepareToMigrate($targetVersion, $direction);
             } elseif ($style == self::STYLE_OFFSET) {
                 $this->_logger->debug('STYLE OFFSET');
                 $this->_migrateFromOffset($offset, $currentVersion, $direction);
@@ -139,14 +137,46 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
         } catch (Phigrate_Exception_MissingSchemaInfoTable $ex) {
             $this->_return .= $ex->getMessage();
         } catch (Phigrate_Exception_MissingMigrationMethod $ex) {
+            $failed = true;
             $this->_return .= $ex->getMessage();
         } catch (Phigrate_Exception $ex) {
+            $failed = true;
             $this->_logger->err('Exception: ' . $ex->getMessage());
             $this->_return .= "\n" . $ex->getMessage() . "\n";
         }
 
+        // Si une erreur de migration est détecté et que la version courante est renseignée
+        if ($failed && !is_null($currentVersion) && $this instanceof Task_Db_Migrate) {
+            $targetVersion = $currentVersion;
+            $currentVersion = $this->_migratorUtil->getMaxVersion();
+            $this->_logger->debug('Retour en arriere: ' . var_export($targetVersion . ' ' . $currentVersion, true));
+            if ($currentVersion != $targetVersion) {
+                $this->_return .= "\n\n" . $this->_prefixText . 'Back to original version: ' . $targetVersion . "\n\n";
+                $direction = $this->_fetchDirection($targetVersion, $currentVersion);
+                // On retourne en arrière pour annuler les migrations
+                $this->_prepareToMigrate($targetVersion, $direction);
+            }
+        }
+
         $this->_logger->debug(__METHOD__ . ' End');
         return $this->_return;
+    }
+
+    /**
+     * Retourne la direction de migration en fonction de la version désirée
+     *
+     * @param string $targetVersion La version à migrer
+     *
+     * @return string
+     */
+    protected function _fetchDirection($targetVersion, $currentVersion)
+    {
+        if (is_null($targetVersion) || $currentVersion <= $targetVersion) {
+            $direction = self::DIRECTION_UP;
+        } else {
+            $direction = self::DIRECTION_DOWN;
+        }
+        return $direction;
     }
 
     /**

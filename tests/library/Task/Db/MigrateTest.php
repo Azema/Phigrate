@@ -17,6 +17,14 @@ class Task_Db_MigrateTest extends PHPUnit_Framework_TestCase
      */
     protected $_adapter;
 
+    public static function setUpBeforeClass()
+    {
+        $list = glob(FIXTURES_PATH . '/db/migrate/*_ThrowException.php');
+        foreach ($list as $file) {
+            unlink($file);
+        }
+    }
+
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -37,9 +45,21 @@ class Task_Db_MigrateTest extends PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
+        $list = glob(FIXTURES_PATH . '/db/migrate/*_ThrowException.php');
+        foreach ($list as $file) {
+            unlink($file);
+        }
         $this->_adapter = null;
         $this->object = null;
         parent::tearDown();
+    }
+
+    public static function tearDownAfterClass()
+    {
+        $list = glob(FIXTURES_PATH . '/db/migrate/*_ThrowException.php');
+        foreach ($list as $file) {
+            unlink($file);
+        }
     }
 
     public function testExecuteWithAdapterNoSupportMigration()
@@ -370,6 +390,58 @@ class Task_Db_MigrateTest extends PHPUnit_Framework_TestCase
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);
         $this->assertEquals($versions, $this->_adapter->versions);
+    }
+
+    public function testExecuteUpWithLastVersionThrowExceptionAndRollbackToOriginalVersion()
+    {
+        copy(FIXTURES_PATH . '/db/otherMigrate/20120111164438_ThrowException.php', FIXTURES_PATH . '/db/migrate/20120111164438_ThrowException.php');
+        $this->_adapter->setTableSchemaExist(true);
+        $versions = array(
+            array('version' => '20120109064438'),
+        );
+        $this->_adapter->versions = $versions;
+        $actual = $this->object->execute(array('VERSION'=>'20120111164438'));
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+            . '\[db:migrate\]:\012+\tMigrating UP to: 20120111164438\012+'
+            . '========= AddIndexToUsers ======== \(\d+.\d{2}\)\012+'
+            . '========= CreateAddresses ======== \(\d+.\d{2}\)\012+'
+            . 'ThrowException - Test exception in up method\012+'
+            . 'Back to original version: 20120109064438\012+'
+            . '\tMigrating DOWN to: 20120109064438\012+'
+            . '========= CreateAddresses ======== \(\d+.\d{2}\)\012+'
+            . '========= AddIndexToUsers ======== \(\d+.\d{2}\)\012+'
+            . 'Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
+        $this->assertNotEmpty($actual);
+        $this->assertRegExp($regexp, $actual);
+        $this->assertEquals($versions, $this->_adapter->versions);
+    }
+
+    public function testExecuteDownWithLastVersionThrowExceptionAndRollbackToOriginalVersion()
+    {
+        copy(FIXTURES_PATH . '/db/otherMigrate/20120112064438_ThrowException2.php', FIXTURES_PATH . '/db/migrate/20120110054438_ThrowException.php');
+        $this->_adapter->setTableSchemaExist(true);
+        $versions = array(
+            array('version' => '20120109064438'),
+            array('version' => '20120110054438'),
+            array('version' => '20120110064438'),
+            array('version' => '20120111064438'),
+        );
+        $this->_adapter->versions = $versions;
+        $actual = $this->object->execute(array('VERSION'=>'20120109064438'));
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+            . '\[db:migrate\]:\012+'
+            . '\tMigrating DOWN to: 20120109064438\012+'
+            . '========= CreateAddresses ======== \(\d+.\d{2}\)\012+'
+            . '========= AddIndexToUsers ======== \(\d+.\d{2}\)\012+'
+            . 'ThrowException - Test exception in down method\012+'
+            . 'Back to original version: 20120111064438\012+'
+            . '\tMigrating UP to: 20120111064438\012+'
+            . '========= AddIndexToUsers ======== \(\d+.\d{2}\)\012+'
+            . '========= CreateAddresses ======== \(\d+.\d{2}\)\012+'
+            . 'Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
+        $this->assertNotEmpty($actual);
+        $this->assertRegExp($regexp, $actual);
+        $this->assertEquals($versions, array_values($this->_adapter->versions));
     }
 
     public function testExecuteWithPreviousVersionException()
