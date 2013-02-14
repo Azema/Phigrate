@@ -90,6 +90,23 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
         $this->assertRegExp($regexp, $actual);
     }
 
+    public function testExecuteWithTableSchemaWihtMaxVersionUnknown()
+    {
+        $this->_adapter->setTableSchemaExist(true);
+        $this->_adapter->versions = array(
+            array('version' => '20130124064438'),
+            array('version' => '20120124064438'),
+            array('version' => '20120112064438'),
+            array('version' => '20120110064438'),
+        );
+        $actual = $this->object->execute(array());
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+            . '\[db:version\]:\012+\t+Current version: 20130124064438'
+            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
+        $this->assertNotEmpty($actual);
+        $this->assertRegExp($regexp, $actual);
+    }
+
     public function testHelp()
     {
         $expected =<<<USAGE

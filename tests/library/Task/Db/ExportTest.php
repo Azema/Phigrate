@@ -74,8 +74,9 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array('VERSION'=>'-1'));
         $regexp = '/^--\012+--\tExport SQL by Phigrate\012+--\012+'
             . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '-- \[db:export\]:\012+--\tMigrating DOWN to: 20120112064438\012+'
-            . '--\012+-- No relevant migrations to run\. Exiting\.\.\.\012+'
+            . '-- \[db:export\]:\012+'
+            . '--\tCannot export DOWN via offset "\-1": not enough migrations exist to execute.\012+'
+            . '--\tYou asked for \(1\) but only available are \(0\): \012+'
             . '-- Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);

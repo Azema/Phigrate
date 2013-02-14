@@ -44,6 +44,11 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
     /** @var integer */
     const STYLE_OFFSET = 2;
 
+    /** @var string */
+    const DIRECTION_DOWN = 'down';
+    /** @var string */
+    const DIRECTION_UP = 'up';
+
     /**
      * migrator util
      *
@@ -107,7 +112,7 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
                 && preg_match('/^([\+-])(\d+)$/', $targetVersion, $matches)
             ) {
                 if (count($matches) == 3) {
-                    $direction = ($matches[1] === '-') ? 'down' : 'up';
+                    $direction = ($matches[1] === '-') ? self::DIRECTION_DOWN : self::DIRECTION_UP;
                     $offset = intval($matches[2]);
                     $style = self::STYLE_OFFSET;
                     $this->_logger->debug(
@@ -122,10 +127,10 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
                 $this->_logger->debug('STYLE REGULAR');
                 // Up to max version            // Up to version specified by user
                 if (is_null($targetVersion) || $currentVersion <= $targetVersion) {
-                    $this->_prepareToMigrate($targetVersion, 'up');
+                    $this->_prepareToMigrate($targetVersion, self::DIRECTION_UP);
                 } elseif ($currentVersion > $targetVersion) {
                     // Down to version specified by user
-                    $this->_prepareToMigrate($targetVersion, 'down');
+                    $this->_prepareToMigrate($targetVersion, self::DIRECTION_DOWN);
                 }
             } elseif ($style == self::STYLE_OFFSET) {
                 $this->_logger->debug('STYLE OFFSET');
@@ -196,47 +201,36 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
             . ' - direction: ' . $direction
         );
         $migrations = $this->_migratorUtil
-            ->getMigrationFiles($this->_migrationDir, $direction);
-        $versions = array();
-        $currentIndex = -1;
-        $nbMigrations = count($migrations);
-        $this->_logger->debug('Nb migrations: ' . $nbMigrations);
-        for ($i = 0; $i < $nbMigrations; $i++) {
-            $versions[] = $migrations[$i]['version'];
-            if ($migrations[$i]['version'] === $currentVersion) {
-                $currentIndex = $i;
-                break;
-            }
-        }
-        $this->_logger->debug('current index: ' . $currentIndex);
-
-        // If we are not at the bottom then adjust our index (to satisfy array_slice)
-        if ($currentIndex == -1) {
-            $currentIndex = 0;
-        } else {
-            $currentIndex += 1;
-        }
-
-        // check to see if we have enough migrations to run - the user
-        // might have asked to run more than we have available
-        $available = array_slice($migrations, $currentIndex, $offset);
-        $this->_logger->debug('Available: ' . var_export($available, true));
-        if (count($available) != $offset) {
+            ->getRunnableMigrations($this->_migrationDir, $direction);
+        $this->_logger->debug('Migrations: ' . var_export($migrations, true));
+        if (count($migrations) < $offset) {
             $names = array();
-            foreach ($available as $a) {
+            foreach ($migrations as $a) {
                 $names[] = $a['file'];
             }
             $numAvailable = count($names);
             $prefix = $direction == 'down' ? '-' : '+';
             $this->_logger->warn(
-                'Cannot migration ' . $direction . ' via offset '
-                . $prefix . $offset
+                'Cannot migration ' . $direction . ' via offset ' . $prefix . $offset
             );
             $this->_return .= $this->_prefixText . "\tCannot {$this->_task} " . strtoupper($direction)
-                . " via offset \"{$prefix}{$offset}\": "
-                . "not enough migrations exist to execute.\n"
+                . " via offset \"{$prefix}{$offset}\": not enough migrations exist to execute.\n"
                 . $this->_prefixText . "\tYou asked for ({$offset}) but only available are "
                 . '(' . $numAvailable . '): ' . implode(', ', $names);
+            return;
+        }
+
+        $start = 0;
+        if ($direction == self::DIRECTION_DOWN) {
+            $start = 1;
+        }
+        // check to see if we have enough migrations to run - the user
+        // might have asked to run more than we have available
+        $available = array_slice($migrations, $start, $offset);
+        $this->_logger->debug('Available: ' . var_export($available, true));
+        if (count($available) != $offset) {
+            $this->_prepareToMigrate(null, $direction);
+            return;
         } else {
             // run em
             $target = end($available);

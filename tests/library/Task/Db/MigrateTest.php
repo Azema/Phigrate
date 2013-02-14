@@ -71,8 +71,10 @@ class Task_Db_MigrateTest extends PHPUnit_Framework_TestCase
         $this->_adapter->versions = array();
         $actual = $this->object->execute(array('VERSION'=>'-1'));
         $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
-            . '\[db:migrate\]:\012+\tMigrating DOWN to: 20120112064438\012+'
-            . 'No relevant migrations to run\. Exiting\.\.\.\012+'
+            . '\[db:migrate\]:\012+'
+            . '\tCannot migrate DOWN via offset "\-1": not enough migrations '
+            . 'exist to execute\.\012+'
+            . '\tYou asked for \(1\) but only available are \(0\): \012+'
             . 'Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);
@@ -153,6 +155,47 @@ class Task_Db_MigrateTest extends PHPUnit_Framework_TestCase
             . 'Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);
+        $this->assertEquals($versions, $this->_adapter->versions);
+    }
+
+    public function testExecuteWithUpOneOffsetAndOneVersionUnknownInMiddleSchemaTable()
+    {
+        $this->_adapter->setTableSchemaExist(true);
+        $versions = array(
+            array('version' => '20120109064438'),
+            array('version' => '20130112064438'),
+            array('version' => '20120110064438'),
+        );
+        $this->_adapter->versions = $versions;
+        $offset = '1';
+        $actual = $this->object->execute(array('VERSION' => '+' . $offset));
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+            . '\[db:migrate\]:\012+\tMigrating UP to: 20120111064438\012+'
+            . '========= CreateAddresses ======== \(\d+.\d{2}\)\012+'
+            . 'Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
+        $this->assertNotEmpty($actual);
+        $this->assertRegExp($regexp, $actual);
+        $versions[] = array('version' => '20120110064438', 'version' => '20120111064438');
+        $this->assertEquals($versions, $this->_adapter->versions);
+    }
+
+    public function testExecuteWithUpOneOffsetAndOneVersionMoreInSchemaTable()
+    {
+        $this->_adapter->setTableSchemaExist(true);
+        $versions = array(
+            array('version' => '20120109064438'),
+            array('version' => '20130112064438'),
+        );
+        $this->_adapter->versions = $versions;
+        $offset = '1';
+        $actual = $this->object->execute(array('VERSION' => '+' . $offset));
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+            . '\[db:migrate\]:\012+\tMigrating UP to: 20120110064438\012+'
+            . '========= AddIndexToUsers ======== \(\d+.\d{2}\)\012+'
+            . 'Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
+        $this->assertNotEmpty($actual);
+        $this->assertRegExp($regexp, $actual);
+        $versions[] = array('version' => '20120110064438');
         $this->assertEquals($versions, $this->_adapter->versions);
     }
 
