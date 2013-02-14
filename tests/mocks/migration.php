@@ -149,30 +149,6 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
         return true;
     }
 
-    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
-    {
-        $this->datas['addForeignKey'] = array(
-            'tableName' => $tableName,
-            'columnName' => $columnName,
-            'tableRef' => $tableRef,
-            'columnRef' => $columnRef,
-            'options' => $options,
-        );
-        return true;
-    }
-
-    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef, $options = array())
-    {
-        $this->datas['removeForeignKey'] = array(
-            'tableName' => $tableName,
-            'columnName' => $columnName,
-            'tableRef' => $tableRef,
-            'columnRef' => $columnRef,
-            'options' => $options,
-        );
-        return true;
-    }
-
     public function query($query)
     {
         $this->datas['execute'] = array(
@@ -215,6 +191,30 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
     public function comment($comment)
     {
         $this->datas['comments'][] = $comment;
+        return true;
+    }
+
+    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
+    {
+        $this->datas['addForeignKey'] = array(
+            'tableName' => $tableName,
+            'columnName' => $columnName,
+            'tableRef' => $tableRef,
+            'columnRef' => $columnRef,
+            'options' => $options,
+        );
+        return true;
+    }
+
+    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
+    {
+        $this->datas['removeForeignKey'] = array(
+            'tableName' => $tableName,
+            'columnName' => $columnName,
+            'tableRef' => $tableRef,
+            'columnRef' => $columnRef,
+            'options' => $options,
+        );
         return true;
     }
 }
