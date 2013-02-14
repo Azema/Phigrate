@@ -1,9 +1,0 @@
-* ~Ajouter la vérification des doublons des noms de classes de migration~
-* ~Vérifier la présence des index de tableau, dans les méthodes de parsing des arguments.~
-* ~Ajouter le paramètre logdir dans les arguments pris en compte par les scripts~
-* Comment gérer le cas, lors d'un regroupement de fichiers de migration, si il y
-a des doublons dans les noms de classes ? Si il y a doublon dans les noms de
-classes, c'est peut être qu'il y a doublon dans le travail réalisé. 
-    - Propositions: 
-      * Créer des hooks pour les gestionnaires de versions pour déceler ce genre
-      de problème.

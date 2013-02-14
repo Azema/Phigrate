@@ -149,6 +149,30 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
         return true;
     }
 
+    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
+    {
+        $this->datas['addForeignKey'] = array(
+            'tableName' => $tableName,
+            'columnName' => $columnName,
+            'tableRef' => $tableRef,
+            'columnRef' => $columnRef,
+            'options' => $options,
+        );
+        return true;
+    }
+
+    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
+    {
+        $this->datas['removeForeignKey'] = array(
+            'tableName' => $tableName,
+            'columnName' => $columnName,
+            'tableRef' => $tableRef,
+            'columnRef' => $columnRef,
+            'options' => $options,
+        );
+        return true;
+    }
+
     public function query($query)
     {
         $this->datas['execute'] = array(
@@ -194,26 +218,30 @@ class migrationAdapterMock extends Phigrate_Adapter_Mysql_Adapter
         return true;
     }
 
-    public function addForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
+    public function createView($viewName, $select, $options = array())
     {
-        $this->datas['addForeignKey'] = array(
-            'tableName' => $tableName,
-            'columnName' => $columnName,
-            'tableRef' => $tableRef,
-            'columnRef' => $columnRef,
-            'options' => $options,
+        $this->datas['createView'] = array(
+            'name' => $viewName,
+            'select'   => $select,
+            'options'  => $options,
         );
         return true;
     }
 
-    public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
+    public function changeView($viewName, $select, $options = array())
     {
-        $this->datas['removeForeignKey'] = array(
-            'tableName' => $tableName,
-            'columnName' => $columnName,
-            'tableRef' => $tableRef,
-            'columnRef' => $columnRef,
-            'options' => $options,
+        $this->datas['changeView'] = array(
+            'name' => $viewName,
+            'select'   => $select,
+            'options'  => $options,
+        );
+        return true;
+    }
+
+    public function dropView($viewName)
+    {
+        $this->datas['dropView'] = array(
+            'name' => $viewName,
         );
         return true;
     }

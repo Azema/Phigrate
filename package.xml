@@ -3,29 +3,25 @@
   <name>Phigrate</name>
   <channel>pear.phigrate.org</channel>
   <summary>Migrations SQL with PHP as ActiveRecord Migrations</summary>
-  <description>Phigrate is a framework written in PHP5 for generating and managing a set of database
-    migrations. Database migrations are declarative files which represent the state of a DB (its tables,
-    columns, indexes, etc) at a particular state of time. By using database migrations, multiple developers can
-    work on the same application and be guaranteed that the application is in a consistent state across all
-    remote developer machines.</description>
+  <description>Phigrate est un outil de versioning de base de données écrit en PHP 5 et s'utilise en ligne de commande.</description>
   <lead>
     <name>Manuel HERVO</name>
-    <user>quazar</user>
+    <user>azema</user>
     <email>manuel.hervo@gmail.com</email>
     <active>yes</active>
   </lead>
-  <date>2012-11-26</date>
-  <time>20:12:00</time>
+  <date>2013-02-14</date>
+  <time>13:20:00</time>
   <version>
-    <release>1.1.2</release>
-    <api>1.1.2</api>
+    <release>1.2.0</release>
+    <api>1.2.0</api>
   </version>
   <stability>
     <release>stable</release>
     <api>stable</api>
   </stability>
   <license uri="http://www.gnu.org/licenses/gpl-2.0.html">GPLv2</license>
-  <notes>Add foreign key constraint in adapter MySQL.</notes>
+  <notes>See CHANGELOG file</notes>
   <contents>
     <dir name="/" baseinstalldir="Phigrate">
       <dir name="bin">

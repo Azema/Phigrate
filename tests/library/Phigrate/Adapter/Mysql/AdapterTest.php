@@ -54,6 +54,7 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
         $this->object = new Phigrate_Adapter_Mysql_Adapter(self::$_dsn, self::$_logger);
+        $this->object->setExport(false);
     }
 
     /**
@@ -62,35 +63,37 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
-        if ($this->object->hasTable(PHIGRATE_TS_SCHEMA_TBL_NAME)) {
-            $this->object->dropTable(PHIGRATE_TS_SCHEMA_TBL_NAME);
-        }
+        if (!$this->object->hasExport()) {
+            if ($this->object->hasTable(PHIGRATE_TS_SCHEMA_TBL_NAME)) {
+                $this->object->dropTable(PHIGRATE_TS_SCHEMA_TBL_NAME);
+            }
 
-        $this->object->query('SET FOREIGN_KEY_CHECKS=0;');
-        if ($this->object->hasTable('users')) {
-            $this->object->dropTable('users');
-        }
+            $this->object->query('SET FOREIGN_KEY_CHECKS=0;');
+            if ($this->object->hasTable('users')) {
+                $this->object->dropTable('users');
+            }
 
-        if ($this->object->hasTable('new_users')) {
-            $this->object->dropTable('new_users');
-        }
+            if ($this->object->hasTable('new_users')) {
+                $this->object->dropTable('new_users');
+            }
 
-        if ($this->object->hasTable('contacts')) {
-            $this->object->dropTable('contacts');
-        }
+            if ($this->object->hasTable('contacts')) {
+                $this->object->dropTable('contacts');
+            }
 
-        if ($this->object->hasTable('v_users')) {
-            $this->object->executeDdl("DROP VIEW `v_users`;");
-        }
+            if ($this->object->hasTable('v_users')) {
+                $this->object->executeDdl("DROP VIEW `v_users`;");
+            }
 
-        if ($this->object->hasTable('addresses')) {
-            $this->object->dropTable('addresses');
-        }
+            if ($this->object->hasTable('addresses')) {
+                $this->object->dropTable('addresses');
+            }
 
-        if ($this->object->hasTable('users_addresses')) {
-            $this->object->dropTable('users_addresses');
+            if ($this->object->hasTable('users_addresses')) {
+                $this->object->dropTable('users_addresses');
+            }
+            $this->object->query('SET FOREIGN_KEY_CHECKS=1;');
         }
-        $this->object->query('SET FOREIGN_KEY_CHECKS=1;');
 
         $this->object = null;
         parent::tearDown();
@@ -346,13 +349,17 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
                 'name' => 'varchar',
                 'limit' => 255,
             ),
+            'smalltext'     => array('name' => 'tinytext'),
             'text'          => array('name' => 'text'),
             'mediumtext'    => array('name' => 'mediumtext'),
+            'longtext'      => array('name' => 'longtext'),
             'integer'       => array(
                 'name' => 'int',
                 'limit' => 11,
             ),
+            'tinyinteger'   => array('name' => 'tinyint'),
             'smallinteger'  => array('name' => 'smallint'),
+            'mediuminteger' => array('name' => 'mediumint'),
             'biginteger'    => array('name' => 'bigint'),
             'float'         => array('name' => 'float'),
             'decimal'       => array('name' => 'decimal'),
@@ -360,7 +367,10 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             'timestamp'     => array('name' => 'timestamp'),
             'time'          => array('name' => 'time'),
             'date'          => array('name' => 'date'),
+            'tinybinary'    => array('name' => 'tinyblob'),
             'binary'        => array('name' => 'blob'),
+            'mediumbinary'  => array('name' => 'mediumblob'),
+            'longbinary'    => array('name' => 'longblob'),
             'boolean'       => array(
                 'name' => 'tinyint',
                 'limit' => 1,
@@ -555,8 +565,38 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(
             $expected,
             $this->object->columnDefinition('active', 'boolean')
-        );	
-        
+        );
+
+        $expected = '`weight` tinyint(2) NULL DEFAULT NULL';
+        $this->assertEquals(
+            $expected,
+            $this->object->columnDefinition(
+                'weight',
+                'tinyinteger',
+                array('limit' => 2)
+            )
+        );
+
+        $expected = '`weight` smallint(8) NULL DEFAULT NULL';
+        $this->assertEquals(
+            $expected,
+            $this->object->columnDefinition(
+                'weight',
+                'smallinteger',
+                array('limit' => 8)
+            )
+        );
+
+        $expected = '`weight` mediumint(12) NULL DEFAULT NULL';
+        $this->assertEquals(
+            $expected,
+            $this->object->columnDefinition(
+                'weight',
+                'mediuminteger',
+                array('limit' => 12)
+            )
+        );
+
         $expected = '`weight` bigint(20) NULL DEFAULT NULL';
         $this->assertEquals(
             $expected,
@@ -566,7 +606,7 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
                 array('limit' => 20)
             )
         );
-        
+
         $expected = '`age` int(11) NULL DEFAULT NULL AFTER `height`';
         $this->assertEquals(
             $expected,
@@ -1329,9 +1369,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->object->addForeignKey('users', 'address', 'addresses');
 
@@ -1382,9 +1422,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
@@ -1398,9 +1438,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyWithActionOnDelete()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
@@ -1418,9 +1458,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyWithWrongAction()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $actionsAllowed = array(
             'CASCADE',
@@ -1457,9 +1497,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyWithAction()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
 
         $this->object->setExport(true);
@@ -1477,9 +1517,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyAlreadyExists()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
@@ -1501,11 +1541,11 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyOnPrimaryKeysOnJointPrimaryKey()
     {
         //create it
-        $sql = "CREATE TABLE `users` (id integer(11), name varchar(20), title varchar(20), other tinyint(1), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `users` (id integer(11), name varchar(20), title varchar(20), other tinyint(1), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (id integer(11), name varchar(25), street varchar(20), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `addresses` (id integer(11), name varchar(25), street varchar(20), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `users_addresses` (usr_id integer(11), adr_id integer(11), PRIMARY KEY(usr_id, adr_id));";
+        $sql = "CREATE TABLE `users_addresses` (usr_id integer(11), adr_id integer(11), PRIMARY KEY(usr_id, adr_id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
         $this->assertTrue($this->object->isPrimaryKey('users', 'id'));
@@ -1519,6 +1559,27 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
 
         $this->assertFalse($this->object->hasIndex('users_addresses', 'usr_id', array('name' => 'users_addresses_ibfk_usr_id')));
         $this->assertTrue($this->object->hasIndex('users_addresses', 'adr_id', array('name' => 'users_addresses_ibfk_adr_id')));
+    }
+
+    public function testAddForeignKeyWithEngineMyisam()
+    {
+        //create it
+        $engine = 'MyISAM';
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=$engine;";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=$engine;";
+        $this->object->executeDdl($sql);
+        $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
+
+        try {
+            $this->object->addForeignKey('users', 'address', 'addresses', 'name');
+            $this->fail('The engine of tables does not support the foreign key constraints!');
+        } catch (Phigrate_Exception_InvalidTableDefinition $ex) {
+            $msg = $engine . ' does not supports foreign key constraints.';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
     }
 
     public function testRemoveForeignKeyOnPrimaryKey()
@@ -1545,9 +1606,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->object->addForeignKey('users', 'address', 'addresses');
         $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
@@ -1561,11 +1622,11 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testRemoveForeignKeyOnPrimaryKeysOnJointPrimaryKey()
     {
         //create it
-        $sql = "CREATE TABLE `users` (id integer(11), name varchar(20), title varchar(20), other tinyint(1), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `users` (id integer(11), name varchar(20), title varchar(20), other tinyint(1), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (id integer(11), name varchar(25), street varchar(20), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `addresses` (id integer(11), name varchar(25), street varchar(20), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `users_addresses` (usr_id integer(11), adr_id integer(11), PRIMARY KEY(usr_id, adr_id));";
+        $sql = "CREATE TABLE `users_addresses` (usr_id integer(11), adr_id integer(11), PRIMARY KEY(usr_id, adr_id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
         $this->assertTrue($this->object->isPrimaryKey('users', 'id'));
@@ -1605,9 +1666,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
@@ -1625,19 +1686,41 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testRemoveForeignKeyNotExists()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $constrainteName = 'users_ibfk_address';
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
+        $this->object->executeDdl($sql);
+        $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('addresses', 'name'));
+        $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => $constrainteName)));
+
+        try {
+            $this->object->removeForeignKey('users', 'address', 'addresses', 'name');
+            $this->fail('constrainte does not exists!');
+        } catch (Phigrate_Exception_AdapterQuery $ex) {
+            $msg = 'Constrainte ('.$constrainteName.') does not exists.';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+    }
+
+    public function testRemoveForeignKeyWithEngineMyisam()
+    {
+        //create it
+        $engine = 'MyISAM';
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=$engine;";
+        $this->object->executeDdl($sql);
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=$engine;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('users', 'address', array('name' => 'users_ibfk_address')));
 
         try {
-            var_dump($this->object->removeForeignKey('users', 'address', 'addresses', 'name'));
-            $this->fail('constrainte does not exists!');
-        } catch (Phigrate_Exception_AdapterQuery $ex) {
-            $msg = 'Constrainte does not exists.';
+            $this->object->removeForeignKey('users', 'address', 'addresses', 'name');
+            $this->fail('The engine of tables does not support the foreign key constraints!');
+        } catch (Phigrate_Exception_InvalidTableDefinition $ex) {
+            $msg = $engine . ' does not supports foreign key constraints.';
             $this->assertEquals($msg, $ex->getMessage());
         }
     }
@@ -1645,9 +1728,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyOnPrimaryKeyByAddIndex()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
 
         $this->object->addIndex('users', 'address', array(
@@ -1679,9 +1762,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
     public function testAddForeignKeyWithoutIndexByAddIndex()
     {
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
@@ -1706,9 +1789,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address int(11), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id));";
+        $sql = "CREATE TABLE `addresses` (id int(11), street varchar(20), PRIMARY KEY(id)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->object->addForeignKey('users', 'address', 'addresses');
         $this->assertTrue($this->object->isPrimaryKey('addresses', 'id'));
@@ -1732,9 +1815,9 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $this->assertEquals($msg, $ex->getMessage());
         }
         //create it
-        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1));";
+        $sql = "CREATE TABLE `users` (name varchar(20), address varchar(25), title varchar(20), other tinyint(1)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
-        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20));";
+        $sql = "CREATE TABLE `addresses` (name varchar(25), street varchar(20)) ENGINE=InnoDB;";
         $this->object->executeDdl($sql);
         $this->assertFalse($this->object->isPrimaryKey('addresses', 'name'));
         $this->assertFalse($this->object->hasIndex('addresses', 'name'));
@@ -1822,8 +1905,8 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $msg = "Error: I dont know what column type of 'unknown' maps to for MySQL.
 You provided: unknown
 Valid types are: 
-\tstring\n\ttext\n\tmediumtext\n\tinteger\n\tsmallinteger\n\tbiginteger\n\tfloat
-\tdecimal\n\tdatetime\n\ttimestamp\n\ttime\n\tdate\n\tbinary\n\tboolean\n";
+\tstring\n\tsmalltext\n\ttext\n\tmediumtext\n\tlongtext\n\tinteger\n\ttinyinteger\n\tsmallinteger\n\tmediuminteger\n\tbiginteger\n\tfloat
+\tdecimal\n\tdatetime\n\ttimestamp\n\ttime\n\tdate\n\ttinybinary\n\tbinary\n\tmediumbinary\n\tlongbinary\n\tboolean\n";
             $this->assertEquals($msg, $e->getMessage());
         }
         try {
@@ -1835,6 +1918,14 @@ Valid types are:
         }
         $type = $this->object->typeToSql('integer', array('limit' => 12));
         $this->assertEquals('int(12)', $type);
+        $type = $this->object->typeToSql('tinyinteger', array('limit' => 2));
+        $this->assertEquals('tinyint(2)', $type);
+        $type = $this->object->typeToSql('smallinteger', array('limit' => 2));
+        $this->assertEquals('smallint(2)', $type);
+        $type = $this->object->typeToSql('mediuminteger', array('limit' => 4));
+        $this->assertEquals('mediumint(4)', $type);
+        $type = $this->object->typeToSql('biginteger', array('limit' => 20));
+        $this->assertEquals('bigint(20)', $type);
         $type = $this->object->typeToSql('integer');
         $this->assertEquals('int(11)', $type);
         $type = $this->object->typeToSql('decimal', array('precision' => 2));
@@ -1971,6 +2062,310 @@ Valid types are:
         $this->assertEquals($expected, $this->object->getSql());
 
     }
+
+    /**
+     * @group view
+     */
+    public function testParametersOfCreateView()
+    {
+        try {
+            $this->object->createView('', '');
+            $this->fail('createView does not accept empty string for view name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing view name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->createView('v_test', '');
+            $this->fail('createView does not accept empty string for select statement!');
+        } catch (Phigrate_Exception_AdapterQuery $ex) {
+            $msg = 'Sql for createView() is not a SELECT : ';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->createView('v_test', 'DELETE users');
+            $this->fail('createView does not accept delete request for select statement!');
+        } catch (Phigrate_Exception_AdapterQuery $ex) {
+            $msg = 'Sql for createView() is not a SELECT : DELETE users';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+    }
+
+    /**
+     * @group view
+     */
+    public function testCreateViewSimple()
+    {
+        $expected = 'CREATE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users;';
+        $this->object->setExport('true');
+        $select = 'select usr_id from users';
+        $this->object->createView('v_users', $select, array());
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testCreateViewReplace()
+    {
+        $expected = 'CREATE OR REPLACE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users;';
+        $this->object->setExport('true');
+        $select = 'select usr_id from users';
+        $options = array('replace' => true);
+        $this->object->createView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testCreateViewWithAlgorithm()
+    {
+        $select = 'select usr_id from users';
+        $options = array('algorithm' => 'WRONG');
+        try {
+            $this->object->createView('v_users', $select, $options);
+            $this->fail('Algorithm for create view is wrong');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = 'algorithm allowed for create view : UNDEFINED, MERGE, TEMPTABLE';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $expected = 'CREATE ALGORITHM=MERGE DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users;';
+        $this->object->setExport('true');
+        $options = array('algorithm' => 'MERGE');
+        $this->object->createView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testCreateViewWithDefiner()
+    {
+        $select = 'select usr_id from users';
+        $options = array('definer' => "toto");
+        try {
+            $this->object->createView('v_users', $select, $options);
+            $this->fail('The format of definer is wrong');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = "The definer should be specified as 'user'@'host'.";
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $expected = "CREATE ALGORITHM=UNDEFINED DEFINER='root'@'localhost' VIEW `v_users` AS select usr_id from users;";
+        $this->object->setExport('true');
+        $options = array('definer' => "'root'@'localhost'");
+        $this->object->createView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testCreateViewWithColumnList()
+    {
+        $expected = 'CREATE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` (`usr_id`,`usr_name`) AS select usr_id from users;';
+        $this->object->setExport('true');
+        $select = 'select usr_id from users';
+        $options = array('columnList' => array('usr_id', 'usr_name'));
+        $this->object->createView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testCreateViewWithCheckOption()
+    {
+        $select = 'select usr_id from users';
+        $options = array('check' => 'wrong');
+        try {
+            $this->object->createView('v_users', $select, $options);
+            $this->fail('the check option of createView is wrong');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = 'check option allowed for create view : LOCAL, CASCADED';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $this->object->setExport('true');
+        $expected = 'CREATE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users WITH CASCADED CHECK OPTION;';
+        $options = array('check' => true);
+        $this->object->createView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+        $this->object->setExport('true');
+        $expected = 'CREATE ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users WITH LOCAL CHECK OPTION;';
+        $options = array('check' => 'LOCAL');
+        $this->object->createView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testParametersOfChangeView()
+    {
+        try {
+            $this->object->changeView('', '');
+            $this->fail('changeView does not accept empty string for view name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing view name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->changeView('v_test', '');
+            $this->fail('changeView does not accept empty string for select statement!');
+        } catch (Phigrate_Exception_AdapterQuery $ex) {
+            $msg = 'Sql for changeView() is not a SELECT : ';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        try {
+            $this->object->changeView('v_test', 'DELETE users');
+            $this->fail('changeView does not accept delete request for select statement!');
+        } catch (Phigrate_Exception_AdapterQuery $ex) {
+            $msg = 'Sql for changeView() is not a SELECT : DELETE users';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+    }
+
+    /**
+     * @group view
+     */
+    public function testChangeViewSimple()
+    {
+        $expected = 'ALTER ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users;';
+        $this->object->setExport('true');
+        $select = 'select usr_id from users';
+        $this->object->changeView('v_users', $select, array());
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testChangeViewWithAlgorithm()
+    {
+        $select = 'select usr_id from users';
+        $options = array('algorithm' => 'WRONG');
+        try {
+            $this->object->changeView('v_users', $select, $options);
+            $this->fail('Algorithm for change view is wrong');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = 'algorithm allowed for change view : UNDEFINED, MERGE, TEMPTABLE';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $expected = 'ALTER ALGORITHM=MERGE DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users;';
+        $this->object->setExport('true');
+        $options = array('algorithm' => 'MERGE');
+        $this->object->changeView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testChangeViewWithDefiner()
+    {
+        $select = 'select usr_id from users';
+        $options = array('definer' => "toto");
+        try {
+            $this->object->changeView('v_users', $select, $options);
+            $this->fail('The format of definer is wrong');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = "The definer should be specified as 'user'@'host'.";
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $expected = "ALTER ALGORITHM=UNDEFINED DEFINER='root'@'localhost' VIEW `v_users` AS select usr_id from users;";
+        $this->object->setExport('true');
+        $options = array('definer' => "'root'@'localhost'");
+        $this->object->changeView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testChangeViewWithColumnList()
+    {
+        $expected = 'ALTER ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` (`usr_id`,`usr_name`) AS select usr_id from users;';
+        $this->object->setExport('true');
+        $select = 'select usr_id from users';
+        $options = array('columnList' => array('usr_id', 'usr_name'));
+        $this->object->changeView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testChangeViewWithCheckOption()
+    {
+        $select = 'select usr_id from users';
+        $options = array('check' => 'wrong');
+        try {
+            $this->object->changeView('v_users', $select, $options);
+            $this->fail('the check option of changeView is wrong');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = 'check option allowed for change view : LOCAL, CASCADED';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+        $this->object->setExport('true');
+        $expected = 'ALTER ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users WITH CASCADED CHECK OPTION;';
+        $options = array('check' => true);
+        $this->object->changeView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+        $this->object->setExport('true');
+        $expected = 'ALTER ALGORITHM=UNDEFINED DEFINER=CURRENT_USER VIEW `v_users` AS select usr_id from users WITH LOCAL CHECK OPTION;';
+        $options = array('check' => 'LOCAL');
+        $this->object->changeView('v_users', $select, $options);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    /**
+     * @group view
+     */
+    public function testDropView()
+    {
+        try {
+            $this->object->dropView('');
+            $this->fail('dropView does not accept empty string for view name!');
+        } catch (Phigrate_Exception_Argument $ex) {
+            $msg = 'Missing view name parameter';
+            $this->assertEquals($msg, $ex->getMessage());
+        }
+        $this->object->setExport(true);
+        $expected = 'DROP VIEW IF EXISTS `v_users`;';
+        $this->object->dropView('v_users');
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
+
+    public function testDelimiterOnExecute()
+    {
+        $this->object->setExport(true);
+        $query = 'SELECT * FROM users';
+        $expected = $query . ';';
+        $this->object->execute($query);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+        $this->object->setExport(true);
+        $delimiter = '|';
+        $this->object->setDelimiter($delimiter);
+        $expected = $query . $delimiter;
+        $this->object->execute($query);
+        $actual = $this->object->getSql();
+        $this->assertStringStartsWith($expected, $actual);
+    }
 }
 
-/* vim: set expandtab tabstop=4 shiftwidth=4: */
+/* vim: set expandtab sw=4: */

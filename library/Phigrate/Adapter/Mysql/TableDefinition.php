@@ -139,7 +139,7 @@ class Phigrate_Adapter_Mysql_TableDefinition extends Phigrate_Adapter_TableDefin
         );
 
         $this->_columns[] = $column;
-        
+
         return $this;
     }
 
@@ -188,7 +188,7 @@ class Phigrate_Adapter_Mysql_TableDefinition extends Phigrate_Adapter_TableDefin
             $opt_str = ' ' . $this->_options['options'];
         }
 
-        $close_sql = sprintf(')%s;', $opt_str);
+        $close_sql = sprintf(')%s', $opt_str);
         $createTableSql = $this->_sql;
 
         if ($this->_autoGenerateId === true) {
@@ -207,7 +207,7 @@ class Phigrate_Adapter_Mysql_TableDefinition extends Phigrate_Adapter_TableDefin
         }
 
         $createTableSql .= $this->_columnsToStr();
-        $createTableSql .= $this->_keys() . $close_sql;
+        $createTableSql .= $this->_keys() . $close_sql . $this->_adapter->getDelimiter();
 
         if ($wants_sql) {
             return $createTableSql;

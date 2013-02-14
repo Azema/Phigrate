@@ -59,14 +59,22 @@ class Task_Db_Status extends Task_Base implements Phigrate_Task_ITask
         $applied = array();
         $notApplied = array();
         foreach ($files as $file) {
-            if (in_array($file['version'], $migrations)) {
+            $key = array_search($file['version'], $migrations);
+            if (false !== $key) {
                 $applied[] = $file['class'] . ' [ ' . $file['version'] . ' ]';
+                unset($migrations[$key]);
             } else {
                 $notApplied[] = $file['class'] . ' [ ' . $file['version'] . ' ]';
             }
         }
         if (count($applied) > 0) {
             $return .= $this->_displayMigrations($applied, 'APPLIED');
+        }
+        if (count($migrations) > 0) {
+            foreach ($migrations as $key => $migration) {
+                $migrations[$key] = '??? [ ' . $migration . ' ]';
+            }
+            $return .= $this->_displayMigrations($migrations, 'APPLIED WITHOUT MIGRATION FILE');
         }
         if (count($notApplied) > 0) {
             $return .= $this->_displayMigrations($notApplied, 'NOT APPLIED');

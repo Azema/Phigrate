@@ -14,10 +14,10 @@ class Phigrate_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_TestC
      */
     protected $object;
 
-    public function __construct()
-    {
-        $this->_adapter = new adapterMock(array(), '');
-    }
+    /**
+     * @var adapterMock
+     */
+    protected $_adapter;
 
     /**
      * Sets up the fixture, for example, opens a network connection.
@@ -26,6 +26,7 @@ class Phigrate_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_TestC
     protected function setUp()
     {
         parent::setUp();
+        $this->_adapter = new adapterMock(array(), '');
     }
 
     /**
@@ -34,6 +35,7 @@ class Phigrate_Adapter_Mysql_TableDefinitionTest extends PHPUnit_Framework_TestC
      */
     protected function tearDown()
     {
+        $this->_adapter = null;
         $this->object = null;
         parent::tearDown();
     }

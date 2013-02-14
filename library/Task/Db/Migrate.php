@@ -36,6 +36,20 @@ require_once 'Task/Db/AMigration.php';
 class Task_Db_Migrate extends Task_Db_AMigration
 {
     /**
+     * Task name
+     *
+     * @var string
+     */
+    protected $_task = 'migrate';
+
+    /**
+     * Flag to force migration
+     *
+     * @var boolean
+     */
+    protected $_force = false;
+
+    /**
      * Primary task entry point
      *
      * @param array $args Arguments of task
@@ -51,12 +65,17 @@ class Task_Db_Migrate extends Task_Db_AMigration
             require_once 'Phigrate/Exception/Task.php';
             throw new Phigrate_Exception_Task($msg);
         }
-        
+
         $this->_return = 'Started: ' . date('Y-m-d g:ia T') . PHP_EOL . PHP_EOL
             . '[db:migrate]:' . PHP_EOL;
-        
+
+        // Recuperation du flag pour forcer les migrations
+        if (array_key_exists('--force', $args)) {
+            $this->_force = true;
+            unset($args['--force']);
+        }
         $this->_execute($args);
-        
+
         $this->_return .= "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";
         $this->_logger->debug(__METHOD__ . ' End');
         return $this->_return;
@@ -75,6 +94,9 @@ Task: \033[36mdb:migrate\033[0m [\033[33mVERSION\033[0m]
 
 The primary purpose of the framework is to run migrations, and the
 execution of migrations is all handled by just a regular ol' task.
+
+To force the execution of migrations on existing database, you can use
+the flag --force, \033[1;31mbut it is your own risk\033[0m.
 
 \t\033[33mVERSION\033[0m can be specified to go up (or down) to a specific
 \tversion, based on the current version. If not specified,
@@ -99,114 +121,6 @@ execution of migrations is all handled by just a regular ol' task.
 USAGE;
         $this->_logger->debug(__METHOD__ . ' End');
         return $output;
-    }
-
-    /**
-     * migrate from offset
-     *
-     * @param int    $offset         The offset
-     * @param int    $currentVersion The current version
-     * @param string $direction      Up or Down
-     *
-     * @return void
-     */
-    protected function _migrateFromOffset($offset, $currentVersion, $direction)
-    {
-        $this->_logger->debug(__METHOD__ . ' Start');
-        $this->_logger->debug(
-            'offset: ' . $offset . ' - currentVersion: ' . $currentVersion
-            . ' - direction: ' . $direction
-        );
-        $migrations = $this->_migratorUtil
-            ->getMigrationFiles($this->_migrationDir, $direction);
-        $versions = array();
-        $currentIndex = -1;
-        $nbMigrations = count($migrations);
-        $this->_logger->debug('Nb migrations: ' . $nbMigrations);
-        for ($i = 0; $i < $nbMigrations; $i++) {
-            $versions[] = $migrations[$i]['version'];
-            if ($migrations[$i]['version'] === $currentVersion) {
-                $currentIndex = $i;
-                break;
-            }
-        }
-        $this->_logger->debug('current index: ' . $currentIndex);
-
-        // If we are not at the bottom then adjust our index (to satisfy array_slice)
-        if ($currentIndex == -1) {
-            $currentIndex = 0;
-        } else {
-            $currentIndex += 1;
-        }
-
-        // check to see if we have enough migrations to run - the user
-        // might have asked to run more than we have available
-        $available = array_slice($migrations, $currentIndex, $offset);
-        $this->_logger->debug('Available: ' . var_export($available, true));
-        if (count($available) != $offset) {
-            $names = array();
-            foreach ($available as $a) {
-                $names[] = $a['file'];
-            }
-            $numAvailable = count($names);
-            $prefix = $direction == 'down' ? '-' : '+';
-            $this->_logger->warn(
-                'Cannot migration ' . $direction . ' via offset '
-                . $prefix . $offset
-            );
-            $this->_return .= "\tCannot migrate " . strtoupper($direction)
-                . " via offset \"{$prefix}{$offset}\": "
-                . "not enough migrations exist to execute.\n"
-                . "\tYou asked for ({$offset}) but only available are "
-                . '(' . $numAvailable . '): ' . implode(', ', $names);
-        } else {
-            // run em
-            $target = end($available);
-            $this->_prepareToMigrate($target['version'], $direction);
-        }
-        $this->_logger->debug(__METHOD__ . ' End');
-    }
-
-    /**
-     * prepare to migrate
-     *
-     * @param string $destination The version desired
-     * @param string $direction   Up or Down
-     *
-     * @return void
-     */
-    protected function _prepareToMigrate($destination, $direction)
-    {
-        $this->_logger->debug(__METHOD__ . ' Start');
-        $this->_logger->debug(
-            'Destination: ' . $destination
-            . ' - direction: ' . $direction
-        );
-        try {
-            $this->_return .= "\tMigrating " . strtoupper($direction);
-            if (! is_null($destination)) {
-                $this->_return .= " to: {$destination}\n";
-            } else {
-                $this->_return .= ":\n";
-            }
-            $migrations = $this->_migratorUtil
-                ->getRunnableMigrations(
-                    $this->_migrationDir,
-                    $direction,
-                    $destination
-                );
-            if (count($migrations) == 0) {
-                $msg = 'No relevant migrations to run. Exiting...';
-                $this->_logger->info($msg);
-                $this->_return .= "\n{$msg}\n";
-                return;
-            }
-            $this->_runMigrations($migrations, $direction);
-        } catch (Exception $ex) {
-            $this->_logger->err('Exception: ' . $ex->getMessage());
-            throw $ex;
-        }
-        $this->_logger->debug(__METHOD__ . ' End');
     }
 
     /**
@@ -259,7 +173,12 @@ USAGE;
                     //wrap the caught exception in our own
                     $msg = $migration['file']['class'] . ' - ' . $e->getMessage();
                     $this->_logger->err($msg);
-                    throw new Phigrate_Exception($msg, $e->getCode(), $e);
+                    $this->_logger->debug('force: ' . var_export($this->_force, true));
+                    // Migrations forcée ?
+                    if ($this->_force !== true) {
+                        throw new Phigrate_Exception($msg, $e->getCode(), $e);
+                    }
+                    $msgForce = $e->getMessage();
                 }
                 $end = microtime(true);
                 $diff = $this->_diffTimer($start, $end);
@@ -268,6 +187,11 @@ USAGE;
                     $migration['file']['class'],
                     $diff
                 );
+                // Ajout du message d'erreur en cas de forçage
+                if ($this->_force && isset($msgForce)) {
+                    $this->_return .= "\033[1;31mError:\033[0m {$msgForce}\n\n";
+                    unset($msgForce);
+                }
                 //successfully ran migration, update our version and commit
                 $this->_migratorUtil
                     ->resolveCurrentVersion($migration['file']['version'], $targetMethod);

@@ -44,6 +44,11 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
     /** @var integer */
     const STYLE_OFFSET = 2;
 
+    /** @var string */
+    const DIRECTION_DOWN = 'down';
+    /** @var string */
+    const DIRECTION_UP = 'up';
+
     /**
      * migrator util
      *
@@ -59,6 +64,20 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
     protected $_return = '';
 
     /**
+     * Task name
+     *
+     * @var string
+     */
+    protected $_task;
+
+    /**
+     * Prefix the text of output
+     *
+     * @var string
+     */
+    protected $_prefixText = '';
+
+    /**
      * Primary task entry point
      *
      * @param array $args Arguments of task
@@ -70,7 +89,9 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
         $this->_logger->debug(__METHOD__ . ' Start');
         $this->_taskArgs = $args;
         $this->_logger->debug('Args of task: ' . var_export($args, true));
-        
+
+        // Flag d'échec de migration
+        $failed = false;
         try {
             // Check that the schema_version table exists,
             // and if not, automatically create it
@@ -93,7 +114,7 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
                 && preg_match('/^([\+-])(\d+)$/', $targetVersion, $matches)
             ) {
                 if (count($matches) == 3) {
-                    $direction = ($matches[1] === '-') ? 'down' : 'up';
+                    $direction = ($matches[1] === '-') ? self::DIRECTION_DOWN : self::DIRECTION_UP;
                     $offset = intval($matches[2]);
                     $style = self::STYLE_OFFSET;
                     $this->_logger->debug(
@@ -106,13 +127,9 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
 
             if ($style == self::STYLE_REGULAR) {
                 $this->_logger->debug('STYLE REGULAR');
-                // Up to max version            // Up to version specified by user
-                if (is_null($targetVersion) || $currentVersion <= $targetVersion) {
-                    $this->_prepareToMigrate($targetVersion, 'up');
-                } elseif ($currentVersion > $targetVersion) {
-                    // Down to version specified by user
-                    $this->_prepareToMigrate($targetVersion, 'down');
-                }
+                $direction = $this->_fetchDirection($targetVersion, $currentVersion);
+                // Up or down to version specified by user or up to max if version not specified
+                $this->_prepareToMigrate($targetVersion, $direction);
             } elseif ($style == self::STYLE_OFFSET) {
                 $this->_logger->debug('STYLE OFFSET');
                 $this->_migrateFromOffset($offset, $currentVersion, $direction);
@@ -120,14 +137,46 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
         } catch (Phigrate_Exception_MissingSchemaInfoTable $ex) {
             $this->_return .= $ex->getMessage();
         } catch (Phigrate_Exception_MissingMigrationMethod $ex) {
+            $failed = true;
             $this->_return .= $ex->getMessage();
         } catch (Phigrate_Exception $ex) {
+            $failed = true;
             $this->_logger->err('Exception: ' . $ex->getMessage());
             $this->_return .= "\n" . $ex->getMessage() . "\n";
         }
-        
+
+        // Si une erreur de migration est détecté et que la version courante est renseignée
+        if ($failed && !is_null($currentVersion) && $this instanceof Task_Db_Migrate) {
+            $targetVersion = $currentVersion;
+            $currentVersion = $this->_migratorUtil->getMaxVersion();
+            $this->_logger->debug('Retour en arriere: ' . var_export($targetVersion . ' ' . $currentVersion, true));
+            if ($currentVersion != $targetVersion) {
+                $this->_return .= "\n\n" . $this->_prefixText . 'Back to original version: ' . $targetVersion . "\n\n";
+                $direction = $this->_fetchDirection($targetVersion, $currentVersion);
+                // On retourne en arrière pour annuler les migrations
+                $this->_prepareToMigrate($targetVersion, $direction);
+            }
+        }
+
         $this->_logger->debug(__METHOD__ . ' End');
         return $this->_return;
+    }
+
+    /**
+     * Retourne la direction de migration en fonction de la version désirée
+     *
+     * @param string $targetVersion La version à migrer
+     *
+     * @return string
+     */
+    protected function _fetchDirection($targetVersion, $currentVersion)
+    {
+        if (is_null($targetVersion) || $currentVersion <= $targetVersion) {
+            $direction = self::DIRECTION_UP;
+        } else {
+            $direction = self::DIRECTION_DOWN;
+        }
+        return $direction;
     }
 
     /**
@@ -163,5 +212,103 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
         $this->_logger->debug('result: ' . $result);
         $this->_logger->debug(__METHOD__ . ' End');
         return $result;
+    }
+
+    /**
+     * export from offset
+     *
+     * @param int    $offset         The offset
+     * @param int    $currentVersion The current version
+     * @param string $direction      Up or Down
+     *
+     * @return void
+     */
+    protected function _migrateFromOffset($offset, $currentVersion, $direction)
+    {
+        $this->_logger->debug(__METHOD__ . ' Start');
+        $this->_logger->debug(
+            'offset: ' . $offset . ' - currentVersion: ' . $currentVersion
+            . ' - direction: ' . $direction
+        );
+        $migrations = $this->_migratorUtil
+            ->getRunnableMigrations($this->_migrationDir, $direction);
+        $this->_logger->debug('Migrations: ' . var_export($migrations, true));
+        if (count($migrations) < $offset) {
+            $names = array();
+            foreach ($migrations as $a) {
+                $names[] = $a['file'];
+            }
+            $numAvailable = count($names);
+            $prefix = $direction == 'down' ? '-' : '+';
+            $this->_logger->warn(
+                'Cannot migration ' . $direction . ' via offset ' . $prefix . $offset
+            );
+            $this->_return .= $this->_prefixText . "\tCannot {$this->_task} " . strtoupper($direction)
+                . " via offset \"{$prefix}{$offset}\": not enough migrations exist to execute.\n"
+                . $this->_prefixText . "\tYou asked for ({$offset}) but only available are "
+                . '(' . $numAvailable . '): ' . implode(', ', $names);
+            return;
+        }
+
+        $start = 0;
+        if ($direction == self::DIRECTION_DOWN) {
+            $start = 1;
+        }
+        // check to see if we have enough migrations to run - the user
+        // might have asked to run more than we have available
+        $available = array_slice($migrations, $start, $offset);
+        $this->_logger->debug('Available: ' . var_export($available, true));
+        if (count($available) != $offset) {
+            $this->_prepareToMigrate(null, $direction);
+            return;
+        } else {
+            // run em
+            $target = end($available);
+            $this->_prepareToMigrate($target['version'], $direction);
+        }
+        $this->_logger->debug(__METHOD__ . ' End');
+    }
+
+    /**
+     * prepare to migrate
+     *
+     * @param string $destination The version desired
+     * @param string $direction   Up or Down
+     *
+     * @return void
+     */
+    protected function _prepareToMigrate($destination, $direction)
+    {
+        $this->_logger->debug(__METHOD__ . ' Start');
+        $this->_logger->debug(
+            'Destination: ' . $destination
+            . ' - direction: ' . $direction
+        );
+        try {
+            $this->_return .= $this->_prefixText . "\tMigrating " . strtoupper($direction);
+            if (! is_null($destination)) {
+                $this->_return .= " to: {$destination}\n";
+            } else {
+                $this->_return .= ":\n";
+            }
+            $migrations = $this->_migratorUtil
+                ->getRunnableMigrations(
+                    $this->_migrationDir,
+                    $direction,
+                    $destination
+                );
+            if (count($migrations) == 0) {
+                $msg = 'No relevant migrations to run. Exiting...';
+                $this->_logger->info($msg);
+                $this->_return .= $this->_prefixText . "\n"
+                    . trim($this->_prefixText . " {$msg}\n");
+                return;
+            }
+            $this->_runMigrations($migrations, $direction);
+        } catch (Exception $ex) {
+            $this->_logger->err('Exception: ' . $ex->getMessage());
+            throw $ex;
+        }
+        $this->_logger->debug(__METHOD__ . ' End');
     }
 }

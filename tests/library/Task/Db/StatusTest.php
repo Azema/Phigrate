@@ -17,11 +17,6 @@ class Task_Db_StatusTest extends PHPUnit_Framework_TestCase
      */
     protected $_adapter;
 
-    public function __construct()
-    {
-        $this->_adapter = new adapterTaskMock(array(), '');
-    }
-
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -29,9 +24,10 @@ class Task_Db_StatusTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
+        $this->_adapter = new adapterTaskMock(array(), '');
         $this->object = new Task_Db_Status($this->_adapter);
         $this->object->setDirectoryOfMigrations(
-            FIXTURES_PATH . '/tasks/Db/migrate'
+            FIXTURES_PATH . '/db/migrate'
         );
     }
 
@@ -41,6 +37,7 @@ class Task_Db_StatusTest extends PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
+        $this->_adapter = null;
         $this->object = null;
         parent::tearDown();
     }
@@ -97,6 +94,31 @@ class Task_Db_StatusTest extends PHPUnit_Framework_TestCase
             . '\tCreateUsers \[ 20120109064438 \]\012+'
             . '\tAddIndexToUsers \[ 20120110064438 \]\012+'
             . '\tCreateAddresses \[ 20120111064438 \]\012+'
+            . '\tMissingMethodUp \[ 20120112064438 \]\012+'
+            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
+        $actual = $this->object->execute(array());
+        $this->assertNotEmpty($actual);
+        $this->assertRegExp($regexp, $actual);
+    }
+
+    public function testExecuteWithOneVersionMoreInTableSchema()
+    {
+        $this->_adapter->setTableSchemaExist(true);
+        $this->_adapter->versions = array(
+            array('version' => '20120109064438'),
+            array('version' => '20120110064438'),
+            array('version' => '20120111064438'),
+            array('version' => '20130112064438'),
+        );
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+            . '\[db:status\]:\012+'
+            . '===================== APPLIED =======================\012+'
+            . '\tCreateUsers \[ 20120109064438 \]\012+'
+            . '\tAddIndexToUsers \[ 20120110064438 \]\012+'
+            . '\tCreateAddresses \[ 20120111064438 \]\012+'
+            . '===================== APPLIED WITHOUT MIGRATION FILE =======================\012+'
+            . '\t\?\?\? \[ 20130112064438 \]\012+'
+            . '===================== NOT APPLIED =======================\012+'
             . '\tMissingMethodUp \[ 20120112064438 \]\012+'
             . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $actual = $this->object->execute(array());

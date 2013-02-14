@@ -21,3 +21,7 @@ build/logs
 build/pdepend
 tests/logs
 library/Phigrate/.tags
+.rucku
+.tags
+Phigrate-*.tgz
+.tags_sorted_by_file

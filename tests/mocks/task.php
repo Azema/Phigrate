@@ -8,6 +8,8 @@ class adapterTaskMock extends adapterMock
 
     public $supportMigration = true;
 
+    public $exception;
+
     public function __construct($dbConfig, $logger)
     {
         require_once 'Phigrate/Logger.php';
@@ -19,6 +21,27 @@ class adapterTaskMock extends adapterMock
     public function supportsMigrations()
     {
         return $this->supportMigration;
+    }
+
+    public function addIndex($table, $column, $options = array())
+    {
+        if (isset($this->exception)) {
+            throw $this->exception;
+        }
+        parent::addIndex($table, $column, $options);
+    }
+
+    public function removeIndex($table, $column)
+    {
+        if (isset($this->exception)) {
+            throw $this->exception;
+        }
+        parent::removeIndex($table, $column);
+    }
+
+    public function throwException($e)
+    {
+        $this->exception = $e;
     }
 
     public function setTableSchemaExist($exist)
@@ -39,7 +62,7 @@ class adapterTaskMock extends adapterMock
         }
         $schema = '';
         if ($this->_conn->tableSchemaExist) {
-            $schema = file_get_contents(FIXTURES_PATH . '/tasks/Db/schema.txt');
+            $schema = file_get_contents(FIXTURES_PATH . '/db/schema.txt');
         }
         return $schema;
     }
@@ -97,14 +120,11 @@ class pdoTaskMock
 
     public function query($query)
     {
-        if (preg_match('/^SHOW TABLES/', $query)) {
-            if ($this->tableSchemaExist) {
-                $return = array(
-                    array(PHIGRATE_TS_SCHEMA_TBL_NAME),
-                );
-            } else {
-                $return = array();
-            }
+        $return = array();
+        if (preg_match('/^SHOW TABLES/', $query) && $this->tableSchemaExist) {
+            $return = array(
+                array(PHIGRATE_TS_SCHEMA_TBL_NAME),
+            );
         } elseif (preg_match('/^SHOW CREATE TABLE `(.*)`$/', $query, $matches)) {
             if (count($matches) > 1 && $matches[1] == PHIGRATE_TS_SCHEMA_TBL_NAME) {
                 return array(
@@ -114,8 +134,6 @@ class pdoTaskMock
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8'),
                 );
             }
-        } else {
-            $return = array();
         }
         return $return;
     }

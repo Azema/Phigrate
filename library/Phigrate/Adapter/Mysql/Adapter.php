@@ -138,13 +138,17 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
                 'name' => 'varchar',
                 'limit' => 255,
             ),
+            'smalltext'     => array('name' => 'tinytext'),
             'text'          => array('name' => 'text'),
             'mediumtext'    => array('name' => 'mediumtext'),
+            'longtext'      => array('name' => 'longtext'),
             'integer'       => array(
                 'name' => 'int',
                 'limit' => 11,
             ),
+            'tinyinteger'   => array('name' => 'tinyint'),
             'smallinteger'  => array('name' => 'smallint'),
+            'mediuminteger' => array('name' => 'mediumint'),
             'biginteger'    => array('name' => 'bigint'),
             'float'         => array('name' => 'float'),
             'decimal'       => array('name' => 'decimal'),
@@ -152,7 +156,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             'timestamp'     => array('name' => 'timestamp'),
             'time'          => array('name' => 'time'),
             'date'          => array('name' => 'date'),
+            'tinybinary'    => array('name' => 'tinyblob'),
             'binary'        => array('name' => 'blob'),
+            'mediumbinary'  => array('name' => 'mediumblob'),
+            'longbinary'    => array('name' => 'longblob'),
             'boolean'       => array(
                 'name' => 'tinyint',
                 'limit' => 1,
@@ -169,7 +176,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function createSchemaVersionTable()
     {
         if (! $this->hasTable(PHIGRATE_TS_SCHEMA_TBL_NAME)) {
-            $t = $this->createTable(
+            $this->createTable(
                 PHIGRATE_TS_SCHEMA_TBL_NAME,
                 array('id' => false))
                 ->column('version', 'string')
@@ -191,8 +198,9 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function startTransaction()
     {
         if ($this->hasExport()) {
-            return 'SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";'
-                . "\nSET AUTOCOMMIT=0;\nSTART TRANSACTION;";
+            return 'SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO"' . $this->_delimiter
+                . "\nSET AUTOCOMMIT=0" . $this->_delimiter
+                . "\nSTART TRANSACTION" . $this->_delimiter;
         }
         try {
             $this->_beginTransaction();
@@ -209,7 +217,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function commitTransaction()
     {
         if ($this->hasExport()) {
-            return "COMMIT;";
+            return 'COMMIT' . $this->_delimiter;
         }
         try {
             $this->_commit();
@@ -226,7 +234,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function rollbackTransaction()
     {
         if ($this->hasExport()) {
-            return "";
+            return '';
         }
         try {
             $this->_rollback();
@@ -277,7 +285,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function databaseExists($db)
     {
-        $ddl = 'SHOW DATABASES';
+        $ddl = 'SHOW DATABASES' . $this->_delimiter;
         $result = $this->selectAll($ddl);
         foreach ($result as $dbrow) {
             if ($dbrow['Database'] == $db) {
@@ -299,7 +307,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         if ($this->databaseExists($db)) {
             return false;
         }
-        $ddl = sprintf('CREATE DATABASE %s;', $this->identifier($db));
+        $ddl = sprintf('CREATE DATABASE %s%s', $this->identifier($db), $this->_delimiter);
         return $this->executeDdl($ddl);
     }
 
@@ -315,7 +323,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         if (!$this->databaseExists($db)) {
             return false;
         }
-        $ddl = sprintf('DROP DATABASE IF EXISTS %s', $this->identifier($db));
+        $ddl = sprintf('DROP DATABASE IF EXISTS %s%s', $this->identifier($db), $this->_delimiter);
         return $this->executeDdl($ddl);
     }
 
@@ -338,15 +346,15 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
                 continue;
             }
 
-            $stmt = sprintf('SHOW CREATE TABLE %s;', $this->identifier($tbl));
+            $stmt = sprintf('SHOW CREATE TABLE %s%s', $this->identifier($tbl), $this->_delimiter);
             $result = $this->execute($stmt);
 
             if (is_array($result) && count($result) == 1) {
                 $row = $result[0];
                 if (array_key_exists('Create Table', $row)) {
-                    $final .= $row['Create Table'] . ";\n\n";
+                    $final .= $row['Create Table'] . $this->_delimiter . "\n\n";
                 } else if (array_key_exists('Create View', $row)) {
-                    $views .= $row['Create View'] . ";\n\n";
+                    $views .= $row['Create View'] . $this->_delimiter . "\n\n";
                 }
             }
         }
@@ -388,6 +396,9 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function execute($query)
     {
+        if (substr($query, -1) != $this->_delimiter) {
+            $query .= $this->_delimiter;
+        }
         if ($this->hasExport()) {
             $this->_logger->debug('Query hasExport true');
             $this->_sql .= $query . "\n\n";
@@ -406,6 +417,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function query($query)
     {
         $this->getLogger()->log($query);
+        // Add semicolon on query if not exists
+        if (substr($query, -1) != $this->_delimiter) {
+            $query .= $this->_delimiter;
+        }
         $queryType = $this->_determineQueryType($query);
         if ($queryType == self::SQL_UNKNOWN_QUERY_TYPE) {
             return false;
@@ -497,7 +512,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function dropTable($tbl)
     {
-        $ddl = sprintf('DROP TABLE IF EXISTS %s;', $this->identifier($tbl));
+        $ddl = sprintf('DROP TABLE IF EXISTS %s%s', $this->identifier($tbl), $this->_delimiter);
         $result = $this->executeDdl($ddl);
         return $result;
     }
@@ -538,20 +553,23 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function renameTable($name, $newName)
     {
-        if (empty($name)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing original table name parameter'
-            );
-        }
-        if (empty($newName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing new table name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'original table name',
+                    'arg'  => $name,
+                ),
+                array(
+                    'name' => 'new table name',
+                    'arg'  => $newName,
+                ),
+            )
+        );
         $sql = sprintf(
-            'RENAME TABLE %s TO %s;',
+            'RENAME TABLE %s TO %s%s',
             $this->identifier($name),
-            $this->identifier($newName)
+            $this->identifier($newName),
+            $this->_delimiter
         );
         return $this->executeDdl($sql);
     }
@@ -569,19 +587,22 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function addColumn($tableName, $columnName, $type, $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
-        if (empty($type)) {
-            throw new Phigrate_Exception_Argument('Missing type parameter');
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+                array(
+                    'name' => 'type',
+                    'arg'  => $type,
+                ),
+            )
+        );
         //default types
         if (! array_key_exists('limit', $options)) {
             $options['limit'] = null;
@@ -598,7 +619,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             $this->identifier($columnName),
             $this->typeToSql($type, $options)
         );
-        $sql .= $this->addColumnOptions($type, $options) . ';';
+        $sql .= $this->addColumnOptions($type, $options) . $this->_delimiter;
 
         return $this->executeDdl($sql);
     }
@@ -614,20 +635,23 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function removeColumn($tableName, $columnName)
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+            )
+        );
         $sql = sprintf(
-            'ALTER TABLE %s DROP COLUMN %s;',
+            'ALTER TABLE %s DROP COLUMN %s%s',
             $this->identifier($tableName),
-            $this->identifier($columnName)
+            $this->identifier($columnName),
+            $this->_delimiter
         );
 
         return $this->executeDdl($sql);
@@ -646,19 +670,22 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function changeColumn($tableName, $columnName, $type, $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
-        if (empty($type)) {
-            throw new Phigrate_Exception_Argument('Missing type parameter');
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+                array(
+                    'name' => 'type',
+                    'arg'  => $type,
+                ),
+            )
+        );
         //default types
         if (! array_key_exists('limit', $options)) {
             $options['limit'] = null;
@@ -679,7 +706,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             $this->identifier($options['new_name']),
             $this->typeToSql($type, $options)
         );
-        $sql .= $this->addColumnOptions($type, $options) . ';';
+        $sql .= $this->addColumnOptions($type, $options) . $this->_delimiter;
 
         return $this->executeDdl($sql);
     }
@@ -696,29 +723,31 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function renameColumn($tableName, $columnName, $newColumnName)
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing original column name parameter'
-            );
-        }
-        if (empty($newColumnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing new column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'original column name',
+                    'arg'  => $columnName,
+                ),
+                array(
+                    'name' => 'new column name',
+                    'arg'  => $newColumnName,
+                ),
+            )
+        );
         $columnInfo = $this->columnInfo($tableName, $columnName);
         $current_type = $columnInfo['type'];
         $sql = sprintf(
-            'ALTER TABLE %s CHANGE %s %s %s;',
+            'ALTER TABLE %s CHANGE %s %s %s%s',
             $this->identifier($tableName),
             $this->identifier($columnName),
             $this->identifier($newColumnName),
-            $current_type
+            $current_type,
+            $this->_delimiter
         );
 
         return $this->executeDdl($sql);
@@ -735,20 +764,23 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function columnInfo($table, $column)
     {
-        if (empty($table)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($column)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $table,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $column,
+                ),
+            )
+        );
         $sql = sprintf(
-            'SHOW COLUMNS FROM %s LIKE \'%s\'',
+            'SHOW COLUMNS FROM %s LIKE \'%s\'%s',
             $this->identifier($table),
-            $column
+            $column,
+            $this->_delimiter
         );
         $result = $this->selectOne($sql);
         if (is_array($result)) {
@@ -772,24 +804,27 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function addForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
-        if (empty($tableRef)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table ref name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+                array(
+                    'name' => 'table ref name',
+                    'arg'  => $tableRef,
+                ),
+            )
+        );
         if (empty($columnRef)) {
             $columnRef = 'id';
         }
+        // Check if table has engine InnoDB
+        $this->_checkEngineForForeignKey($tableName);
 
         $constrainteName = $this->_getConstrainteName($tableName, $columnName, $tableRef, $columnRef, $options);
         if (strlen($constrainteName) > self::MAX_IDENTIFIER_LENGTH) {
@@ -842,14 +877,15 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             $this->addIndex($tableRef, $columnRef);
         }
         $sql = sprintf(
-            'ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s) ON DELETE %s ON UPDATE %s;',
+            'ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s (%s) ON DELETE %s ON UPDATE %s%s',
             $this->identifier($tableName),
             $constrainteName,
             $this->identifier($columnName),
             $this->identifier($tableRef),
             $this->identifier($columnRef),
             $delete,
-            $update
+            $update,
+            $this->_delimiter
         );
 
         return $this->executeDdl($sql);
@@ -869,30 +905,34 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function removeForeignKey($tableName, $columnName, $tableRef, $columnRef = 'id', $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
-        if (empty($tableRef)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table ref name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+                array(
+                    'name' => 'table ref name',
+                    'arg'  => $tableRef,
+                ),
+            )
+        );
         if (empty($columnRef)) {
             $columnRef = 'id';
         }
+        // Check if table has engine InnoDB
+        $this->_checkEngineForForeignKey($tableName);
 
         $constrainteName = $this->_getConstrainteName($tableName, $columnName, $tableRef, $columnRef, $options);
         $sql = sprintf(
-            'ALTER TABLE %s DROP FOREIGN KEY %s;',
+            'ALTER TABLE %s DROP FOREIGN KEY %s%s',
             $this->identifier($tableName),
-            $constrainteName
+            $constrainteName,
+            $this->_delimiter
         );
         $result = false;
         try {
@@ -911,7 +951,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
                 }
             }
         } catch (Exception $e) {
-            throw new Phigrate_Exception_AdapterQuery('Constrainte does not exists.', $e->getCode(), $e);
+            $this->_logger->err('Constrainte ('.$constrainteName.') does not exists.');
+            throw new Phigrate_Exception_AdapterQuery(
+                'Constrainte ('.$constrainteName.') does not exists.', $e->getCode(), $e
+            );
         }
 
         return $result;
@@ -930,16 +973,18 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function addIndex($tableName, $columnName, $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+            )
+        );
         if (is_array($options) && array_key_exists('foreignKey', $options)
             && $options['foreignKey'] == true)
         {
@@ -982,11 +1027,12 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             $cols[] = $this->identifier($name);
         }
         $sql = sprintf(
-            'CREATE %sINDEX %s ON %s(%s);',
+            'CREATE %sINDEX %s ON %s(%s)%s',
             ($unique === true) ? 'UNIQUE ' : '',
             $indexName,
             $this->identifier($tableName),
-            join(', ', $cols)
+            join(', ', $cols),
+            $this->_delimiter
         );
 
         return $this->executeDdl($sql);
@@ -1004,16 +1050,18 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function removeIndex($tableName, $columnName, $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+            )
+        );
         if (is_array($options) && array_key_exists('foreignKey', $options)
             && $options['foreignKey'] == true)
         {
@@ -1031,9 +1079,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         }
         $indexName = $this->_getIndexName($tableName, $columnName, $options);
         $sql = sprintf(
-            'DROP INDEX %s ON %s;',
+            'DROP INDEX %s ON %s%s',
             $this->identifier($indexName),
-            $this->identifier($tableName)
+            $this->identifier($tableName),
+            $this->_delimiter
         );
 
         return $this->executeDdl($sql);
@@ -1051,16 +1100,18 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function hasIndex($tableName, $columnName, $options = array())
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+            )
+        );
         $indexName = $this->_getIndexName($tableName, $columnName, $options);
         $indexes = $this->indexes($tableName);
         foreach ($indexes as $idx) {
@@ -1081,12 +1132,15 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function indexes($tableName)
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        $sql = sprintf('SHOW KEYS FROM %s;', $this->identifier($tableName));
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+            )
+        );
+        $sql = sprintf('SHOW KEYS FROM %s%s', $this->identifier($tableName), $this->_delimiter);
         $result = $this->selectAll($sql);
         $indexes = array();
         foreach ($result as $row) {
@@ -1113,20 +1167,22 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function isPrimaryKey($tableName, $columnName)
     {
-        if (empty($tableName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing table name parameter'
-            );
-        }
-        if (empty($columnName)) {
-            throw new Phigrate_Exception_Argument(
-                'Missing column name parameter'
-            );
-        }
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'table name',
+                    'arg'  => $tableName,
+                ),
+                array(
+                    'name' => 'column name',
+                    'arg'  => $columnName,
+                ),
+            )
+        );
         if (!is_array($columnName)) {
             $columnName = array($columnName);
         }
-        $sql = sprintf('SHOW KEYS FROM %s;', $this->identifier($tableName));
+        $sql = sprintf('SHOW KEYS FROM %s%s', $this->identifier($tableName), $this->_delimiter);
         $result = $this->selectAll($sql);
         $primary = array_fill_keys($columnName, false);
         foreach ($result as $row) {
@@ -1225,8 +1281,55 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     }
 
     /**
+     * Check the charset
+     *
+     * @param string $character The character
+     *
+     * @return boolean
+     */
+    protected function _checkCaracter($character)
+    {
+        // En mode export, on ne peut pas vérifier le charset
+        if ($this->hasExport()) {
+            return true;
+        }
+        $sql = sprintf('SHOW CHARACTER SET%s', $this->_delimiter);
+        $result = $this->selectAll($sql);
+        foreach ($result as $row) {
+            if ($row['Charset'] == $character) {
+                return true;
+            }
+        }
+    }
+
+    /**
+     * Check the collation
+     *
+     * @param string $collation The collation
+     * @param string $charset   The charset
+     *
+     * @return boolean
+     */
+    protected function _checkCollation($collation, $charset)
+    {
+        // En mode export, on ne peut pas vérifier le charset
+        if ($this->hasExport()) {
+            return true;
+        }
+        $sql = sprintf('SHOW COLLATION LIKE \'%s\%\'%s', $character, $this->_delimiter);
+        $result = $this->selectAll($sql);
+        foreach ($result as $row) {
+            if ($row['Collation'] == $collation) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * add column options
      *
+     * @param string $type    The type of column
      * @param array  $options The options definition
      *
      * @return string
@@ -1240,10 +1343,23 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         }
 
         // unsigned
-        if (array_key_exists('unsigned', $options)
-            && $options['unsigned'] === true
-        ) {
+        if (array_key_exists('unsigned', $options) && $options['unsigned'] === true) {
             $sql .= ' UNSIGNED';
+        }
+        // Check the type string for options character and collate
+        if ($type == 'string' || $type == 'tinytext' || $type == 'text'
+            || $type == 'mediumtext' || $type == 'longtext')
+        {
+            // Add character option
+            if (array_key_exists('character', $options) && $this->_checkCaracter($options['character'])) {
+                $sql .= ' CHARACTER SET ' . $this->identifier($options['character']);
+                // Add collate option
+                if (array_key_exists('collate', $options)
+                    && $this->_checkCollation($options['collate'], $options['character']))
+                {
+                    $sql .= ' COLLATE ' . $this->identifier($options['collate']);
+                }
+            }
         }
 
         // auto_increment
@@ -1297,6 +1413,11 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
             $sql .= ' ON UPDATE ' . $options['update'];
         }
 
+        // Add comment column option
+        if (array_key_exists('comment', $options)) {
+            $sql .= sprintf(" COMMENT %s", $this->quote((string)$options['comment']));
+        }
+
         // position of column
         if (array_key_exists('after', $options)) {
             $sql .= sprintf(' AFTER %s', $this->identifier($options['after']));
@@ -1315,9 +1436,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function setCurrentVersion($version)
     {
         $sql = sprintf(
-            "INSERT INTO %s (version) VALUES ('%s');",
+            "INSERT INTO %s (version) VALUES ('%s')%s",
             PHIGRATE_TS_SCHEMA_TBL_NAME,
-            $version
+            $version,
+            $this->_delimiter
         );
         return $this->executeDdl($sql);
     }
@@ -1332,9 +1454,10 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     public function removeVersion($version)
     {
         $sql = sprintf(
-            "DELETE FROM %s WHERE version = '%s';",
+            "DELETE FROM %s WHERE version = '%s'%s",
             PHIGRATE_TS_SCHEMA_TBL_NAME,
-            $version
+            $version,
+            $this->_delimiter
         );
         return $this->executeDdl($sql);
     }
@@ -1356,7 +1479,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      */
     public function getVersionServer()
     {
-        $version = $this->_conn->getAttribute(PDO::ATTR_SERVER_VERSION);
+        $version = $this->getConnexion()->getAttribute(PDO::ATTR_SERVER_VERSION);
         return $version;
     }
 
@@ -1375,10 +1498,252 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         return true;
     }
 
+    /**
+     * Add view
+     *
+     * @param string $viewName The view name
+     * @param string $select   The select statement
+     * @param array  $options  The options
+     *
+     * @return boolean
+     */
+    public function createView($viewName, $select, $options = array())
+    {
+        $create = 'CREATE';
+        if (array_key_exists('replace', $options) && $options['replace'] === true) {
+            $create .= ' OR REPLACE';
+        }
+        $query = $create . ' %s %s VIEW %s%s AS %s%s;';
+        return $this->_createOrAlterView($viewName, $select, $query, 'create', $options);
+    }
+
+    /**
+     * Change view
+     *
+     * @param string $viewName The view name
+     * @param string $select   The select statement
+     * @param array  $options  The options
+     *
+     * @return boolean
+     */
+    public function changeView($viewName, $select, $options = array())
+    {
+        $query = 'ALTER %s %s VIEW %s%s AS %s%s;';
+        return $this->_createOrAlterView($viewName, $select, $query, 'change', $options);
+    }
+
+    /**
+     * Drop view
+     *
+     * @param string $viewName The view name
+     *
+     * @return boolean
+     */
+    public function dropView($viewName)
+    {
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'view name',
+                    'arg'  => $viewName,
+                ),
+            )
+        );
+        $ddl = sprintf('DROP VIEW IF EXISTS %s;', $this->identifier($viewName));
+        return $this->executeDdl($ddl);
+    }
 
     //-----------------------------------
     // PRIVATE METHODS
     //-----------------------------------
+
+    /**
+     * Check missing parameters
+     *
+     * @param array $parameters The array of parameters
+     *
+     * @return void
+     * @throws Phigrate_Exception_Argument
+     */
+    protected function _checkMissingParameters($parameters)
+    {
+        foreach ($parameters as $parameter) {
+            if (empty($parameter['arg'])) {
+                throw new Phigrate_Exception_Argument(
+                    'Missing ' . $parameter['name'] . ' parameter'
+                );
+            }
+        }
+    }
+
+    /**
+     * Check engine of table for foreign key constraints
+     *
+     * @param string $tableName The name of table
+     *
+     * @return void
+     * @throws Phigrate_Exception_InvalidTableDefinition
+     */
+    protected function _checkEngineForForeignKey($tableName)
+    {
+        // Check if table has engine InnoDB
+        if (!$this->hasExport()) {
+            $stmt = sprintf('SHOW CREATE TABLE %s%s', $this->identifier($tableName), $this->_delimiter);
+            $result = $this->execute($stmt);
+
+            if (is_array($result) && count($result) == 1) {
+                $row = $result[0];
+                if (array_key_exists('Create Table', $row) && false != strstr($row['Create Table'], 'ENGINE')) {
+                    $matches = array();
+                    preg_match('/ENGINE=(\w*)/', $row['Create Table'], $matches);
+                    if (count($matches) > 1 && strtoupper($matches[1]) != 'INNODB') {
+                        throw new Phigrate_Exception_InvalidTableDefinition(
+                            $matches[1] . ' does not supports foreign key constraints.'
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Create or Alter view
+     *
+     * @param string $viewName The view name
+     * @param string $select   The select statement
+     * @param string $query    The query for view
+     * @param string $funcName The function name
+     * @param array  $options  The options
+     *
+     * @return boolean
+     */
+    protected function _createOrAlterView($viewName, $select, $query, $funcName,  $options = array())
+    {
+        $this->_checkMissingParameters(
+            array(
+                array(
+                    'name' => 'view name',
+                    'arg'  => $viewName,
+                ),
+            )
+        );
+        $query_type = $this->_determineQueryType($select);
+        if ($query_type != self::SQL_SELECT) {
+            require_once 'Phigrate/Exception/AdapterQuery.php';
+            throw new Phigrate_Exception_AdapterQuery(
+                'Sql for ' . $funcName . 'View() is not a SELECT : ' . $select
+            );
+        }
+        $algorithm = $this->_getAlgorithm($options, $funcName);
+        $definer = $this->_getDefiner($options);
+        $columnList = $this->_getColumnList($options);
+        $check = $this->_getCheckOption($options, $funcName);
+        $ddl = sprintf(
+            $query,
+            $algorithm,
+            $definer,
+            $this->identifier($viewName),
+            $columnList,
+            $select,
+            $check
+        );
+        return $this->executeDdl($ddl);
+    }
+
+    /**
+     * Return algorithm for create and alter view
+     *
+     * @param array  $options  Array of options containing algorithm key
+     * @param string $funcName The fonction name
+     *
+     * @return string
+     */
+    protected function _getAlgorithm($options, $funcName)
+    {
+        $algorithm = 'ALGORITHM=UNDEFINED';
+        $allowedAlgos = array('UNDEFINED', 'MERGE', 'TEMPTABLE');
+        if (array_key_exists('algorithm', $options) && !empty($options['algorithm'])) {
+            if (!in_array($options['algorithm'], $allowedAlgos)) {
+                throw new Phigrate_Exception_Argument(
+                    'algorithm allowed for ' . $funcName . ' view : ' . implode(', ', $allowedAlgos)
+                );
+            }
+            $algorithm = 'ALGORITHM=' . $options['algorithm'];
+        }
+        return $algorithm;
+    }
+
+    /**
+     * Return definer for create and alter view
+     *
+     * @param array $options Array of options containing definer key
+     *
+     * @return string
+     */
+    protected function _getDefiner($options)
+    {
+        $definer = 'DEFINER=CURRENT_USER';
+        // Get definer
+        if (array_key_exists('definer', $options) && !empty($options['definer'])) {
+            // check definer format
+            if (preg_match("/'\w*'@'\w*'/", $options['definer']) == false) {
+                throw new Phigrate_Exception_Argument(
+                    "The definer should be specified as 'user'@'host'."
+                );
+            }
+            $definer = 'DEFINER=' . $options['definer'];
+        }
+        return $definer;
+    }
+
+    /**
+     * Return list of column for create and alter view
+     *
+     * @param array $options Array of options containing columnList key
+     *
+     * @return string
+     */
+    protected function _getColumnList($options)
+    {
+        $columnList = '';
+        if (array_key_exists('columnList', $options) && is_array($options['columnList'])
+            && !empty($options['columnList']))
+        {
+            $columns = array_map(array($this, 'identifier'), $options['columnList']);
+            $columnList = ' (' . implode(',', $columns) . ')';
+        }
+        return $columnList;
+    }
+
+    /**
+     * Return check option for create and alter view
+     *
+     * @param array  $options  Array of options containing check key
+     * @param string $funcName The fonction name
+     *
+     * @return string
+     */
+    protected function _getCheckOption($options, $funcName)
+    {
+        $check = '';
+        $allowedCheck = array('LOCAL', 'CASCADED');
+        if (array_key_exists('check', $options) && !empty($options['check'])) {
+            $versionServer = preg_replace('/[^\.\d]/', '', $this->getVersionServer());
+            if (!$this->hasExport() && version_compare($versionServer, '5.0.2') < 0) {
+                throw new Phigrate_Exception_AdapterQuery(
+                    'The WITH CHECK OPTION clause was implemented in MySQL 5.0.2.'
+                );
+            } elseif (!is_bool($options['check']) && !in_array($options['check'], $allowedCheck)) {
+                throw new Phigrate_Exception_Argument(
+                    'check option allowed for ' . $funcName . ' view : ' . implode(', ', $allowedCheck)
+                );
+            } elseif ($options['check'] === true) {
+                $options['check'] = 'CASCADED';
+            }
+            $check = ' WITH ' . $options['check'] . ' CHECK OPTION';
+        }
+        return $check;
+    }
 
     /**
      * initialize DSN MySQL with URI or array config
@@ -1430,8 +1795,9 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
     {
         if ($this->_tablesLoaded == false || $reload) {
             $this->_tables = array(); //clear existing structure
-            $qry = 'SHOW TABLES';
+            $qry = 'SHOW TABLES' . $this->_delimiter;
             $results = $this->getConnexion()->query($qry);
+
             foreach ($results as $row) {
                 $table = $row[0];
                 $this->_tables[$table] = true;

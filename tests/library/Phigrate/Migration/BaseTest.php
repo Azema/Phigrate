@@ -17,11 +17,6 @@ class Phigrate_Migration_BaseTest extends PHPUnit_Framework_TestCase
      */
     protected $_adapter;
 
-    public function __construct()
-    {
-        $this->_adapter = new migrationAdapterMock(array(), '');
-    }
-
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -29,6 +24,7 @@ class Phigrate_Migration_BaseTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
+        $this->_adapter = new migrationAdapterMock(array(), '');
         $this->object = new migrationMock($this->_adapter);
     }
 
@@ -38,6 +34,7 @@ class Phigrate_Migration_BaseTest extends PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
+        $this->_adapter = null;
         $this->object = null;
         parent::tearDown();
     }
@@ -370,6 +367,36 @@ class Phigrate_Migration_BaseTest extends PHPUnit_Framework_TestCase
         $comment = 'Ceci est un commentaire a ajouter au code SQL';
         $this->object->comment($comment);
         $this->assertContains($comment, $this->_adapter->datas['comments']);
+    }
+
+    public function testCreateView()
+    {
+        $name = 'users';
+        $select = 'select usr_id from users';
+        $return = $this->object->createView($name, $select);
+        $this->assertTrue($return);
+        $this->assertEquals($name, $this->_adapter->datas['createView']['name']);
+        $this->assertEquals($select, $this->_adapter->datas['createView']['select']);
+    }
+
+    public function testChangeView()
+    {
+        $name = 'users';
+        $select = 'select usr_id from users';
+        $return = $this->object->changeView($name, $select);
+        $this->assertTrue($return);
+        $this->assertEquals($name, $this->_adapter->datas['changeView']['name']);
+        $this->assertEquals($select, $this->_adapter->datas['changeView']['select']);
+    }
+
+    /**
+     */
+    public function testDropView()
+    {
+        $name = 'users';
+        $return = $this->object->dropView($name);
+        $this->assertTrue($return);
+        $this->assertEquals($name, $this->_adapter->datas['dropView']['name']);
     }
 }
 

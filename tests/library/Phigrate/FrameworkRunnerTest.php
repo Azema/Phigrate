@@ -259,6 +259,24 @@ class Phigrate_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
         unlink($pathFile);
     }
 
+    public function testConstructorWithoutConfigDbFile()
+    {
+        $parameters = array(
+            'monScript.php',
+            'db:version',
+            '-c',
+            PHIGRATE_BASE . '/tests/fixtures/config/applicationWithoutDatabase.ini',
+            'ENV=test',
+        );
+        try {
+            new Phigrate_FrameworkRunner($parameters);
+            $this->fail('No config file for database in application.ini and parameters');
+        } catch (Phigrate_Exception_Config $e) {
+            $msg = 'Config file for DB not found! Please, create config file';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+    }
+
     public function testConstructorWithParameterTaskDir()
     {
         $parameters = array(
@@ -271,7 +289,9 @@ class Phigrate_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
         );
         $framework = new Phigrate_FrameworkRunner($parameters);
         $tasksDir = $framework->getTaskDir();
-        $this->assertEquals(PHIGRATE_BASE . '/library/Task', $tasksDir);
+        $this->assertInternalType('array', $tasksDir);
+        $this->assertEquals(1, count($tasksDir));
+        $this->assertContains(PHIGRATE_BASE . '/library/Task', $tasksDir);
 
         $addParams = array(
             '-t',
@@ -280,12 +300,16 @@ class Phigrate_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
         $parameters = array_merge($parameters, $addParams);
         $actual = new Phigrate_FrameworkRunner($parameters);
         $this->assertInstanceOf('Phigrate_FrameworkRunner', $actual);
-        $this->assertEquals(PHIGRATE_BASE . '/tests/fixtures/tasks', $actual->getTaskDir());
+        $tasksDir = $actual->getTaskDir();
+        $this->assertInternalType('array', $tasksDir);
+        $this->assertEquals(2, count($tasksDir));
+        $this->assertContains(PHIGRATE_BASE . '/tests/fixtures/tasks', $tasksDir);
         $parameters[2] = PHIGRATE_BASE . '/tests/fixtures/config/application.ini';
         array_splice($parameters, 6);
         $actual = new Phigrate_FrameworkRunner($parameters);
         $this->assertInstanceOf('Phigrate_FrameworkRunner', $actual);
-        $this->assertEquals(PHIGRATE_BASE . '/library/Task', $actual->getTaskDir());
+        $this->assertInternalType('array', $actual->getTaskDir());
+        $this->assertContains(PHIGRATE_BASE . '/library/Task', $actual->getTaskDir());
         $addParams = array(
             '--taskdir',
             PHIGRATE_BASE . '/tests/fixtures/tasks',
@@ -293,7 +317,9 @@ class Phigrate_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
         $parameters = array_merge($parameters, $addParams);
         $actual = new Phigrate_FrameworkRunner($parameters);
         $this->assertInstanceOf('Phigrate_FrameworkRunner', $actual);
-        $this->assertEquals(PHIGRATE_BASE . '/tests/fixtures/tasks', $actual->getTaskDir());
+        $tasksDir = $actual->getTaskDir();
+        $this->assertInternalType('array', $tasksDir);
+        $this->assertContains(PHIGRATE_BASE . '/tests/fixtures/tasks', $tasksDir);
     }
 
     public function testConstructorWithParameterMigrationDir()
@@ -379,6 +405,13 @@ class Phigrate_FrameworkRunnerTest extends PHPUnit_Framework_TestCase
         $actual = new Phigrate_FrameworkRunner($parameters);
         $this->assertInstanceOf('Phigrate_FrameworkRunner', $actual);
         $expected =<<<USAGE
+ ____  _     _                 _
+|  _ \| |__ (_) __ _ _ __ __ _| |_ ___
+| |_) | '_ \| |/ _` | '__/ _` | __/ _ \
+|  __/| | | | | (_| | | | (_| | ||  __/
+|_|   |_| |_|_|\__, |_|  \__,_|\__\___|
+               |___/
+
 Task: \033[36mdb:version\033[0m
 
 It is always possible to ask the framework (really the DB) what version it is
@@ -414,6 +447,36 @@ USAGE;
             PHIGRATE_BASE . '/tests/fixtures/config/database.ini',
             '-c',
             PHIGRATE_BASE . '/tests/fixtures/config/application.ini',
+            '-l',
+            '/tmp',
+            'ENV=test',
+            'db:version',
+        );
+        $actual = new Phigrate_FrameworkRunner($parameters);
+        $this->assertInstanceOf('Phigrate_FrameworkRunner', $actual);
+        $this->assertInstanceOf('Phigrate_Logger', $actual->getLogger());
+
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            PHIGRATE_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            PHIGRATE_BASE . '/tests/fixtures/config/application.ini',
+            '--logdir',
+            '/tmp',
+            'ENV=test',
+            'db:version',
+        );
+        $actual = new Phigrate_FrameworkRunner($parameters);
+        $this->assertInstanceOf('Phigrate_FrameworkRunner', $actual);
+        $this->assertInstanceOf('Phigrate_Logger', $actual->getLogger());
+
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            PHIGRATE_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            PHIGRATE_BASE . '/tests/fixtures/config/application.ini',
             'ENV=test3',
             'db:version',
         );
@@ -424,6 +487,42 @@ USAGE;
             $msg = 'Cannot write to log directory: /usr/bin. Check permissions.';
             $this->assertEquals($msg, $e->getMessage());
         }
+
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            PHIGRATE_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            PHIGRATE_BASE . '/tests/fixtures/config/application.ini',
+            '--logdir',
+            '/var/lib',
+            'ENV=test3',
+            'db:version',
+        );
+        try {
+            new Phigrate_FrameworkRunner($parameters);
+            $this->fail('The variable log directory, in parameters, is not writable');
+        } catch (Phigrate_Exception_InvalidLog $e) {
+            $msg = 'Cannot write to log directory: /var/lib. Check permissions.';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            PHIGRATE_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            PHIGRATE_BASE . '/tests/fixtures/config/application.ini',
+            '--logdir',
+        );
+        try {
+            new Phigrate_FrameworkRunner($parameters);
+            $this->fail('The variable log directory, in parameters, is not writable');
+        } catch (Phigrate_Exception_Argument $e) {
+            $msg = 'Please, specify the directory of log files if you use the argument -l or --logdir';
+            $this->assertEquals($msg, $e->getMessage());
+        }
+
         $parameters = array(
             'monScript.php',
             '-d',
@@ -476,7 +575,38 @@ USAGE;
             $this->assertEquals($msg, $e->getMessage());
         }
     }
-    
+
+    public function testExecuteWithVersionTaskWithTableSchemaAndParameterForce()
+    {
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            PHIGRATE_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            PHIGRATE_BASE . '/tests/fixtures/config/application.ini',
+            '-m',
+            PHIGRATE_BASE . '/tests/fixtures/db/migrate',
+            '--force',
+            'db:migrate',
+            'VERSION=20120111064438',
+        );
+        $actual = new Phigrate_FrameworkRunner($parameters);
+        $adapter = new adapterTaskMock(array(), '');
+        $adapter->setTableSchemaExist(true);
+        $adapter->versions = array(array('version' => '20120109064438'));
+        $e = new InvalidArgumentException('test force');
+        $adapter->throwException($e);
+        $actual->setAdapter($adapter);
+        $task = $actual->execute();
+        $regexp = '/Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+        . '\[db:migrate\]:\012+\t+Migrating UP to: 20120111064438\012+'
+        . '========= AddIndexToUsers ======== \(\d+.\d{2}\)\012+\\033\[1;31mError:\\033\[0m test force\012+'
+        . '========= CreateAddresses ======== \(\d+.\d{2}\)\012+\\033\[1;31mError:\\033\[0m test force\012+'
+        . 'Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
+        $this->assertNotEmpty($task);
+        $this->assertRegExp($regexp, $task);
+    }
+
     public function testExecuteWithVersionTaskWithTableSchema()
     {
         $parameters = array(
@@ -493,7 +623,7 @@ USAGE;
         $adapter->versions = array(array('version' => '20120110064438'));
         $actual->setAdapter($adapter);
         $task = $actual->execute();
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+        $regexp = '/Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
         . '\[db:version\]:\012+\t+Current version: \d+\012+Finished: '
         . '\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($task);
@@ -515,7 +645,7 @@ USAGE;
         $adapter->setTableSchemaExist(false);
         $actual->setAdapter($adapter);
         $task = $actual->execute(array());
-        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+        $regexp = '/Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:version\]:\012+\t+Schema version table \(schema_migrations\) '
             . "does not exist\. Do you need to run 'db:setup'\?"
             . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
@@ -541,7 +671,7 @@ USAGE;
             $this->assertEquals($msg, $e->getMessage());
         }
     }
-    
+
     public function testParseArgumentConfigurationDbWithoutConfigDbFile()
     {
         $parameters = array(
@@ -560,7 +690,7 @@ USAGE;
             $this->assertEquals($msg, $e->getMessage());
         }
     }
-    
+
     public function testParseArgumentMigrationWithoutDirectory()
     {
         $parameters = array(
@@ -581,7 +711,7 @@ USAGE;
             $this->assertEquals($msg, $e->getMessage());
         }
     }
-    
+
     public function testParseArgumentMigrationWithRelatifDirectory()
     {
         $parameters = array(
@@ -598,7 +728,7 @@ USAGE;
         $this->assertInstanceOf('Phigrate_FrameworkRunner', $actual);
         $this->assertEquals(PHIGRATE_BASE . '/tests/dummy/db/migrate', $actual->getMigrationDir());
     }
-    
+
     public function testParseArgumentTasksWithoutDirectory()
     {
         $parameters = array(
@@ -619,16 +749,24 @@ USAGE;
             $this->assertEquals($msg, $e->getMessage());
         }
     }
-    
-    /**
-     * @todo   Implement testUpdateSchemaForTimestamps().
-     */
-    public function testUpdateSchemaForTimestamps()
+    public function testExecuteExportForTestHeader()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-          'This test has not been implemented yet.'
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            PHIGRATE_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            PHIGRATE_BASE . '/tests/fixtures/config/application.ini',
+            'db:export',
         );
+        $actual = new Phigrate_FrameworkRunner($parameters);
+        $adapter = new adapterTaskMock(array(), '');
+        $adapter->setTableSchemaExist(true);
+        $adapter->versions = array(array('version' => '20120110064438'));
+        $actual->setAdapter($adapter);
+        $task = $actual->execute();
+        $this->assertNotEmpty($task);
+        $this->assertNotRegExp('/^[\s_|`]+/', $task);
     }
 }
 

@@ -71,8 +71,8 @@ class Phigrate_Task_Manager
      * __construct
      *
      * @param Phigrate_Adapter_Base $adapter       Adapter RDBMS
-     * @param string                 $tasksDir      The path of directory of tasks
-     * @param string                 $migrationsDir The path of directory of migrations.
+     * @param string|array          $tasksDir      The path of directory of tasks
+     * @param string                $migrationsDir The path of directory of migrations.
      *
      * @return Phigrate_Task_Manager
      */
@@ -91,8 +91,8 @@ class Phigrate_Task_Manager
     /**
      * set directory of tasks
      *
-     * @param string  $tasksDir The path of directory of tasks
-     * @param boolean $reload   Reload all tasks
+     * @param string|array  $tasksDir The path of directory of tasks
+     * @param boolean       $reload   Reload all tasks
      *
      * @return Phigrate_Task_Manager
      * @throws Phigrate_Exception_Argument
@@ -100,15 +100,20 @@ class Phigrate_Task_Manager
     public function setDirectoryOfTasks($tasksDir, $reload = false)
     {
         $this->_logger->debug(__METHOD__ . ' Start');
-        if (! is_dir($tasksDir)) {
-            $msg = 'Task dir: "' . $tasksDir . '" does not exist!';
-            $this->_logger->err($msg);
-            require_once 'Phigrate/Exception/Argument.php';
-            throw new Phigrate_Exception_Argument($msg);
+        if (!is_array($tasksDir)) {
+            $tasksDir = array($tasksDir);
         }
-        if (! isset($this->_tasksDir) || $tasksDir != $this->_tasksDir) {
-            $this->_tasksDir = $tasksDir;
-            $this->_tasks = array();
+        $this->_tasks = array();
+        foreach ($tasksDir as $dir) {
+            if (! is_dir($dir)) {
+                $msg = 'Task dir: "' . $dir . '" does not exist!';
+                $this->_logger->err($msg);
+                require_once 'Phigrate/Exception/Argument.php';
+                throw new Phigrate_Exception_Argument($msg);
+            }
+            if (empty($this->_tasksDir) || !in_array($dir, $this->_tasksDir)) {
+                $this->_tasksDir[] = $dir;
+            }
         }
         if ($reload) {
             $this->_loadAllTasks();
@@ -310,38 +315,40 @@ class Phigrate_Task_Manager
             $this->_logger->err($msg);
             throw new Phigrate_Exception_Argument($msg);
         }
-        $namespaces = scandir($this->_tasksDir);
-        $this->_logger->debug('Task dir: ' . $this->_tasksDir);
-        $this->_tasks = array();
-        foreach ($namespaces as $namespace) {
-            $this->_logger->debug('Namespace: ' . $namespace);
-            //skip over invalid files
-            if ($namespace == '.' || $namespace == '..'
-                || ! is_dir($this->_tasksDir . '/' . $namespace)
-            ) {
-                continue;
-            }
-            $this->_logger->debug('Namespace: ' . $namespace);
-
-            $files = scandir($this->_tasksDir . '/' . $namespace);
-            foreach ($files as $file) {
-                $ext = substr($file, -4);
+        foreach ($this->_tasksDir as $index => $taskDir) {
+            $namespaces = scandir($taskDir);
+            $this->_logger->debug('Tasks dir['.$index.']: ' . $taskDir);
+            //$this->_tasks = array();
+            foreach ($namespaces as $namespace) {
                 //skip over invalid files
-                if ($file == '.' || $file == '..' || $ext != '.php') {
+                if ($namespace == '.' || $namespace == '..'
+                    || ! is_dir($taskDir . '/' . $namespace))
+                {
                     continue;
                 }
-                $this->_logger->debug('include ' . $namespace . '/' . $file);
-                $class = Phigrate_Util_Naming::classFromFileName(
-                    $this->_tasksDir . '/' . $namespace . '/' . $file
-                );
-                $refl = new ReflectionClass($class);
-                if ($refl->isInstantiable()) {
-                    $this->_logger->debug('className ' . $class);
-                    $taskName = Phigrate_Util_Naming::taskFromClassName($class);
-                    $this->_logger->debug('TaskName: ' . $taskName);
-                    $taskObj = new $class($this->getAdapter());
-                    $this->_logger->debug('obj: ' . get_class($taskObj));
-                    $this->registerTask($taskName, $taskObj);
+                $this->_logger->debug('Namespace: ' . $namespace);
+
+                $files = scandir($taskDir . '/' . $namespace);
+                foreach ($files as $file) {
+                    $ext = substr($file, -4);
+                    //skip over invalid files
+                    if ($file == '.' || $file == '..' || $ext != '.php') {
+                        continue;
+                    }
+                    $this->_logger->debug('include ' . $namespace . '/' . $file);
+                    require_once $taskDir . '/' . $namespace . '/' . $file;
+                    $class = Phigrate_Util_Naming::classFromFileName(
+                        $taskDir . '/' . $namespace . '/' . $file
+                    );
+                    $refl = new ReflectionClass($class);
+                    if ($refl->isInstantiable()) {
+                        $this->_logger->debug('className ' . $class);
+                        $taskName = Phigrate_Util_Naming::taskFromClassName($class);
+                        $this->_logger->debug('TaskName: ' . $taskName);
+                        $taskObj = new $class($this->getAdapter());
+                        $this->_logger->debug('obj: ' . get_class($taskObj));
+                        $this->registerTask($taskName, $taskObj);
+                    }
                 }
             }
         }

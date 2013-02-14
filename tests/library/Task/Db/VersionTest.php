@@ -17,11 +17,6 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
      */
     protected $_adapter;
 
-    public function __construct()
-    {
-        $this->_adapter = new adapterTaskMock(array(), '');
-    }
-
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -29,6 +24,7 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
+        $this->_adapter = new adapterTaskMock(array(), '');
         $this->object = new Task_Db_Version($this->_adapter);
     }
 
@@ -38,6 +34,7 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
      */
     protected function tearDown()
     {
+        $this->_adapter = null;
         $this->object = null;
         parent::tearDown();
     }
@@ -88,6 +85,23 @@ class Task_Db_VersionTest extends PHPUnit_Framework_TestCase
         $actual = $this->object->execute(array());
         $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:version\]:\012+\t+Current version: 20120124064438'
+            . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
+        $this->assertNotEmpty($actual);
+        $this->assertRegExp($regexp, $actual);
+    }
+
+    public function testExecuteWithTableSchemaWihtMaxVersionUnknown()
+    {
+        $this->_adapter->setTableSchemaExist(true);
+        $this->_adapter->versions = array(
+            array('version' => '20130124064438'),
+            array('version' => '20120124064438'),
+            array('version' => '20120112064438'),
+            array('version' => '20120110064438'),
+        );
+        $actual = $this->object->execute(array());
+        $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+            . '\[db:version\]:\012+\t+Current version: 20130124064438'
             . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $this->assertNotEmpty($actual);
         $this->assertRegExp($regexp, $actual);

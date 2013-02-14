@@ -47,7 +47,7 @@ abstract class Phigrate_Adapter_Base
      * @var Phigrate_Logger
      */
     protected $_logger;
-    
+
     /**
      * Export SQL
      *
@@ -56,11 +56,25 @@ abstract class Phigrate_Adapter_Base
     protected $_export = false;
 
     /**
+     * tables
+     *
+     * @var array
+     */
+    protected $_tables = array();
+
+    /**
      * SQL to export
      *
      * @var string
      */
     protected $_sql;
+
+    /**
+     * The delimiter of requests
+     *
+     * @var string
+     */
+    protected $_delimiter = ';';
 
     /**
      * __construct 
@@ -225,13 +239,84 @@ abstract class Phigrate_Adapter_Base
             }
             return implode(', ', $value);
         }
-        return "'" . addcslashes($value, "\000\n\r\\'\"\032") . "'";
+        return $this->getConnexion()->quote($value);
     }
+
+    /**
+     * Define flag export SQL
+     * 
+     * @param boolean $export The export flag
+     * 
+     * @return \Phigrate_Adapter_Base
+     */
+    public function setExport($export = false)
+    {
+        $this->_export = (boolean)$export;
+        $this->initSql();
+        return $this;
+    }
+
+    /**
+     * Return the flag export SQL
+     * 
+     * @return boolean
+     */
+    public function hasExport()
+    {
+        return $this->_export;
+    }
+
+    /**
+     * Return the SQL
+     * 
+     * @return string
+     */
+    public function getSql()
+    {
+        return $this->_sql;
+    }
+
+    /**
+     * Initialize the variable SQL
+     * 
+     * @return void
+     */
+    public function initSql()
+    {
+        $this->_sql = '';
+    }
+
+    /**
+     * Return the delimiter of requests
+     *
+     * @return string
+     */
+    public function getDelimiter()
+    {
+        return $this->_delimiter;
+    }
+
+    /**
+     * Define the delimiter of requests
+     *
+     * @param string $delimiter The delimiter of requests
+     *
+     * @return Phigrate_Adapter_Mysql_Adapter
+     */
+    public function setDelimiter($delimiter)
+    {
+        $this->_delimiter = (string)$delimiter;
+        return $this;
+    }
+
+    // *******************
+    // PROTECTED METHODS
+    // *******************
 
     /**
      * Creates a PDO instance to represent a connection
      * to the requested database.
-     * 
+     *
      * @return PDO
      * @throws Phigrate_Exception_AdapterConnexion
      */
@@ -269,50 +354,6 @@ abstract class Phigrate_Adapter_Base
         }
 
         return $pdo;
-    }
-    
-    /**
-     * Define flag export SQL
-     * 
-     * @param boolean $export The export flag
-     * 
-     * @return \Phigrate_Adapter_Base
-     */
-    public function setExport($export = false)
-    {
-        $this->_export = (boolean)$export;
-        $this->initSql();
-        return $this;
-    }
-    
-    /**
-     * Return the flag export SQL
-     * 
-     * @return boolean
-     */
-    public function hasExport()
-    {
-        return $this->_export;
-    }
-    
-    /**
-     * Return the SQL
-     * 
-     * @return string
-     */
-    public function getSql()
-    {
-        return $this->_sql;
-    }
-    
-    /**
-     * Initialize the variable SQL
-     * 
-     * @return void
-     */
-    public function initSql()
-    {
-        $this->_sql = '';
     }
 }
 
