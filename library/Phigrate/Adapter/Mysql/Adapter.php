@@ -145,6 +145,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
                 'limit' => 11,
             ),
             'smallinteger'  => array('name' => 'smallint'),
+            'mediuminteger' => array('name' => 'mediumint'),
             'biginteger'    => array('name' => 'bigint'),
             'float'         => array('name' => 'float'),
             'decimal'       => array('name' => 'decimal'),

@@ -356,6 +356,7 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
                 'limit' => 11,
             ),
             'smallinteger'  => array('name' => 'smallint'),
+            'mediuminteger' => array('name' => 'mediumint'),
             'biginteger'    => array('name' => 'bigint'),
             'float'         => array('name' => 'float'),
             'decimal'       => array('name' => 'decimal'),
@@ -1868,7 +1869,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`".USER_MYSQL_DEFAULT."`@`localhost` SQL SECU
             $msg = "Error: I dont know what column type of 'unknown' maps to for MySQL.
 You provided: unknown
 Valid types are: 
-\tstring\n\ttext\n\tmediumtext\n\tinteger\n\tsmallinteger\n\tbiginteger\n\tfloat
+\tstring\n\ttext\n\tmediumtext\n\tinteger\n\tsmallinteger\n\tmediuminteger\n\tbiginteger\n\tfloat
 \tdecimal\n\tdatetime\n\ttimestamp\n\ttime\n\tdate\n\tbinary\n\tboolean\n";
             $this->assertEquals($msg, $e->getMessage());
         }
@@ -1881,6 +1882,12 @@ Valid types are:
         }
         $type = $this->object->typeToSql('integer', array('limit' => 12));
         $this->assertEquals('int(12)', $type);
+        $type = $this->object->typeToSql('smallinteger', array('limit' => 2));
+        $this->assertEquals('smallint(2)', $type);
+        $type = $this->object->typeToSql('mediuminteger', array('limit' => 4));
+        $this->assertEquals('mediumint(4)', $type);
+        $type = $this->object->typeToSql('biginteger', array('limit' => 20));
+        $this->assertEquals('bigint(20)', $type);
         $type = $this->object->typeToSql('integer');
         $this->assertEquals('int(11)', $type);
         $type = $this->object->typeToSql('decimal', array('precision' => 2));
