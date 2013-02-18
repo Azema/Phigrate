@@ -128,4 +128,78 @@
       <install as="phigrate-generate" name="bin/phigrate-generate"/>
     </filelist>
   </phprelease>
+  <changelog>
+    <release>
+      <version>
+        <release>0.9.4</release>
+        <api>0.9.4</api>
+      </version>
+      <stability>
+        <release>alpha</release>
+        <api>alpha</api>
+      </stability>
+      <date>2012-30-09</date>
+      <license uri="http://www.gnu.org/licenses/gpl-2.0.html">GPLv2</license>
+      <notes>
+        * fix Bug #4 : error config path relative
+        * fix Bug #3 : Relative path in config file
+        * Version initial
+      </notes>
+    </release>
+    <release>
+      <version>
+        <release>1.1.0</release>
+        <api>1.1.0</api>
+      </version>
+      <stability>
+        <release>stable</release>
+        <api>stable</api>
+      </stability>
+      <date>2012-25-11</date>
+      <license uri="http://www.gnu.org/licenses/gpl-2.0.html">GPLv2</license>
+      <notes>
+        * fix #5 : Add foreignKey in adapter MySQL
+        * fix Bug #7 : Add foreignKey by addIndex and removeIndex on Migration_Base class
+      </notes>
+    </release>
+    <release>
+      <version>
+        <release>1.1.1</release>
+        <api>1.1.1</api>
+      </version>
+      <stability>
+        <release>stable</release>
+        <api>stable</api>
+      </stability>
+      <date>2012-13-12</date>
+      <license uri="http://www.gnu.org/licenses/gpl-2.0.html">GPLv2</license>
+      <notes>
+        * Change remove foreignKey in adapter MySQL
+      </notes>
+    </release>
+    <release>
+      <version>
+        <release>1.2.0</release>
+        <api>1.2.0</api>
+      </version>
+      <stability>
+        <release>stable</release>
+        <api>stable</api>
+      </stability>
+      <date>2013-14-02</date>
+      <license uri="http://www.gnu.org/licenses/gpl-2.0.html">GPLv2</license>
+      <notes>
+        * fix Evo #6 : Adding a new feature to display comments in SQL exports
+        * fix Evo #9 : Adding parameter force for the task db:migrate
+        * fix Evo #10 : Adding methods to create, change and drop views
+        * fix Bug #11 : Adding getter/setter of delimiter on adapter MySQL
+        * fix Evo #12 : Add revert migrations if exception is throw
+        * fix Bug #13 : Consideration of versions without file migration
+        * Adding another tasks directory in config
+        * Add header Phigrate in output of scripts
+        * Add new types of column (smalltext, mediumtext, longtext, tinybinary, mediumbinary, longbinary, mediumint)
+        * Add new options of column (character, collate &amp; comment)
+      </notes>
+    </release>
+  </changelog>
 </package>
