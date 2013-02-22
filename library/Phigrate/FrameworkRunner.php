@@ -459,6 +459,9 @@ class Phigrate_FrameworkRunner
                                 $this->_env = $value;
                             }
                             $options[$key] = $value;
+                        } elseif (array_key_exists($i+1, $argv) && substr($argv[$i+1], 0, 1) != '-') {
+                            $i++;
+                            $options[(string)$arg] = $argv[$i];
                         } else {
                             $options[(string)$arg] = true;
                         }

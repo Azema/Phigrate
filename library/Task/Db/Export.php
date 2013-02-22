@@ -76,6 +76,33 @@ class Task_Db_Export extends Task_Db_AMigration
         $this->_adapter->setExport(false);
 
         $this->_return .= "\n\n-- Finished: " . date('Y-m-d g:ia T') . "\n\n";
+        // If output export
+        if (array_key_exists('-o', $args)) {
+            // Filepath
+            $file = $args['-o'];
+            $writable = true;
+            // If file does not exists
+            if (!file_exists($file)) {
+                // Get directory parent
+                $parent = dirname($file);
+                // If directory parent is not writable
+                if (!is_writable($parent)) {
+                    $writable = false;
+                }
+            } elseif (!is_writable($file)) {
+                // If file is not writable
+                $writable = false;
+            }
+            // If file is writable
+            if ($writable) {
+                // Write content in file
+                file_put_contents($file, $this->_return);
+                $this->_return = 'The content is writed in file: ' . $file . "\n";
+            } else {
+                // Return the content and indicate the file is not writable
+                $this->_return .= "\n\033[40m\033[1;31mThe file {$file} is not writable or his directory.\033[0m\n\n";
+            }
+        }
         $this->_logger->debug(__METHOD__ . ' End');
         return $this->_return;
     }
