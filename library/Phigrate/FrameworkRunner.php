@@ -453,19 +453,26 @@ class Phigrate_FrameworkRunner
                         } elseif ($arg == '-h' || $arg == '--help' || $arg == 'help') {
                             $this->_helpTask = true;
                             continue;
+                        } elseif ($arg == '-f' || $arg == '--force') {
+                            $options[(string)$arg] = true;
+                        } elseif ($arg == '-o' || $arg == '--output') {
+                            $i++;
+                            if (! array_key_exists($i, $argv) || substr($argv[$i+1], 0, 1) == '-') {
+                                require_once 'Phigrate/Exception/Argument.php';
+                                throw new Phigrate_Exception_Argument(
+                                    'Please, specify the file name for the output.'
+                                );
+                            }
+                            $options[(string)$arg] = $argv[$i];
                         } elseif (strpos($arg, '=') !== false) {
                             list($key, $value) = explode('=', $arg);
                             if ($key == 'ENV') {
                                 $this->_env = $value;
                             }
                             $options[$key] = $value;
-                        } elseif (array_key_exists($i+1, $argv) && substr($argv[$i+1], 0, 1) != '-') {
-                            $i++;
-                            $options[(string)$arg] = $argv[$i];
                         } else {
                             $options[(string)$arg] = true;
                         }
-                        break;
                 }
             }
             $this->_taskOptions = $options;
