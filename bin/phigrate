@@ -140,15 +140,6 @@ if (! in_array('-c', $args)) {
         $args[] = $config;
     }
 }
-// Si l'option de sortie est indiquée
-if (in_array('-o', $args)) {
-    $key = array_search('-o', $args);
-    // Si le chemin indiqué est relatif
-    if (substr($args[$key+1], 0, 1) != '/') {
-        // On rajoute le chemin courant au nom du fichier
-        $args[$key+1] = getcwd() . '/' . $args[$key+1];
-    }
-}
 $main = new Phigrate_FrameworkRunner($args);
 $output = $main->execute();
 echo $output, "\n";

@@ -80,6 +80,11 @@ class Task_Db_Export extends Task_Db_AMigration
         if (array_key_exists('-o', $args)) {
             // Filepath
             $file = $args['-o'];
+            // Si le chemin indiqué est relatif
+            if (substr($file, 0, 1) != '/') {
+                // On rajoute le chemin courant au nom du fichier
+                $file = getcwd() . '/' . $file;
+            }
             $writable = true;
             // If file does not exists
             if (!file_exists($file)) {
