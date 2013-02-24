@@ -457,13 +457,13 @@ class Phigrate_FrameworkRunner
                             $options[(string)$arg] = true;
                         } elseif ($arg == '-o' || $arg == '--output') {
                             $i++;
-                            if (! array_key_exists($i, $argv) || substr($argv[$i+1], 0, 1) == '-') {
+                            if (! array_key_exists($i, $argv) || substr($argv[$i], 0, 1) == '-') {
                                 require_once 'Phigrate/Exception/Argument.php';
                                 throw new Phigrate_Exception_Argument(
                                     'Please, specify the file name for the output.'
                                 );
                             }
-                            $options[(string)$arg] = $argv[$i];
+                            $options['-o'] = $argv[$i];
                         } elseif (strpos($arg, '=') !== false) {
                             list($key, $value) = explode('=', $arg);
                             if ($key == 'ENV') {
