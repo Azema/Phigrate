@@ -320,6 +320,49 @@ class Task_Db_ExportTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($versions, $this->_adapter->versions);
     }
 
+    public function testExecuteWithOutput()
+    {
+        $this->_adapter->setTableSchemaExist(true);
+        $versions = array(
+            array('version' => '20120109064438'),
+            array('version' => '20120110064438'),
+            array('version' => '20120111064438'),
+        );
+        $this->_adapter->versions = $versions;
+        $file = '/tmp/tests.sql';
+        $actual = $this->object->execute(array('VERSION' => '20120110064438', '-o' => $file));
+        $regexp = '/^--\012+--\tExport SQL by Phigrate\012+--\012+'
+            . '-- Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
+            . '-- \[db:export\]:\012+--\tMigrating DOWN to: 20120110064438\012+'
+            . '-- ========= CreateAddresses ======== \(\d+.\d{2}\)\012+'
+            . 'DROP INDEX `idx_addresses_user_id` ON `addresses`;\012+'
+            . 'DROP TABLE IF EXISTS `addresses`;\012+'
+            . '-- Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
+        $this->assertNotEmpty($actual);
+        $this->assertStringStartsWith('The content is writed in file: '.$file, $actual);
+        $this->assertRegExp($regexp, file_get_contents($file));
+        array_pop($versions);
+        $this->assertEquals($versions, $this->_adapter->versions);
+        unlink($file);
+    }
+
+    public function testExecuteWithOutputAndFileNotWritable()
+    {
+        $this->_adapter->setTableSchemaExist(true);
+        $versions = array(
+            array('version' => '20120109064438'),
+            array('version' => '20120110064438'),
+            array('version' => '20120111064438'),
+        );
+        $this->_adapter->versions = $versions;
+        $file = '/usr/bin/tests.sql';
+        $actual = $this->object->execute(array('VERSION' => '20120110064438', '-o' => $file));
+        $this->assertNotEmpty($actual);
+        $this->assertStringEndsWith("\n\033[40m\033[1;31mThe file {$file} is not writable or his directory.\033[0m\n\n", $actual);
+        array_pop($versions);
+        $this->assertEquals($versions, $this->_adapter->versions);
+    }
+
     public function testHelp()
     {
         $expected =<<<USAGE
