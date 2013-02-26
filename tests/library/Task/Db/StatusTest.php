@@ -48,7 +48,7 @@ class Task_Db_StatusTest extends PHPUnit_Framework_TestCase
         $this->_adapter->versions = array();
         $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:status\]:\012+'
-            . '===================== NOT APPLIED =======================\012+'
+            . '=+ NOT APPLIED =+\012+'
             . "\t\033\[40m\033\[1;33mCreateUsers \[ 20120109064438 \]\033\[0m\012+"
             . "\t\033\[40m\033\[1;33mAddIndexToUsers \[ 20120110064438 \]\033\[0m\012+"
             . "\t\033\[40m\033\[1;33mCreateAddresses \[ 20120111064438 \]\033\[0m\012+"
@@ -67,9 +67,9 @@ class Task_Db_StatusTest extends PHPUnit_Framework_TestCase
         );
         $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:status\]:\012+'
-            . '===================== APPLIED =======================\012+'
-            . "\t\033\[40m\033\[1;34mCreateUsers \[ 20120109064438 \]\033\[0m\012+"
-            . '===================== NOT APPLIED =======================\012+'
+            . '=+ APPLIED =+\012+'
+            . "\t\033\[40m\033\[1;32mCreateUsers \[ 20120109064438 \]\033\[0m\012+"
+            . '=+ NOT APPLIED =+\012+'
             . "\t\033\[40m\033\[1;33mAddIndexToUsers \[ 20120110064438 \]\033\[0m\012+"
             . "\t\033\[40m\033\[1;33mCreateAddresses \[ 20120111064438 \]\033\[0m\012+"
             . "\t\033\[40m\033\[1;33mMissingMethodUp \[ 20120112064438 \]\033\[0m\012+"
@@ -90,11 +90,11 @@ class Task_Db_StatusTest extends PHPUnit_Framework_TestCase
         );
         $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:status\]:\012+'
-            . '===================== APPLIED =======================\012+'
-            . "\t\033\[40m\033\[1;34mCreateUsers \[ 20120109064438 \]\033\[0m\012+"
-            . "\t\033\[40m\033\[1;34mAddIndexToUsers \[ 20120110064438 \]\033\[0m\012+"
-            . "\t\033\[40m\033\[1;34mCreateAddresses \[ 20120111064438 \]\033\[0m\012+"
-            . "\t\033\[40m\033\[1;34mMissingMethodUp \[ 20120112064438 \]\033\[0m\012+"
+            . '=+ APPLIED =+\012+'
+            . "\t\033\[40m\033\[1;32mCreateUsers \[ 20120109064438 \]\033\[0m\012+"
+            . "\t\033\[40m\033\[1;32mAddIndexToUsers \[ 20120110064438 \]\033\[0m\012+"
+            . "\t\033\[40m\033\[1;32mCreateAddresses \[ 20120111064438 \]\033\[0m\012+"
+            . "\t\033\[40m\033\[1;32mMissingMethodUp \[ 20120112064438 \]\033\[0m\012+"
             . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $actual = $this->object->execute(array());
         $this->assertNotEmpty($actual);
@@ -112,14 +112,14 @@ class Task_Db_StatusTest extends PHPUnit_Framework_TestCase
         );
         $regexp = '/^Started: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+'
             . '\[db:status\]:\012+'
-            . '===================== APPLIED =======================\012+'
-            . "\t\033\[40m\033\[1;34mCreateUsers \[ 20120109064438 \]\033\[0m\012+"
-            . "\t\033\[40m\033\[1;34mAddIndexToUsers \[ 20120110064438 \]\033\[0m\012+"
-            . "\t\033\[40m\033\[1;34mCreateAddresses \[ 20120111064438 \]\033\[0m\012+"
-            . '===================== APPLIED WITHOUT MIGRATION FILE =======================\012+'
-            . "\t\033\[40m\033\[1;31m\?\?\? \[ 20130112064438 \]\033\[0m\012+"
-            . '===================== NOT APPLIED =======================\012+'
+            . '=+ APPLIED =+\012+'
+            . "\t\033\[40m\033\[1;32mCreateUsers \[ 20120109064438 \]\033\[0m\012+"
+            . "\t\033\[40m\033\[1;32mAddIndexToUsers \[ 20120110064438 \]\033\[0m\012+"
+            . "\t\033\[40m\033\[1;32mCreateAddresses \[ 20120111064438 \]\033\[0m\012+"
+            . '=+ NOT APPLIED =+\012+'
             . "\t\033\[40m\033\[1;33mMissingMethodUp \[ 20120112064438 \]\033\[0m\012+"
+            . '=+ APPLIED WITHOUT MIGRATION FILE =+\012+'
+            . "\t\033\[40m\033\[1;31m\?\?\? \[ 20130112064438 \]\033\[0m\012+"
             . '\012+Finished: \d{4}-\d{2}-\d{2} \d{1,2}:\d{2}(am|pm) \w{3,4}\012+$/';
         $actual = $this->object->execute(array());
         $this->assertNotEmpty($actual);

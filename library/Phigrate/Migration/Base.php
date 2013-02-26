@@ -40,6 +40,13 @@ abstract class Phigrate_Migration_Base
     protected $_adapter;
 
     /**
+     * Comment of migration
+     *
+     * @var string
+     */
+    protected $_comment;
+
+    /**
      * __construct
      *
      * @param Phigrate_Adapter_Base $adapter Adapter of RDBMS
@@ -76,6 +83,29 @@ abstract class Phigrate_Migration_Base
     public function getAdapter()
     {
         return $this->_adapter;
+    }
+
+    /**
+     * Define comment of migration
+     *
+     * @param string $comment The comment of migration
+     *
+     * @return Phigrate_Migration_Base
+     */
+    public function setComment($comment)
+    {
+        $this->_comment = (string)$comment;
+        return $this;
+    }
+
+    /**
+     * Return the comment of the migration
+     *
+     * @return string
+     */
+    public function getComment()
+    {
+        return $this->_comment;
     }
 
     /**
