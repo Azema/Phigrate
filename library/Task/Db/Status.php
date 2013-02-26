@@ -39,6 +39,11 @@ require_once 'Phigrate/Task/ITask.php';
  */
 class Task_Db_Status extends Task_Base implements Phigrate_Task_ITask
 {
+    const BLUE_COLOR = "\033[40m\033[1;34m";
+    const ORANGE_COLOR = "\033[40m\033[1;33m";
+    const RED_COLOR = "\033[40m\033[1;31m";
+    const END_COLOR = "\033[0m";
+
     /**
      * Primary task entry point
      *
@@ -61,10 +66,10 @@ class Task_Db_Status extends Task_Base implements Phigrate_Task_ITask
         foreach ($files as $file) {
             $key = array_search($file['version'], $migrations);
             if (false !== $key) {
-                $applied[] = $file['class'] . ' [ ' . $file['version'] . ' ]';
+                $applied[] = self::BLUE_COLOR . $file['class'] . ' [ ' . $file['version'] . ' ]' . self::END_COLOR;
                 unset($migrations[$key]);
             } else {
-                $notApplied[] = $file['class'] . ' [ ' . $file['version'] . ' ]';
+                $notApplied[] = self::ORANGE_COLOR . $file['class'] . ' [ ' . $file['version'] . ' ]' . self::END_COLOR;
             }
         }
         if (count($applied) > 0) {
@@ -72,7 +77,7 @@ class Task_Db_Status extends Task_Base implements Phigrate_Task_ITask
         }
         if (count($migrations) > 0) {
             foreach ($migrations as $key => $migration) {
-                $migrations[$key] = '??? [ ' . $migration . ' ]';
+                $migrations[$key] = self::RED_COLOR . '??? [ ' . $migration . ' ]' . self::END_COLOR;
             }
             $return .= $this->_displayMigrations($migrations, 'APPLIED WITHOUT MIGRATION FILE');
         }
