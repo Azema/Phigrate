@@ -353,7 +353,7 @@ function main($args, $config, $configPath)
             . "\nOr the file is maybe double ({$fileName})?"
         );
     }
-    echo "\nCreated migration: {$fileName}\n\n";
+    echo "\nCreated migration: {$fullPath}\n\n";
 }
 
 /**
