@@ -30,6 +30,8 @@
  */
 class CreateAddresses extends Phigrate_Migration_Base
 {
+    protected $_comment = "This is a comment";
+    
     /**
      * up 
      * 

@@ -30,6 +30,7 @@
  */
 class CreateUsers extends Phigrate_Migration_Base
 {
+    protected $_comment = "This is a long comment for see the cut of string in 50 caracters";
     /**
      * up 
      * 
