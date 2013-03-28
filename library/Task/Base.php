@@ -63,6 +63,13 @@ abstract class Task_Base
     protected $_migrationDir;
 
     /**
+     * Manager de taches
+     *
+     * @var Phigrate_Task_Manager
+     */
+    protected $_manager;
+
+    /**
      * __construct
      *
      * @param Phigrate_Adapter_Base $adapter Adapter RDBMS
@@ -98,6 +105,19 @@ abstract class Task_Base
     public function setAdapter(Phigrate_Adapter_IAdapter $adapter)
     {
         $this->_adapter = $adapter;
+        return $this;
+    }
+
+    /**
+     * setManager
+     *
+     * @param Phigrate_Task_Manager $manager Le manager des taches
+     *
+     * @return Phigrate_Task_ITask
+     */
+    public function setManager(Phigrate_Task_Manager $manager)
+    {
+        $this->_manager = $manager;
         return $this;
     }
 }

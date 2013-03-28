@@ -260,6 +260,7 @@ class Phigrate_Task_Manager
         }
         $this->_logger->debug('migrationDir: ' . $this->_migrationDir);
         $taskObj->setDirectoryOfMigrations($this->_migrationDir);
+        $taskObj->setManager($this);
         $this->_tasks[$taskName] = $taskObj;
         $this->_logger->debug(__METHOD__ . ' End');
         return true;

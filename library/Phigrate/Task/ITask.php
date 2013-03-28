@@ -60,6 +60,15 @@ interface Phigrate_Task_ITask
      * @return Phigrate_Task_ITask
      */
     public function setAdapter(Phigrate_Adapter_IAdapter $adapter);
+
+    /**
+     * setManager
+     *
+     * @param Phigrate_Task_Manager $manager Le manager des taches
+     *
+     * @return Phigrate_Task_ITask
+     */
+    public function setManager(Phigrate_Task_Manager $manager);
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */
