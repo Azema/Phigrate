@@ -47,6 +47,13 @@ abstract class Phigrate_Migration_Base
     protected $_comment;
 
     /**
+     * Migration's path
+     *
+     * @var string
+     */
+    protected $_migrationDir;
+
+    /**
      * __construct
      *
      * @param Phigrate_Adapter_Base $adapter Adapter of RDBMS
@@ -56,6 +63,19 @@ abstract class Phigrate_Migration_Base
     public function __construct($adapter)
     {
         $this->setAdapter($adapter);
+    }
+
+    /**
+     * Définit le chemin des migrations
+     *
+     * @param string $migrationDir Le chemin des migrations
+     *
+     * @return Phigrate_Migration_Base
+     */
+    public function setMigrationDir($migrationDir)
+    {
+        $this->_migrationDir = $migrationDir;
+        return $this;
     }
 
     /**
@@ -109,8 +129,8 @@ abstract class Phigrate_Migration_Base
     }
 
     /**
-     * __call 
-     * 
+     * __call
+     *
      * @param string $name The method name
      * @param array  $args The parameters of method called
      *
