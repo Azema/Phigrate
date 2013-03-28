@@ -342,7 +342,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
         $views = '';
         $this->_loadTables(true);
         foreach (array_keys($this->_tables) as $tbl) {
-            if ($tbl == PHIGRATE_SCHEMA_TBL_NAME) {
+            if ($tbl == PHIGRATE_TS_SCHEMA_TBL_NAME) {
                 continue;
             }
 
@@ -1791,7 +1791,7 @@ class Phigrate_Adapter_Mysql_Adapter extends Phigrate_Adapter_Base
      *
      * @return void
      */
-    private function _loadTables($reload = true)
+    protected function _loadTables($reload = true)
     {
         if ($this->_tablesLoaded == false || $reload) {
             $this->_tables = array(); //clear existing structure
