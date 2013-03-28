@@ -148,6 +148,7 @@ USAGE;
             $class = Phigrate_Util_Naming::classFromMigrationFile($file['file']);
             /** @param Phigrate_Migration_Base $obj */
             $obj = new $class($this->_adapter);
+            $obj->setMigrationDir($this->_migrationDir);
             $refl = new ReflectionObject($obj);
             if (! $refl->hasMethod($targetMethod)) {
                 $msg = $class . ' does not have (' . $targetMethod

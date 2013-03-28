@@ -135,14 +135,27 @@ abstract class Task_Db_AMigration extends Task_Base implements Phigrate_Task_ITa
                 $this->_migrateFromOffset($offset, $currentVersion, $direction);
             }
         } catch (Phigrate_Exception_MissingSchemaInfoTable $ex) {
-            $this->_return .= $ex->getMessage();
+            $message = $ex->getMessage();
+            while ($ex->getPrevious() != null) {
+                $ex = $ex->getPrevious();
+            }
+            $this->_return .= $message . ' (' . $ex->getLine() . ')';
         } catch (Phigrate_Exception_MissingMigrationMethod $ex) {
             $failed = true;
-            $this->_return .= $ex->getMessage();
+            $message = $ex->getMessage();
+            while ($ex->getPrevious() != null) {
+                $ex = $ex->getPrevious();
+            }
+            $this->_return .= $message . ' (' . $ex->getLine() . ')';
         } catch (Phigrate_Exception $ex) {
+            var_dump($ex);
             $failed = true;
-            $this->_logger->err('Exception: ' . $ex->getMessage());
-            $this->_return .= "\n" . $ex->getMessage() . "\n";
+            $message = $ex->getMessage();
+            $this->_logger->err('Exception: ' . $message);
+            while ($ex->getPrevious() != null) {
+                $ex = $ex->getPrevious();
+            }
+            $this->_return .= $message . ' (' . $ex->getLine() . ')' . "\n";
         }
 
         // Si une erreur de migration est détecté et que la version courante est renseignée
