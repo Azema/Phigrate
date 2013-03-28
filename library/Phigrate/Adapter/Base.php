@@ -28,22 +28,22 @@
 abstract class Phigrate_Adapter_Base
 {
     /**
-     * dsn 
-     * 
+     * dsn
+     *
      * @var array
      */
     protected $_dsn;
 
     /**
      * connection to DB
-     * 
+     *
      * @var PDO
      */
     protected $_conn;
 
     /**
-     * logger 
-     * 
+     * logger
+     *
      * @var Phigrate_Logger
      */
     protected $_logger;
@@ -77,8 +77,8 @@ abstract class Phigrate_Adapter_Base
     protected $_delimiter = ';';
 
     /**
-     * __construct 
-     * 
+     * __construct
+     *
      * @param array            $dbConfig    Config DB for connect it
      * @param Phigrate_Logger $logger The logger
      *
@@ -92,8 +92,8 @@ abstract class Phigrate_Adapter_Base
     }
 
     /**
-     * set dbConfig 
-     * 
+     * set dbConfig
+     *
      * @param array $dbConfig Config DB for connect it
      *
      * @return Phigrate_Adapter_Base
@@ -106,8 +106,8 @@ abstract class Phigrate_Adapter_Base
     }
 
     /**
-     * check DB infos 
-     * 
+     * check DB infos
+     *
      * @param array $dbConfig DB Infos
      *
      * @return boolean
@@ -154,8 +154,8 @@ abstract class Phigrate_Adapter_Base
     }
 
     /**
-     * get dsn 
-     * 
+     * get dsn
+     *
      * @return array
      */
     public function getDsn()
@@ -167,8 +167,8 @@ abstract class Phigrate_Adapter_Base
     }
 
     /**
-     * set logger 
-     * 
+     * set logger
+     *
      * @param Phigrate_Logger $logger The logger
      *
      * @return void
@@ -186,8 +186,8 @@ abstract class Phigrate_Adapter_Base
     }
 
     /**
-     * get logger 
-     * 
+     * get logger
+     *
      * @return Phigrate_Logger
      */
     public function getLogger()
@@ -197,8 +197,8 @@ abstract class Phigrate_Adapter_Base
 
     //alias
     /**
-     * has table 
-     * 
+     * has table
+     *
      * @param string $tbl Table name
      *
      * @return boolean
@@ -209,8 +209,8 @@ abstract class Phigrate_Adapter_Base
     }
 
     /**
-     * getConnexion 
-     * 
+     * getConnexion
+     *
      * @return PDO
      */
     public function getConnexion()
@@ -222,8 +222,22 @@ abstract class Phigrate_Adapter_Base
     }
 
     /**
+     * Return database's name
+     *
+     * @return string
+     */
+    public function getDatabaseName()
+    {
+        if (!isset($this->_databaseName)) {
+            $query = $this->selectOne('SELECT DATABASE();');
+            $this->_databaseName = $query['DATABASE()'];
+        }
+        return $this->_databaseName;
+    }
+
+    /**
      * Quote a raw string.
-     * 
+     *
      * @param string|int|float|string[] $value Raw string
      *
      * @return string
@@ -245,9 +259,9 @@ abstract class Phigrate_Adapter_Base
 
     /**
      * Define flag export SQL
-     * 
+     *
      * @param boolean $export The export flag
-     * 
+     *
      * @return \Phigrate_Adapter_Base
      */
     public function setExport($export = false)
@@ -259,7 +273,7 @@ abstract class Phigrate_Adapter_Base
 
     /**
      * Return the flag export SQL
-     * 
+     *
      * @return boolean
      */
     public function hasExport()
@@ -269,7 +283,7 @@ abstract class Phigrate_Adapter_Base
 
     /**
      * Return the SQL
-     * 
+     *
      * @return string
      */
     public function getSql()
@@ -279,7 +293,7 @@ abstract class Phigrate_Adapter_Base
 
     /**
      * Initialize the variable SQL
-     * 
+     *
      * @return void
      */
     public function initSql()
@@ -308,6 +322,19 @@ abstract class Phigrate_Adapter_Base
     {
         $this->_delimiter = (string)$delimiter;
         return $this;
+    }
+
+    /**
+     * Retourne les tables chargées
+     *
+     * @return array
+     */
+    public function getTables()
+    {
+        if (null == $this->_tables) {
+            $this->_loadTables(true);
+        }
+        return array_keys($this->_tables);
     }
 
     // *******************
@@ -364,6 +391,16 @@ abstract class Phigrate_Adapter_Base
         $this->getLogger()->debug('End ' . __METHOD__);
         return $pdo;
     }
+
+    /**
+     * load tables
+     * Initialize an array of table names
+     *
+     * @param boolean $reload Flag to reload tables
+     *
+     * @return void
+     */
+    abstract protected function _loadTables($reload = true);
 }
 
 /* vim: set expandtab tabstop=4 shiftwidth=4: */
