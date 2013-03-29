@@ -64,7 +64,7 @@ class Task_Db_Setup extends Task_Base implements Phigrate_Task_ITask
                 'Your database isn\'t empty. Do you want generate the first migration file (yes/no)? '
             );
             if ($getDatabase) {
-                //$withData = $this->_ask('Would you get data (yes/no)? ');
+                $withData = $this->_ask('Would you get data (yes/no)? ');
                 $filePath = $this->_createMigrationImportInitial($withData);
                 $return .= "\n\tThe migration file is generated in {$filePath}\n";
                 // Suppression des tables de la base de données
@@ -286,6 +286,9 @@ TPL;
         $query .= '(' . implode(', ', $keys) . ')';
         foreach ($data as $index => $record) {
             array_walk($record, function(&$item, $key) use ($adapter) {
+                if (is_numeric($item)) {
+                    $item = (int)$item;
+                }
                 $item = $adapter->quote($item);
             });
             $data[$index] = '(' . implode(',', $record) . ')';
