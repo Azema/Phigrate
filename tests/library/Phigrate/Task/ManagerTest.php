@@ -98,6 +98,7 @@ class Phigrate_Task_ManagerTest extends PHPUnit_Framework_TestCase
             'Phigrate_Task_ITask',
             $this->object->getTask($taskName)
         );
+        $this->assertInstanceOf('Phigrate_Task_Manager', $task->manager);
         $task = $this->object->getTask($taskName);
         $this->assertEquals('/tmp', $task->dir);
     }
@@ -193,6 +194,7 @@ class Phigrate_Task_ManagerTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($actual);
         $this->assertTrue($this->object->hasTask($taskName));
         $this->assertInstanceOf('Phigrate_Task_ITask', $this->object->getTask($taskName));
+        $this->assertInstanceOf('Phigrate_Task_Manager', $task->manager);
     }
 
     /**
@@ -210,6 +212,7 @@ class Phigrate_Task_ManagerTest extends PHPUnit_Framework_TestCase
             'Phigrate_Task_ITask',
             $this->object->getTask($taskName)
         );
+        $this->assertInstanceOf('Phigrate_Task_Manager', $task->manager);
         $args = array(
             'test' => 'value',
             'get' => 'task',
@@ -236,6 +239,7 @@ class Phigrate_Task_ManagerTest extends PHPUnit_Framework_TestCase
             'Phigrate_Task_ITask',
             $this->object->getTask($taskName)
         );
+        $this->assertInstanceOf('Phigrate_Task_Manager', $task->manager);
         $help = $this->object->help($taskName);
         $this->assertInternalType('string', $help);
         $expected = 'my help task';

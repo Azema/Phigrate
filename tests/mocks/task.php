@@ -156,9 +156,11 @@ class taskMock implements Phigrate_Task_ITask
 
     public $adapter;
 
+    public $manager;
+
     /**
      * execute the task
-     * 
+     *
      * @param array $args Argument to the task
      *
      * @return string
@@ -167,10 +169,10 @@ class taskMock implements Phigrate_Task_ITask
     {
         return __METHOD__ . ': ' . implode(', ', $args);
     }
-    
+
     /**
      * Return the usage of the task
-     * 
+     *
      * @return string
      */
     public function help()
@@ -186,6 +188,12 @@ class taskMock implements Phigrate_Task_ITask
     public function setAdapter(Phigrate_Adapter_IAdapter $adapter)
     {
         $this->adapter = $adapter;
+        return $this;
+    }
+
+    public function setManager(Phigrate_Task_Manager $manager)
+    {
+        $this->manager = $manager;
         return $this;
     }
 }

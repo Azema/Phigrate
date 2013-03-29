@@ -65,8 +65,12 @@ USAGE;
     public function setDirectoryOfMigrations($dir)
     {
     }
-    
+
     public function setAdapter(Phigrate_Adapter_IAdapter $adapter)
+    {
+    }
+
+    public function setManager(Phigrate_Task_Manager $manager)
     {
     }
 }
