@@ -6,6 +6,7 @@ database = "phigrate"
 user     = "phigrate"
 password = "phigrate"
 options.PDO::MYSQL_ATTR_INIT_COMMAND = "SET NAMES utf8"
+options.PDO::ATTR_ORACLE_NULLS = PDO::NULL_NATURAL
 
 [development]
 type     = "mysql"
