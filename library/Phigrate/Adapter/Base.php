@@ -244,7 +244,9 @@ abstract class Phigrate_Adapter_Base
      */
     public function quote($value)
     {
-        if (is_int($value)) {
+        if (is_null($value)) {
+            return 'NULL';
+        } elseif (is_int($value)) {
             return $value;
         } elseif (is_float($value)) {
             return sprintf('%F', $value);
