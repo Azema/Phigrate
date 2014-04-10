@@ -2,7 +2,7 @@
     "name": "azema/phigrate",
     "description": "Migrations SQL for PHP 5.3",
     "keywords": ["sql", "migration", "mysql", "pdo"],
-    "homepage": "http://blog.phigrate.org",
+    "homepage": "https://github.com/Azema/Phigrate",
     "type": "library",
     "license": "GPL-2.0",
     "authors": [
@@ -19,7 +19,7 @@
     ],
     "support": {
         "issues": "https://github.com/Azema/Phigrate/issues",
-        "wiki" : "http://blog.phigrate.org/doc/home",
+        "wiki" : "https://github.com/Azema/Phigrate/wiki",
         "source" : "https://github.com/Azema/Phigrate"
     },
     "require": {
@@ -37,10 +37,6 @@
         {
             "type": "vcs",
             "url": "https://github.com/Azema/Phigrate"
-        },
-        {
-            "type": "pear",
-            "url": "http://pear.phigrate.org"
         }
     ]
 }
