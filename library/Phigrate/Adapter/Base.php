@@ -88,6 +88,7 @@ abstract class Phigrate_Adapter_Base
     {
         $this->setDbConfig($dbConfig);
         $this->setLogger($logger);
+        $logger->debug('Constructeur ' . __CLASS__);
     }
 
     /**
@@ -322,6 +323,7 @@ abstract class Phigrate_Adapter_Base
      */
     protected function _createPdo()
     {
+        $this->getLogger()->debug('Start ' . __METHOD__);
         $user = '';
         if (array_key_exists('user', $this->_dbConfig)) {
             $user = $this->_dbConfig['user'];
@@ -334,7 +336,13 @@ abstract class Phigrate_Adapter_Base
         if (array_key_exists('options', $this->_dbConfig)
             && is_array($this->_dbConfig['options'])
         ) {
-            $options = $this->_dbConfig['options'];
+            foreach ($this->_dbConfig['options'] as $key => $value) {
+                // if key is constant
+                if (defined($key) && !is_null($constant = constant($key))) {
+                    $key = $constant;
+                }
+                $options[$key] = $value;
+            }
         }
         try {
             $pdo = new PDO($this->getDsn(), $user, $password, $options);
@@ -353,6 +361,7 @@ abstract class Phigrate_Adapter_Base
             }
         }
 
+        $this->getLogger()->debug('End ' . __METHOD__);
         return $pdo;
     }
 }

@@ -141,6 +141,26 @@ class Phigrate_Util_NamingTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(
             'AddindextoUsers', Phigrate_Util_Naming::camelcase($d)
         );
+
+        $e = 'add_index_to_users';
+        $this->assertEquals(
+            'AddIndexToUsers', Phigrate_Util_Naming::camelcase($e)
+        );
+
+        $f = 'add_Index_to_users';
+        $this->assertEquals(
+            'AddIndexToUsers', Phigrate_Util_Naming::camelcase($f)
+        );
+
+        $g = 'add__index_to_users';
+        $this->assertEquals(
+            'AddIndexToUsers', Phigrate_Util_Naming::camelcase($g)
+        );
+
+        $h = 'Add Index To Users';
+        $this->assertEquals(
+            'AddIndexToUsers', Phigrate_Util_Naming::camelcase($h)
+        );
     }
 
     /**

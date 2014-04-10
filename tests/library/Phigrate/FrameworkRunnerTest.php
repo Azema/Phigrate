@@ -630,6 +630,72 @@ USAGE;
         $this->assertRegExp($regexp, $task);
     }
 
+    public function testExecuteWithOutputParameter()
+    {
+        $file = '/usr/bin/tests.sql';
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            PHIGRATE_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            PHIGRATE_BASE . '/tests/fixtures/config/application.ini',
+            '-o',
+            $file,
+            'db:export',
+        );
+        $actual = new Phigrate_FrameworkRunner($parameters);
+        $adapter = new adapterTaskMock(array(), '');
+        $adapter->setTableSchemaExist(true);
+        $adapter->versions = array(array('version' => '20120110064438'));
+        $actual->setAdapter($adapter);
+        $task = $actual->execute();
+        $this->assertStringEndsWith("\n\033[40m\033[1;31mThe file {$file} is not writable or his directory.\033[0m\n\n", $task);
+
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            PHIGRATE_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            PHIGRATE_BASE . '/tests/fixtures/config/application.ini',
+            '-o',
+            'tests.sql',
+            'db:export',
+        );
+        $actual = new Phigrate_FrameworkRunner($parameters);
+        $adapter = new adapterTaskMock(array(), '');
+        $adapter->setTableSchemaExist(true);
+        $adapter->versions = array(array('version' => '20120110064438'));
+        $actual->setAdapter($adapter);
+        $task = $actual->execute();
+        $file = getcwd().'/tests.sql';
+        $this->assertFileExists($file);
+        $this->assertNotEmpty(file_get_contents($file));
+        $this->assertStringStartsWith('The content is writed in file: '.$file, $task);
+        unlink($file);
+
+        $file = '/tmp/tests.sql';
+        $parameters = array(
+            'monScript.php',
+            '-d',
+            PHIGRATE_BASE . '/tests/fixtures/config/database.ini',
+            '-c',
+            PHIGRATE_BASE . '/tests/fixtures/config/application.ini',
+            '--output',
+            $file,
+            'db:export',
+        );
+        $actual = new Phigrate_FrameworkRunner($parameters);
+        $adapter = new adapterTaskMock(array(), '');
+        $adapter->setTableSchemaExist(true);
+        $adapter->versions = array(array('version' => '20120110064438'));
+        $actual->setAdapter($adapter);
+        $task = $actual->execute();
+        $this->assertFileExists($file);
+        $this->assertNotEmpty(file_get_contents($file));
+        $this->assertStringStartsWith('The content is writed in file: '.$file, $task);
+        unlink($file);
+    }
+
     public function testExecuteWithVersionTaskWithoutTableSchema()
     {
         $parameters = array(

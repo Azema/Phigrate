@@ -5,6 +5,7 @@ socket   = "/var/run/mysqld/mysqld.sock"
 database = "phigrate"
 user     = "phigrate"
 password = "phigrate"
+options.PDO::MYSQL_ATTR_INIT_COMMAND = "SET NAMES utf8"
 
 [development]
 type     = "mysql"
@@ -14,6 +15,7 @@ port     = 3306
 database = "phigrate_dev"
 user     = "phigrate"
 password = "phigrate"
+options.PDO::MYSQL_ATTR_INIT_COMMAND = "SET NAMES utf8"
 
 [test]
 type     = "mysql"

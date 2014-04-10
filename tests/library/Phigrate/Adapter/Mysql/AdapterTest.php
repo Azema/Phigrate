@@ -333,6 +333,17 @@ class Phigrate_Adapter_Mysql_AdapterTest extends PHPUnit_Framework_TestCase
             $msg = 'SQLSTATE[HY000] [2002]';
             $this->assertStringStartsWith($msg, $e->getMessage());
         }
+
+        $dbConfig = array(
+            'database' => 'phigrate_test',
+            'socket' => SOCKET_MYSQL_DEFAULT,
+            'user' => USER_MYSQL_DEFAULT,
+            'password' => PASSWORD_MYSQL_DEFAULT,
+            'options' => array("PDO::MYSQL_ATTR_INIT_COMMAND" => "SET NAMES utf8"),
+        );
+        $actual = new Phigrate_Adapter_Mysql_Adapter($dbConfig, self::$_logger);
+        $this->assertInstanceOf('Phigrate_Adapter_Mysql_Adapter', $actual);
+        $this->assertInstanceOf('PDO', $actual->getConnexion());
     }
 
     /**

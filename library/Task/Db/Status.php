@@ -39,6 +39,14 @@ require_once 'Phigrate/Task/ITask.php';
  */
 class Task_Db_Status extends Task_Base implements Phigrate_Task_ITask
 {
+    const WHITE_COLOR = "\033[40m\033[1;37m";
+    const PURPLE_COLOR = "\033[40m\033[1;35m";
+    const BLUE_COLOR = "\033[40m\033[1;34m";
+    const ORANGE_COLOR = "\033[40m\033[1;33m";
+    const GREEN_COLOR = "\033[40m\033[1;32m";
+    const RED_COLOR = "\033[40m\033[1;31m";
+    const END_COLOR = "\033[0m";
+
     /**
      * Primary task entry point
      *
@@ -60,24 +68,36 @@ class Task_Db_Status extends Task_Base implements Phigrate_Task_ITask
         $notApplied = array();
         foreach ($files as $file) {
             $key = array_search($file['version'], $migrations);
+            require_once $this->_migrationDir . '/' . $file['file'];
+            $class = new $file['class']($this->_adapter);
+            // Get comment of migration limited to 50 caracters
+            $comment = $class->getComment();
+            if (!empty($comment)) {
+                // if comment is more than 50 caracters, cut string
+                if (strlen($comment) > 50) {
+                    $comment = substr($comment, 0, 50) . '...';
+                }
+                $comment = self::PURPLE_COLOR . ' (' . $comment . ')';
+            }
+            unset($class);
             if (false !== $key) {
-                $applied[] = $file['class'] . ' [ ' . $file['version'] . ' ]';
+                $applied[] = self::GREEN_COLOR . $file['class'] . ' [ ' . $file['version'] . ' ]' . $comment . self::END_COLOR;
                 unset($migrations[$key]);
             } else {
-                $notApplied[] = $file['class'] . ' [ ' . $file['version'] . ' ]';
+                $notApplied[] = self::ORANGE_COLOR . $file['class'] . ' [ ' . $file['version'] . ' ]' . $comment . self::END_COLOR;
             }
         }
         if (count($applied) > 0) {
             $return .= $this->_displayMigrations($applied, 'APPLIED');
         }
-        if (count($migrations) > 0) {
-            foreach ($migrations as $key => $migration) {
-                $migrations[$key] = '??? [ ' . $migration . ' ]';
-            }
-            $return .= $this->_displayMigrations($migrations, 'APPLIED WITHOUT MIGRATION FILE');
-        }
         if (count($notApplied) > 0) {
             $return .= $this->_displayMigrations($notApplied, 'NOT APPLIED');
+        }
+        if (count($migrations) > 0) {
+            foreach ($migrations as $key => $migration) {
+                $migrations[$key] = self::RED_COLOR . '??? [ ' . $migration . ' ]' . self::END_COLOR;
+            }
+            $return .= $this->_displayMigrations($migrations, 'APPLIED WITHOUT MIGRATION FILE');
         }
         $return .= "\n\nFinished: " . date('Y-m-d g:ia T') . "\n\n";
         return $return;
@@ -93,7 +113,8 @@ class Task_Db_Status extends Task_Base implements Phigrate_Task_ITask
      */
     protected function _displayMigrations($migrations, $title)
     {
-        $return = "\n\n===================== {$title} =======================\n";
+        $separator = round((46 - strlen($title)) / 2, 0);
+        $return = "\n\n" . str_repeat('=', $separator) . " {$title} " . str_repeat('=', $separator) . "\n";
         foreach ($migrations as $a) {
             $return .= "\t" . $a . "\n";
         }
