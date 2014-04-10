@@ -49,7 +49,7 @@ if (strpos('@package_version@', '@package_version') === 0) {  // not a pear inst
     define('PHIGRATE_VERSION', '@package_version@');
 }
 if (strpos('@package_date@', '@package_date') === 0) {
-    define('PHIGRATE_DATE', date('c', mktime(20,10,0,26,11,2012)));
+    define('PHIGRATE_DATE', date('c', mktime(20,10,0,11,26,2012)));
 } else {
     define('PHIGRATE_DATE', '@package_date@');
 }
