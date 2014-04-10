@@ -13,7 +13,7 @@ config/database.ini
 .ant-targets-build.xml
 *.swp
 nbproject
-
+vendor/
 build/api
 build/code-browser
 build/coverage
